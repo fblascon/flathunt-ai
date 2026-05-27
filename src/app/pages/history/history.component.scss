@@ -1,7 +1,44 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #888;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: #555;
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+  }
+}
+
 .table-container {
   overflow-x: auto;
   border-radius: 8px;
   overflow: hidden;
+  margin-top: 16px;
 
   table {
     width: 100%;

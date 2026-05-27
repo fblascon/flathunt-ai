@@ -10,6 +10,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { DecimalPipe } from '@angular/common';
 import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
+import { HistoryService } from '../../services/history.service';
 import { AiService, AiAnalysis } from '../../services/ai.service';
 import { Listing } from '../../models/listing.model';
 
@@ -33,6 +34,7 @@ export class ListingDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private listingsService = inject(ListingsService);
   private favoritesService = inject(FavoritesService);
+  private historyService = inject(HistoryService);
   private aiService = inject(AiService);
   private snackBar = inject(MatSnackBar);
 
@@ -50,6 +52,7 @@ export class ListingDetailComponent implements OnInit {
       this.listing.set(listing);
       const fav = await this.favoritesService.isFavorited(id);
       this.isFavorited.set(fav);
+      this.historyService.addView(id);
     } finally {
       this.loading.set(false);
     }

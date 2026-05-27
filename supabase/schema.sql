@@ -104,6 +104,17 @@ create table if not exists search_history (
 );
 
 -- ============================================
+-- HISTORIAL DE PISOS VISTOS
+-- ============================================
+create table if not exists viewed_listings (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  listing_id text references listings(id) on delete cascade not null,
+  viewed_at timestamptz default now(),
+  unique (user_id, listing_id)
+);
+
+-- ============================================
 -- ÍNDICES
 -- ============================================
 create index if not exists listings_price_idx on listings(price);
@@ -112,9 +123,8 @@ create index if not exists listings_last_seen_idx on listings(last_seen desc);
 create index if not exists favorites_user_idx on favorites(user_id);
 create index if not exists search_history_user_idx on search_history(user_id);
 create index if not exists search_preferences_user_idx on search_preferences(user_id);
-
--- ============================================
--- ROW LEVEL SECURITY
+create index if not exists viewed_listings_user_idx on viewed_listings(user_id);
+create index if not exists viewed_listings_viewed_at_idx on viewed_listings(viewed_at desc);
 -- ============================================
 
 -- Profiles
@@ -146,6 +156,11 @@ create policy "Usuarios gestionan sus favoritos" on favorites
 -- Search history: cada usuario ve el suyo
 alter table search_history enable row level security;
 create policy "Usuarios ven su historial" on search_history
+  for all using (auth.uid() = user_id);
+
+-- Viewed listings: cada usuario gestiona el suyo
+alter table viewed_listings enable row level security;
+create policy "Usuarios gestionan sus pisos vistos" on viewed_listings
   for all using (auth.uid() = user_id);
 
 -- ============================================

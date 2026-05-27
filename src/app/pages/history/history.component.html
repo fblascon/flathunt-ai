@@ -1,39 +1,69 @@
 <div class="page-container">
-  <h1 class="page-title">Historial de búsquedas</h1>
+  <div class="page-header">
+    <h1 class="page-title">Historial</h1>
+    @if (viewedListings().length) {
+      <button mat-stroked-button color="warn" (click)="clearHistory()">
+        <mat-icon>delete_sweep</mat-icon> Limpiar historial
+      </button>
+    }
+  </div>
 
   @if (loading()) {
     <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
-  } @else if (!history().length) {
-    <div class="empty-state">
-      <mat-icon>history</mat-icon>
-      <p>No hay búsquedas registradas</p>
-    </div>
   } @else {
-    <div class="table-container">
-      <table mat-table [dataSource]="history()">
-        <ng-container matColumnDef="query">
-          <th mat-header-cell *matHeaderCellDef>Búsqueda</th>
-          <td mat-cell *matCellDef="let row">{{ row.query }}</td>
-        </ng-container>
+    <mat-tab-group dynamicHeight>
+      <mat-tab label="Pisos vistos ({{ viewedListings().length }})">
+        @if (!viewedListings().length) {
+          <div class="empty-state">
+            <mat-icon>visibility</mat-icon>
+            <p>No has visto ningún piso todavía</p>
+            <button mat-raised-button color="primary" routerLink="/listings">Explorar pisos</button>
+          </div>
+        } @else {
+          <div class="listing-grid">
+            @for (listing of viewedListings(); track listing.id) {
+              <app-listing-card
+                [listing]="listing"
+                [isFavorited]="favoritedIds().has(listing.id)"
+                [showFavorite]="true"
+                (favorite)="toggleFavorite($event)"
+                (selected)="goToDetail($event)"
+              />
+            }
+          </div>
+        }
+      </mat-tab>
 
-        <ng-container matColumnDef="results">
-          <th mat-header-cell *matHeaderCellDef>Resultados</th>
-          <td mat-cell *matCellDef="let row">{{ row.results_count }}</td>
-        </ng-container>
+      <mat-tab label="Búsquedas ({{ searchHistory().length }})">
+        @if (!searchHistory().length) {
+          <div class="empty-state">
+            <mat-icon>search</mat-icon>
+            <p>No hay búsquedas registradas</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="searchHistory()">
+              <ng-container matColumnDef="query">
+                <th mat-header-cell *matHeaderCellDef>Búsqueda</th>
+                <td mat-cell *matCellDef="let row">{{ row.query }}</td>
+              </ng-container>
 
-        <ng-container matColumnDef="source">
-          <th mat-header-cell *matHeaderCellDef>Origen</th>
-          <td mat-cell *matCellDef="let row">{{ row.source }}</td>
-        </ng-container>
+              <ng-container matColumnDef="results">
+                <th mat-header-cell *matHeaderCellDef>Resultados</th>
+                <td mat-cell *matCellDef="let row">{{ row.results_count }}</td>
+              </ng-container>
 
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Fecha</th>
-          <td mat-cell *matCellDef="let row">{{ row.created_at | date: 'short' }}</td>
-        </ng-container>
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ row.created_at | date: 'short' }}</td>
+              </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    </div>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+        }
+      </mat-tab>
+    </mat-tab-group>
   }
 </div>
