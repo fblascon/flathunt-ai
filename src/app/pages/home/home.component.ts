@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,11 +15,19 @@ import { Favorite } from '../../services/favorites.service';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatTabsModule, MatProgressSpinnerModule, ListingCardComponent],
+  imports: [
+    RouterLink,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTabsModule,
+    MatProgressSpinnerModule,
+    ListingCardComponent,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   supabase = inject(SupabaseService);
   private listingsService = inject(ListingsService);
   private favoritesService = inject(FavoritesService);
@@ -31,11 +39,11 @@ export class HomeComponent {
 
   async ngOnInit() {
     try {
-      const [listings, favorites] = await Promise.all([
-        this.listingsService.getAll(),
+      const [listingsRes, favorites] = await Promise.all([
+        this.listingsService.getAll({ page: 1, pageSize: 6 }),
         this.favoritesService.getAll(),
       ]);
-      this.recentListings.set(listings.slice(0, 6));
+      this.recentListings.set(listingsRes.data);
       this.favs.set(favorites.slice(0, 6));
     } catch {
       // Empty state

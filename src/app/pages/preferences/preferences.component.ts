@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,11 +14,20 @@ import { SearchPreference } from '../../models/search-preference.model';
 @Component({
   selector: 'app-preferences',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatSlideToggleModule, MatChipsModule, MatProgressSpinnerModule, MatDialogModule, CurrencyPipe],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    CurrencyPipe,
+  ],
   templateUrl: './preferences.component.html',
   styleUrl: './preferences.component.scss',
 })
-export class PreferencesComponent {
+export class PreferencesComponent implements OnInit {
   private prefsService = inject(PreferencesService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
@@ -40,7 +49,7 @@ export class PreferencesComponent {
   async toggleActive(pref: SearchPreference) {
     await this.prefsService.toggleActive(pref.id, !pref.is_active);
     this.preferences.update((list) =>
-      list.map((p) => (p.id === pref.id ? { ...p, is_active: !p.is_active } : p))
+      list.map((p) => (p.id === pref.id ? { ...p, is_active: !p.is_active } : p)),
     );
   }
 

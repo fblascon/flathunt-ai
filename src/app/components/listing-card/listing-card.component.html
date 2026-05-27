@@ -1,7 +1,12 @@
-<mat-card class="listing-card" (click)="onSelect.emit(listing().id)">
+<mat-card class="listing-card" (click)="selected.emit(listing().id)">
   @if (listing().image_url) {
     <div class="img-container">
-      <img mat-card-image [src]="listing().image_url" [alt]="listing().title" class="listing-image" />
+      <img
+        mat-card-image
+        [src]="listing().image_url"
+        [alt]="listing().title"
+        class="listing-image"
+      />
       @if (listing().neighborhood) {
         <div class="neighborhood-badge">{{ listing().neighborhood }}</div>
       }
@@ -16,7 +21,7 @@
   }
 
   <mat-card-content>
-    <div class="listing-price">{{ listing().price | number:'1.0-0' }} €/mes</div>
+    <div class="listing-price">{{ listing().price | number: '1.0-0' }} €/mes</div>
     <h3 class="listing-title">{{ listing().title }}</h3>
     <p class="listing-address">
       <mat-icon class="small-icon">location_on</mat-icon>
@@ -43,7 +48,10 @@
         </span>
       }
       @if (siblingCount() > 1) {
-        <span class="detail building-indicator" [matTooltip]="siblingCount() + ' pisos en este edificio'">
+        <span
+          class="detail building-indicator"
+          [matTooltip]="siblingCount() + ' pisos en este edificio'"
+        >
           <mat-icon class="small-icon">apartment</mat-icon>
           {{ siblingCount() }}
         </span>
@@ -67,17 +75,32 @@
   </mat-card-content>
 
   <mat-card-actions>
-    <a mat-icon-button [href]="listing().external_url" target="_blank" rel="noopener" matTooltip="Ver en Idealista" (click)="$event.stopPropagation()">
+    <a
+      mat-icon-button
+      [href]="listing().external_url"
+      target="_blank"
+      rel="noopener"
+      matTooltip="Ver en Idealista"
+      (click)="$event.stopPropagation()"
+    >
       <mat-icon>open_in_new</mat-icon>
     </a>
     @if (showCompare()) {
-      <button mat-icon-button matTooltip="Comparar" (click)="$event.stopPropagation(); onCompare.emit(listing().id)">
+      <button
+        mat-icon-button
+        matTooltip="Comparar"
+        (click)="$event.stopPropagation(); compare.emit(listing().id)"
+      >
         <mat-icon>compare_arrows</mat-icon>
       </button>
     }
     @if (showFavorite()) {
-      <button mat-icon-button [color]="isFavorited() ? 'warn' : undefined"
-              matTooltip="Favorito" (click)="$event.stopPropagation(); onFavorite.emit(listing().id)">
+      <button
+        mat-icon-button
+        [color]="isFavorited() ? 'warn' : undefined"
+        matTooltip="Favorito"
+        (click)="$event.stopPropagation(); favorite.emit(listing().id)"
+      >
         <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
       </button>
     }

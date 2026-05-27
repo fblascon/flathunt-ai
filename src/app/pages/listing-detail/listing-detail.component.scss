@@ -52,8 +52,12 @@
   color: white !important;
   z-index: 2;
 
-  &.prev { left: 8px; }
-  &.next { right: 8px; }
+  &.prev {
+    left: 8px;
+  }
+  &.next {
+    right: 8px;
+  }
 
   &:hover {
     background: rgba(0, 0, 0, 0.8) !important;
@@ -86,7 +90,9 @@
     border-radius: 8px;
     cursor: pointer;
     opacity: 0.6;
-    transition: opacity 0.2s, border-color 0.2s;
+    transition:
+      opacity 0.2s,
+      border-color 0.2s;
     border: 2px solid transparent;
     flex-shrink: 0;
 
@@ -138,7 +144,8 @@
   }
 }
 
-.detail-features, .detail-description {
+.detail-features,
+.detail-description {
   margin-bottom: 20px;
 
   h3 {
@@ -166,8 +173,12 @@
   margin: 12px 0;
   color: #ffb300;
 
-  &.high { color: #66bb6a; }
-  &.low { color: #ef5350; }
+  &.high {
+    color: #66bb6a;
+  }
+  &.low {
+    color: #ef5350;
+  }
 }
 
 .ai-summary {
@@ -180,8 +191,12 @@
   font-size: 0.85rem;
   margin: 12px 0 4px;
 
-  &.green { color: #66bb6a; }
-  &.red { color: #ef5350; }
+  &.green {
+    color: #66bb6a;
+  }
+  &.red {
+    color: #ef5350;
+  }
 }
 
 .ai-list {
@@ -190,7 +205,9 @@
   color: #bbb;
   font-size: 0.85rem;
 
-  li { margin-bottom: 4px; }
+  li {
+    margin-bottom: 4px;
+  }
 }
 
 .ai-price-quality {

@@ -11,24 +11,30 @@ export class ListingsService {
     minRooms?: number;
     minSize?: number;
     neighborhoods?: string[];
-  }): Promise<Listing[]> {
+    page?: number;
+    pageSize?: number;
+  }): Promise<{ data: Listing[]; count: number }> {
+    const page = filters?.page ?? 1;
+    const pageSize = filters?.pageSize ?? 50;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
     let query = this.supabase
       .from('listings')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('is_active', true)
-      .order('last_seen', { ascending: false });
+      .order('last_seen', { ascending: false })
+      .range(from, to);
 
     if (filters?.maxPrice) {
       query = query.lte('price', filters.maxPrice);
     }
     if (filters?.minRooms !== undefined && filters.minRooms !== null) {
       if (filters.minRooms === -1) {
-        // Studio search: rooms is 0 or null
         query = query.or('rooms.lte.0,rooms.is.null');
       } else if (filters.minRooms > 0) {
         query = query.gte('rooms', filters.minRooms);
       }
-      // minRooms === 0 means "any", no filter needed
     }
     if (filters?.minSize) {
       query = query.gte('size_m2', filters.minSize);
@@ -37,20 +43,24 @@ export class ListingsService {
       query = query.in('neighborhood', filters.neighborhoods);
     }
 
-    const { data, error } = await query;
+    const { data, count, error } = await query;
     if (error) throw error;
-    return data as Listing[];
+    return { data: (data as Listing[]) || [], count: count ?? 0 };
   }
 
   async getById(id: string): Promise<Listing | null> {
-    const { data, error } = await this.supabase
-      .from('listings')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await this.supabase.from('listings').select('*').eq('id', id).single();
 
     if (error) return null;
     return data as Listing;
+  }
+
+  async getByIds(ids: string[]): Promise<Listing[]> {
+    if (!ids.length) return [];
+    const { data, error } = await this.supabase.from('listings').select('*').in('id', ids);
+
+    if (error) throw error;
+    return data as Listing[];
   }
 
   async getNeighborhoods(): Promise<string[]> {

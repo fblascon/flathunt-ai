@@ -27,7 +27,9 @@ export class PreferencesService {
     return data as SearchPreference;
   }
 
-  async create(pref: Omit<SearchPreference, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<SearchPreference> {
+  async create(
+    pref: Omit<SearchPreference, 'id' | 'user_id' | 'created_at' | 'updated_at'>,
+  ): Promise<SearchPreference> {
     const { data, error } = await this.supabase
       .from('search_preferences')
       .insert(pref)
@@ -48,10 +50,7 @@ export class PreferencesService {
   }
 
   async remove(id: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('search_preferences')
-      .delete()
-      .eq('id', id);
+    const { error } = await this.supabase.from('search_preferences').delete().eq('id', id);
 
     if (error) throw error;
   }

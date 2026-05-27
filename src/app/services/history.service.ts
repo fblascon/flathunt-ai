@@ -17,7 +17,12 @@ export class HistoryService {
     return data as SearchHistory[];
   }
 
-  async add(query: string, filters: Record<string, unknown>, resultsCount: number, source = 'manual'): Promise<void> {
+  async add(
+    query: string,
+    filters: Record<string, unknown>,
+    resultsCount: number,
+    source = 'manual',
+  ): Promise<void> {
     const { error } = await this.supabase
       .from('search_history')
       .insert({ query, filters, results_count: resultsCount, source });

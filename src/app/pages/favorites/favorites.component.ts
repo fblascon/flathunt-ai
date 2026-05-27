@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,7 @@ import { ListingCardComponent } from '../../components/listing-card/listing-card
   templateUrl: './favorites.component.html',
   styleUrl: './favorites.component.scss',
 })
-export class FavoritesComponent {
+export class FavoritesComponent implements OnInit {
   private favoritesService = inject(FavoritesService);
   private router = inject(Router);
 

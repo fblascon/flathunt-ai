@@ -2,11 +2,19 @@
   <div class="page-header">
     <h1 class="page-title">Pisos en Madrid</h1>
     <div class="header-actions">
-      <button mat-stroked-button color="accent" (click)="scoreWithAi()"
-              [disabled]="aiScoring() || !listings().length"
-              matTooltip="Pide a la IA que puntúe los pisos visibles según los filtros actuales">
+      <button
+        mat-stroked-button
+        color="accent"
+        (click)="scoreWithAi()"
+        [disabled]="aiScoring() || !listings().length"
+        matTooltip="Pide a la IA que puntúe los pisos visibles según los filtros actuales"
+      >
         <mat-icon>smart_toy</mat-icon>
-        @if (aiScoring()) { Puntuando... } @else { IA: Puntuar }
+        @if (aiScoring()) {
+          Puntuando...
+        } @else {
+          IA: Puntuar
+        }
       </button>
       <button mat-icon-button (click)="resetFilters()" matTooltip="Resetear filtros">
         <mat-icon>filter_alt_off</mat-icon>
@@ -17,15 +25,30 @@
   <div class="filters-panel">
     <mat-form-field appearance="outline" class="filter-field ai-search">
       <mat-label>Búsqueda con IA (ej: "ático con terraza en Chamberí")</mat-label>
-      <input matInput [(ngModel)]="aiQuery" (keyup.enter)="aiSearch()" placeholder="piso luminoso cerca del Retiro" />
-      <button mat-icon-button matSuffix (click)="aiSearch()" [disabled]="aiSearching() || !aiQuery().trim()">
+      <input
+        matInput
+        [(ngModel)]="aiQuery"
+        (keyup.enter)="aiSearch()"
+        placeholder="piso luminoso cerca del Retiro"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="aiSearch()"
+        [disabled]="aiSearching() || !aiQuery().trim()"
+      >
         <mat-icon>smart_toy</mat-icon>
       </button>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Precio máx.</mat-label>
-      <input matInput type="number" [ngModel]="maxPrice()" (ngModelChange)="onFilterChange('maxPrice', $event)" />
+      <input
+        matInput
+        type="number"
+        [ngModel]="maxPrice()"
+        (ngModelChange)="onFilterChange('maxPrice', $event)"
+      />
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="filter-field">
@@ -42,12 +65,26 @@
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Mín. m²</mat-label>
-      <input matInput type="number" [ngModel]="minSize()" (ngModelChange)="onFilterChange('minSize', $event)" />
+      <input
+        matInput
+        type="number"
+        [ngModel]="minSize()"
+        (ngModelChange)="onFilterChange('minSize', $event)"
+      />
     </mat-form-field>
 
-    <button mat-raised-button color="primary" (click)="aiSearch()" [disabled]="aiSearching() || !aiQuery().trim()">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="aiSearch()"
+      [disabled]="aiSearching() || !aiQuery().trim()"
+    >
       <mat-icon>search</mat-icon>
-      @if (aiSearching()) { Buscando... } @else { Buscar }
+      @if (aiSearching()) {
+        Buscando...
+      } @else {
+        Buscar
+      }
     </button>
   </div>
 
@@ -57,9 +94,9 @@
       <mat-chip-option
         [selected]="selectedNeighborhoods().includes(n)"
         (selectionChange)="toggleNeighborhood(n)"
-      >{{ n }}</mat-chip-option>
+        >{{ n }}</mat-chip-option
+      >
     }
-
   </div>
 
   @if (loading()) {
@@ -78,35 +115,82 @@
         </button>
       }
     </div>
-    @if (isAiSearchActive() && (maxPrice() < 2000 || minRooms() > 0 || minSize() > 0 || selectedNeighborhoods().length > 0)) {
+    @if (
+      isAiSearchActive() &&
+      (maxPrice() < 2000 || minRooms() > 0 || minSize() > 0 || selectedNeighborhoods().length > 0)
+    ) {
       <div class="active-filters-hint">
         <mat-icon>filter_list</mat-icon>
         <span>
           Filtros aplicados:
-          @if (maxPrice() < 2000) { ≤{{ maxPrice() }}€ }
-          @if (minRooms() > 0 && !ignoreRoomsFilter()) { {{ minRooms() }}+ hab }
-          @if (minSize() > 0) { {{ minSize() }}+ m² }
-          @if (selectedNeighborhoods().length > 0) { en {{ selectedNeighborhoods().join(', ') }} }
+          @if (maxPrice() < 2000) {
+            ≤{{ maxPrice() }}€
+          }
+          @if (minRooms() > 0 && !ignoreRoomsFilter()) {
+            {{ minRooms() }}+ hab
+          }
+          @if (minSize() > 0) {
+            {{ minSize() }}+ m²
+          }
+          @if (selectedNeighborhoods().length > 0) {
+            en {{ selectedNeighborhoods().join(', ') }}
+          }
         </span>
       </div>
     }
     @if (ignoreRoomsFilter()) {
       <div class="studio-hint">
         <mat-icon>info</mat-icon>
-        <span>Buscando estudios: filtro de habitaciones ignorado (los estudios tienen 0 habitaciones)</span>
+        <span
+          >Buscando estudios: filtro de habitaciones ignorado (los estudios tienen 0
+          habitaciones)</span
+        >
       </div>
     }
     @if (aiNoResultsNeighborhoods(); as hoods) {
       <div class="ai-no-results-banner">
         <mat-icon>location_off</mat-icon>
         <div>
-          <p>No se encontraron resultados en <strong>{{ hoods.join(', ') }}</strong>.</p>
-          <button mat-stroked-button color="primary" (click)="aiSearchAllMadrid()" [disabled]="aiSearching()">
-            @if (aiSearching()) { Buscando... } @else { Buscar en toda Madrid }
+          <p>
+            No se encontraron resultados en <strong>{{ hoods.join(', ') }}</strong
+            >.
+          </p>
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="aiSearchAllMadrid()"
+            [disabled]="aiSearching()"
+          >
+            @if (aiSearching()) {
+              Buscando...
+            } @else {
+              Buscar en toda Madrid
+            }
           </button>
         </div>
       </div>
     }
+    <div class="pagination-info">
+      Página {{ currentPage() }} de {{ totalPages() }} ({{ totalCount() }} pisos)
+      @if (currentPage() > 1 || currentPage() < totalPages()) {
+        <span class="pagination-nav">
+          <button
+            mat-mini-fab
+            (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() <= 1"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button
+            mat-mini-fab
+            (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() >= totalPages()"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </span>
+      }
+    </div>
     <div class="listing-grid">
       @for (group of groups; track group.key) {
         <app-listing-card
@@ -115,11 +199,30 @@
           [showCompare]="true"
           [aiScore]="aiScores().get(group.representative.id) ?? null"
           [siblingCount]="group.siblingCount"
-          (onFavorite)="toggleFavorite($event)"
-          (onSelect)="goToDetail($event)"
+          (favorite)="toggleFavorite($event)"
+          (selected)="goToDetail($event)"
         />
       }
     </div>
+    @if (totalPages() > 1) {
+      <div class="pagination-bottom">
+        <button
+          mat-stroked-button
+          (click)="goToPage(currentPage() - 1)"
+          [disabled]="currentPage() <= 1"
+        >
+          <mat-icon>chevron_left</mat-icon> Anterior
+        </button>
+        <span class="page-indicator">{{ currentPage() }} / {{ totalPages() }}</span>
+        <button
+          mat-stroked-button
+          (click)="goToPage(currentPage() + 1)"
+          [disabled]="currentPage() >= totalPages()"
+        >
+          Siguiente <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
   } @else if (!listings().length) {
     <div class="empty-state">
       <mat-icon>search_off</mat-icon>
@@ -132,7 +235,12 @@
       <div class="empty-actions">
         <button mat-button (click)="resetFilters()">Quitar filtros</button>
         @if (isAiSearchActive() && aiNoResultsNeighborhoods()) {
-          <button mat-raised-button color="primary" (click)="aiSearchAllMadrid()" [disabled]="aiSearching()">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="aiSearchAllMadrid()"
+            [disabled]="aiSearching()"
+          >
             Buscar en toda Madrid
           </button>
         }
@@ -140,10 +248,18 @@
       <div class="search-suggestions">
         <p class="suggestions-title">Búsquedas populares:</p>
         <div class="suggestion-chips">
-          <button mat-stroked-button (click)="runSuggestion('ático con terraza')">ático con terraza</button>
-          <button mat-stroked-button (click)="runSuggestion('piso luminoso centro')">piso luminoso centro</button>
-          <button mat-stroked-button (click)="runSuggestion('estudio barato')">estudio barato</button>
-          <button mat-stroked-button (click)="runSuggestion('dúplex 3 habitaciones')">dúplex 3 habitaciones</button>
+          <button mat-stroked-button (click)="runSuggestion('ático con terraza')">
+            ático con terraza
+          </button>
+          <button mat-stroked-button (click)="runSuggestion('piso luminoso centro')">
+            piso luminoso centro
+          </button>
+          <button mat-stroked-button (click)="runSuggestion('estudio barato')">
+            estudio barato
+          </button>
+          <button mat-stroked-button (click)="runSuggestion('dúplex 3 habitaciones')">
+            dúplex 3 habitaciones
+          </button>
         </div>
       </div>
     </div>

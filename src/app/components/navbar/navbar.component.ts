@@ -14,9 +14,16 @@ import { SupabaseService } from '../../services/supabase.service';
   selector: 'app-navbar',
   standalone: true,
   imports: [
-    CommonModule, RouterLink, RouterLinkActive,
-    MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule,
-    MatSidenavModule, MatListModule, MatDividerModule,
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatSidenavModule,
+    MatListModule,
+    MatDividerModule,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
@@ -25,18 +32,24 @@ export class NavbarComponent {
   supabase = inject(SupabaseService);
   private router = inject(Router);
 
-  get user() { return this.supabase.user(); }
-  get isAuth() { return this.supabase.isAuthenticated(); }
+  get user() {
+    return this.supabase.user();
+  }
+  get isAuth() {
+    return this.supabase.isAuthenticated();
+  }
 
   get userAvatar(): string {
     return this.user?.user_metadata?.['avatar_url'] ?? '';
   }
 
   get userName(): string {
-    return this.user?.user_metadata?.['full_name'] ??
-           this.user?.user_metadata?.['name'] ??
-           this.user?.email?.split('@')[0] ??
-           'Usuario';
+    return (
+      this.user?.user_metadata?.['full_name'] ??
+      this.user?.user_metadata?.['name'] ??
+      this.user?.email?.split('@')[0] ??
+      'Usuario'
+    );
   }
 
   async signIn() {

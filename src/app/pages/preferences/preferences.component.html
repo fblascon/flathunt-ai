@@ -12,7 +12,9 @@
     <div class="empty-state">
       <mat-icon>tune</mat-icon>
       <p>No tienes preferencias guardadas</p>
-      <button mat-raised-button color="primary" (click)="newPreference()">Crear primera preferencia</button>
+      <button mat-raised-button color="primary" (click)="newPreference()">
+        Crear primera preferencia
+      </button>
     </div>
   } @else {
     <div class="prefs-grid">
@@ -27,9 +29,17 @@
           </mat-card-header>
           <mat-card-content>
             <div class="pref-details">
-              @if (pref.max_price) { <span class="pref-tag">Max {{ pref.max_price | currency:'EUR':'symbol':'1.0-0' }}</span> }
-              @if (pref.min_rooms) { <span class="pref-tag">{{ pref.min_rooms }}+ hab.</span> }
-              @if (pref.min_size) { <span class="pref-tag">{{ pref.min_size }}+ m²</span> }
+              @if (pref.max_price) {
+                <span class="pref-tag"
+                  >Max {{ pref.max_price | currency: 'EUR' : 'symbol' : '1.0-0' }}</span
+                >
+              }
+              @if (pref.min_rooms) {
+                <span class="pref-tag">{{ pref.min_rooms }}+ hab.</span>
+              }
+              @if (pref.min_size) {
+                <span class="pref-tag">{{ pref.min_size }}+ m²</span>
+              }
             </div>
             @if (pref.neighborhoods.length) {
               <div class="pref-neighborhoods">

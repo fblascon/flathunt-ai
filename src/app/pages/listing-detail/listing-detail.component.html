@@ -16,17 +16,24 @@
                 <button class="carousel-nav next" mat-icon-button (click)="nextImage()">
                   <mat-icon>chevron_right</mat-icon>
                 </button>
-                <div class="carousel-counter">{{ currentImageIndex() + 1 }} / {{ allImages.length }}</div>
+                <div class="carousel-counter">
+                  {{ currentImageIndex() + 1 }} / {{ allImages.length }}
+                </div>
               }
             </div>
             @if (allImages.length > 1) {
               <div class="carousel-thumbnails">
                 @for (img of allImages; track $index) {
-                  <img 
-                    [src]="img" 
+                  <img
+                    [src]="img"
                     [class.active]="currentImageIndex() === $index"
                     (click)="selectImage($index)"
-                    alt="" />
+                    (keydown.enter)="selectImage($index)"
+                    (keydown.space)="selectImage($index); $event.preventDefault()"
+                    role="button"
+                    tabindex="0"
+                    alt=""
+                  />
                 }
               </div>
             }
@@ -38,7 +45,7 @@
         </div>
 
         <div class="detail-body">
-          <div class="detail-price">{{ l.price | number:'1.0-0' }} €/mes</div>
+          <div class="detail-price">{{ l.price | number: '1.0-0' }} €/mes</div>
           <h1>{{ l.title }}</h1>
           <p class="detail-address">
             <mat-icon>location_on</mat-icon>
@@ -76,10 +83,20 @@
           }
 
           <div class="detail-actions">
-            <a mat-raised-button color="primary" [href]="l.external_url" target="_blank" rel="noopener">
+            <a
+              mat-raised-button
+              color="primary"
+              [href]="l.external_url"
+              target="_blank"
+              rel="noopener"
+            >
               <mat-icon>open_in_new</mat-icon> Ver en Idealista
             </a>
-            <button mat-raised-button [color]="isFavorited() ? 'warn' : undefined" (click)="toggleFavorite()">
+            <button
+              mat-raised-button
+              [color]="isFavorited() ? 'warn' : undefined"
+              (click)="toggleFavorite()"
+            >
               <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
               {{ isFavorited() ? 'Quitar favorito' : 'Guardar favorito' }}
             </button>
@@ -90,16 +107,18 @@
       <div class="detail-sidebar">
         <mat-card>
           <mat-card-header>
-            <mat-card-title>
-              <mat-icon>smart_toy</mat-icon> Análisis IA
-            </mat-card-title>
+            <mat-card-title> <mat-icon>smart_toy</mat-icon> Análisis IA </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             @if (analyzing()) {
               <mat-progress-bar mode="indeterminate"></mat-progress-bar>
               <p class="analyzing-text">Analizando piso...</p>
             } @else if (aiAnalysis(); as analysis) {
-              <div class="ai-score-big" [class.high]="analysis.score >= 70" [class.low]="analysis.score < 40">
+              <div
+                class="ai-score-big"
+                [class.high]="analysis.score >= 70"
+                [class.low]="analysis.score < 40"
+              >
                 {{ analysis.score }}/100
               </div>
               <p class="ai-summary">{{ analysis.summary }}</p>
@@ -134,7 +153,12 @@
               <p class="analyze-prompt">
                 Pide a la IA que analice este piso según tus preferencias
               </p>
-              <button mat-raised-button color="primary" (click)="analyzeWithAi()" class="analyze-btn">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="analyzeWithAi()"
+                class="analyze-btn"
+              >
                 <mat-icon>smart_toy</mat-icon> Analizar con IA
               </button>
             }

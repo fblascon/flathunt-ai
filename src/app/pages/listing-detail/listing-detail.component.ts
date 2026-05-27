@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,11 +16,20 @@ import { Listing } from '../../models/listing.model';
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatProgressBarModule, MatProgressSpinnerModule, MatSnackBarModule, DecimalPipe],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    DecimalPipe,
+  ],
   templateUrl: './listing-detail.component.html',
   styleUrl: './listing-detail.component.scss',
 })
-export class ListingDetailComponent {
+export class ListingDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private listingsService = inject(ListingsService);
   private favoritesService = inject(FavoritesService);
@@ -73,7 +82,9 @@ export class ListingDetailComponent {
     if (!l) return;
     const nowFav = await this.favoritesService.toggle(l.id);
     this.isFavorited.set(nowFav);
-    this.snackBar.open(nowFav ? 'Añadido a favoritos' : 'Eliminado de favoritos', 'Cerrar', { duration: 2000 });
+    this.snackBar.open(nowFav ? 'Añadido a favoritos' : 'Eliminado de favoritos', 'Cerrar', {
+      duration: 2000,
+    });
   }
 
   get allImages(): string[] {
@@ -83,19 +94,19 @@ export class ListingDetailComponent {
     if (l.image_url && !imgs.includes(l.image_url)) {
       return [l.image_url, ...imgs];
     }
-    return imgs.length > 0 ? imgs : (l.image_url ? [l.image_url] : []);
+    return imgs.length > 0 ? imgs : l.image_url ? [l.image_url] : [];
   }
 
   nextImage() {
     const images = this.allImages;
     if (images.length <= 1) return;
-    this.currentImageIndex.update(i => (i + 1) % images.length);
+    this.currentImageIndex.update((i) => (i + 1) % images.length);
   }
 
   prevImage() {
     const images = this.allImages;
     if (images.length <= 1) return;
-    this.currentImageIndex.update(i => (i - 1 + images.length) % images.length);
+    this.currentImageIndex.update((i) => (i - 1 + images.length) % images.length);
   }
 
   selectImage(index: number) {

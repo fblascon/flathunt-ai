@@ -36,22 +36,17 @@ export class FavoritesService {
   }
 
   async add(listingId: string, aiScore?: number, aiNotes?: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('favorites')
-      .insert({
-        listing_id: listingId,
-        ai_score: aiScore ?? null,
-        ai_notes: aiNotes ?? null,
-      });
+    const { error } = await this.supabase.from('favorites').insert({
+      listing_id: listingId,
+      ai_score: aiScore ?? null,
+      ai_notes: aiNotes ?? null,
+    });
 
     if (error) throw error;
   }
 
   async remove(listingId: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('favorites')
-      .delete()
-      .eq('listing_id', listingId);
+    const { error } = await this.supabase.from('favorites').delete().eq('listing_id', listingId);
 
     if (error) throw error;
   }

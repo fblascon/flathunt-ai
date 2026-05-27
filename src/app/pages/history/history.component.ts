@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
@@ -14,7 +14,7 @@ import { SearchHistory } from '../../models/search-history.model';
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss',
 })
-export class HistoryComponent {
+export class HistoryComponent implements OnInit {
   private historyService = inject(HistoryService);
 
   history = signal<SearchHistory[]>([]);

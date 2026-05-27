@@ -93,6 +93,48 @@
   }
 }
 
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+
+  .pagination-nav {
+    margin-left: 8px;
+    display: inline-flex;
+    gap: 4px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+      }
+    }
+  }
+}
+
+.pagination-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px 0;
+
+  .page-indicator {
+    font-size: 0.9rem;
+    color: #888;
+  }
+}
+
 .listing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

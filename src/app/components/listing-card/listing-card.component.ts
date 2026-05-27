@@ -10,7 +10,14 @@ import { Listing } from '../../models/listing.model';
 @Component({
   selector: 'app-listing-card',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatTooltipModule, DecimalPipe],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatTooltipModule,
+    DecimalPipe,
+  ],
   templateUrl: './listing-card.component.html',
   styleUrl: './listing-card.component.scss',
 })
@@ -21,7 +28,7 @@ export class ListingCardComponent {
   isFavorited = input(false);
   aiScore = input<number | null>(null);
   siblingCount = input(0);
-  onFavorite = output<string>();
-  onCompare = output<string>();
-  onSelect = output<string>();
+  favorite = output<string>();
+  compare = output<string>();
+  selected = output<string>();
 }

@@ -28,29 +28,52 @@ export class AiService {
   private apiUrl = environment.apiUrl;
 
   async analyzeListing(
-    listing: { title: string; price: number; rooms: number; size: number; description: string; address: string; features: string[] },
-    preferences?: { maxPrice?: number; minRooms?: number; minSize?: number; mustHave?: string[] }
+    listing: {
+      title: string;
+      price: number;
+      rooms: number;
+      size: number;
+      description: string;
+      address: string;
+      features: string[];
+    },
+    preferences?: { maxPrice?: number; minRooms?: number; minSize?: number; mustHave?: string[] },
   ): Promise<AiAnalysis> {
     return lastValueFrom(
-      this.http.post<AiAnalysis>(`${this.apiUrl}/ai/analyze-listing`, { listing, preferences })
+      this.http.post<AiAnalysis>(`${this.apiUrl}/ai/analyze-listing`, { listing, preferences }),
     );
   }
 
   async scoreListings(
-    listings: { id: string; title: string; price: number; rooms: number; size: number; address: string }[],
-    preferences: { maxPrice?: number; minRooms?: number; minSize?: number; mustHave?: string[] }
+    listings: {
+      id: string;
+      title: string;
+      price: number;
+      rooms: number;
+      size: number;
+      address: string;
+    }[],
+    preferences: { maxPrice?: number; minRooms?: number; minSize?: number; mustHave?: string[] },
   ): Promise<{ id: string; score: number; reason: string }[]> {
     return lastValueFrom(
-      this.http.post<{ id: string; score: number; reason: string }[]>(`${this.apiUrl}/ai/score-listings`, { listings, preferences })
+      this.http.post<{ id: string; score: number; reason: string }[]>(
+        `${this.apiUrl}/ai/score-listings`,
+        { listings, preferences },
+      ),
     );
   }
 
   async compareListings(
-    listings: { id: string; title: string; price: number; rooms: number; size: number; description: string }[]
+    listings: {
+      id: string;
+      title: string;
+      price: number;
+      rooms: number;
+      size: number;
+      description: string;
+    }[],
   ): Promise<AiComparison> {
-    return lastValueFrom(
-      this.http.post<AiComparison>(`${this.apiUrl}/ai/compare`, { listings })
-    );
+    return lastValueFrom(this.http.post<AiComparison>(`${this.apiUrl}/ai/compare`, { listings }));
   }
 
   async extractFromUrl(url: string): Promise<{
@@ -64,29 +87,51 @@ export class AiService {
   }> {
     return lastValueFrom(
       this.http.post<{
-        title: string; price: number; rooms: number; size: number;
-        description: string; address: string; analysis: string;
-      }>(`${this.apiUrl}/ai/extract-url`, { url })
+        title: string;
+        price: number;
+        rooms: number;
+        size: number;
+        description: string;
+        address: string;
+        analysis: string;
+      }>(`${this.apiUrl}/ai/extract-url`, { url }),
     );
   }
 
-  async semanticSearch(query: string, limit = 10, keyword?: string, neighborhoods?: string[]): Promise<{
+  async semanticSearch(
+    query: string,
+    limit = 10,
+    keyword?: string,
+    neighborhoods?: string[],
+  ): Promise<{
     results: {
-      id: string; title: string; price: number; rooms: number;
-      size_m2: number; neighborhood: string; address: string;
-      image_url: string; similarity: number;
+      id: string;
+      title: string;
+      price: number;
+      rooms: number;
+      size_m2: number;
+      neighborhood: string;
+      address: string;
+      image_url: string;
+      similarity: number;
     }[];
     filteredNeighborhoods: string[] | null;
   }> {
     return lastValueFrom(
       this.http.post<{
         results: {
-          id: string; title: string; price: number; rooms: number;
-          size_m2: number; neighborhood: string; address: string;
-          image_url: string; similarity: number;
+          id: string;
+          title: string;
+          price: number;
+          rooms: number;
+          size_m2: number;
+          neighborhood: string;
+          address: string;
+          image_url: string;
+          similarity: number;
         }[];
         filteredNeighborhoods: string[] | null;
-      }>(`${this.apiUrl}/ai/semantic-search`, { query, limit, keyword, neighborhoods })
+      }>(`${this.apiUrl}/ai/semantic-search`, { query, limit, keyword, neighborhoods }),
     );
   }
 }

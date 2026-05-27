@@ -16,8 +16,8 @@
           [listing]="$any(fav.listings)"
           [isFavorited]="true"
           [showFavorite]="true"
-          (onFavorite)="removeFavorite($event)"
-          (onSelect)="goToDetail($event)"
+          (favorite)="removeFavorite($event)"
+          (selected)="goToDetail($event)"
         />
       }
     </div>
