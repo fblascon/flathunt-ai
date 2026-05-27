@@ -5,6 +5,7 @@ import { SearchHistory } from '../models/search-history.model';
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
   private supabase = inject(SupabaseService).getClient();
+  private supabaseService = inject(SupabaseService);
 
   async getAll(): Promise<SearchHistory[]> {
     const { data, error } = await this.supabase
@@ -23,9 +24,12 @@ export class HistoryService {
     resultsCount: number,
     source = 'manual',
   ): Promise<void> {
+    const userId = this.supabaseService.getUserId();
+    if (!userId) return;
+
     const { error } = await this.supabase
       .from('search_history')
-      .insert({ query, filters, results_count: resultsCount, source });
+      .insert({ user_id: userId, query, filters, results_count: resultsCount, source });
 
     if (error) throw error;
   }

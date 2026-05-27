@@ -42,6 +42,10 @@ export class SupabaseService {
     await this.supabase.auth.signOut();
   }
 
+  getUserId(): string | null {
+    return this.user()?.id ?? null;
+  }
+
   isAuthenticated(): boolean {
     return !!this.session();
   }

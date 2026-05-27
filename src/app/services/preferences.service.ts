@@ -5,6 +5,7 @@ import { SearchPreference } from '../models/search-preference.model';
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
   private supabase = inject(SupabaseService).getClient();
+  private supabaseService = inject(SupabaseService);
 
   async getAll(): Promise<SearchPreference[]> {
     const { data, error } = await this.supabase
@@ -21,18 +22,21 @@ export class PreferencesService {
       .from('search_preferences')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) return null;
-    return data as SearchPreference;
+    return data as SearchPreference | null;
   }
 
   async create(
     pref: Omit<SearchPreference, 'id' | 'user_id' | 'created_at' | 'updated_at'>,
   ): Promise<SearchPreference> {
+    const userId = this.supabaseService.getUserId();
+    if (!userId) throw new Error('User not authenticated');
+
     const { data, error } = await this.supabase
       .from('search_preferences')
-      .insert(pref)
+      .insert({ ...pref, user_id: userId })
       .select()
       .single();
 
@@ -41,16 +45,27 @@ export class PreferencesService {
   }
 
   async update(id: string, updates: Partial<SearchPreference>): Promise<void> {
+    const userId = this.supabaseService.getUserId();
+    if (!userId) throw new Error('User not authenticated');
+
     const { error } = await this.supabase
       .from('search_preferences')
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId);
 
     if (error) throw error;
   }
 
   async remove(id: string): Promise<void> {
-    const { error } = await this.supabase.from('search_preferences').delete().eq('id', id);
+    const userId = this.supabaseService.getUserId();
+    if (!userId) throw new Error('User not authenticated');
+
+    const { error } = await this.supabase
+      .from('search_preferences')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
 
     if (error) throw error;
   }
