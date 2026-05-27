@@ -2,6 +2,9 @@
 
 Angular 21 app que busca pisos en Madrid con IA, scraping de Idealista, Supabase backend.
 
+**Producción:** https://flathunt-ai.vercel.app
+**GitHub:** https://github.com/fblascon/flathunt-ai
+
 ## Fases Completadas
 
 1. ✅ **Frontend Angular 21** con Material UI, Supabase auth, Express backend proxy
@@ -12,6 +15,8 @@ Angular 21 app que busca pisos en Madrid con IA, scraping de Idealista, Supabase
 6. ✅ **Scraper de detalle con fotos múltiples** — `fetch_detail_page()` extrae galería completa, pipeline incluye `--detail-limit` (default 100) para poblar `images[]` en Supabase
 7. ✅ **UI sin agrupación** — cada piso como tarjeta individual con indicador visual de edificio compartido
 8. ✅ **Fallback por barrio** — si no hay resultados en un barrio, opción de buscar en toda Madrid
+9. ✅ **Deploy Vercel** — frontend Angular estático + Express serverless en `api/index.js`
+10. ✅ **Google OAuth** — configurado en Supabase Auth + Google Cloud Console, login funcional
 
 ---
 
@@ -23,6 +28,8 @@ Angular 21 app que busca pisos en Madrid con IA, scraping de Idealista, Supabase
 | `src/app/components/listing-card/listing-card.component.ts` | Tarjeta individual con badge de barrio, planta, indicador de edificio compartido |
 | `src/app/pages/listing-detail/listing-detail.component.ts` | Detalle del piso con carousel de fotos, análisis IA |
 | `server.js` | Express con endpoints AI, semantic search con fallback por barrio |
+| `api/index.js` | Entry point serverless Vercel (require + export de server.js) |
+| `vercel.json` | Config Vercel: framework angular, rewrites /api → serverless function |
 | `pipeline/pipeline.py` | Scraper principal con opción `--full-madrid` y `--detail-limit` |
 | `pipeline/idealista_spain.py` | Scraper de Idealista usando `curl_cffi` |
 | `pipeline/embeddings.py` | Genera embeddings vía OpenRouter, guarda en pgvector |
@@ -32,9 +39,12 @@ Angular 21 app que busca pisos en Madrid con IA, scraping de Idealista, Supabase
 
 ## Configuración Activa
 
+- **Producción**: https://flathunt-ai.vercel.app
+- **GitHub**: https://github.com/fblascon/flathunt-ai
 - **Supabase**: `quipyyrmhzbcxlksthpo.supabase.co`
-- **OpenRouter**: API key en `.env` (modelo `google/gemini-2.0-flash-001`)
-- **Google OAuth**: funcionando
+- **OpenRouter**: API key en dashboard Vercel (modelo `google/gemini-2.0-flash-001`)
+- **Google OAuth**: configurado en Supabase Auth + Google Cloud Console
+- **Env Vars Vercel**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY`
 - **Scraping**: `curl_cffi` con impersonate `chrome124`, delays de 5s entre requests
 
 ---
@@ -77,12 +87,15 @@ Filtra por barrios (`neighborhoods`) y devuelve `similarity`, `floor`, `descript
 
 ## Cómo arrancar el proyecto
 
-```bash
-# Terminal 1 — Frontend Angular
-npm start
-# o manualmente:
-rm -rf .angular && npx ng serve --proxy-config proxy.conf.json
+### Local
 
+```bash
+# Frontend + backend (concurrently)
+npm start
+
+# o manualmente:
+# Terminal 1 — Frontend Angular
+rm -rf .angular && npx ng serve --proxy-config proxy.conf.json
 # Terminal 2 — Backend Express
 node server.js
 ```
@@ -96,6 +109,7 @@ cd pipeline
 python pipeline.py --pages 5          # Scrapear 21 distritos + 100 detalles
 python pipeline.py --pages 5 --detail-limit 0   # Solo listings, sin detalles
 python pipeline.py --full-madrid --pages 10     # Madrid completo
+python embeddings.py --regenerate     # Regenerar embeddings
 ```
 
 ---
@@ -130,8 +144,31 @@ python embeddings.py --regenerate
 
 ---
 
-## Endpoints del Backend Express (port 3001)
+## Deploy (Vercel)
 
+```bash
+# Manual (si no hay push a main)
+vercel deploy --prod --yes
+
+# Automático: cada push a main en GitHub redeploya
+```
+
+### Estructura Vercel
+- `vercel.json` → framework angular, build command, rewrites `/api/*` → serverless function
+- `api/index.js` → `require('../server')` + `module.exports = app`
+- `server.js` → `if (!process.env.VERCEL)` condiciona el `listen()` para serverless
+- Variables de entorno configuradas en dashboard Vercel (no en .env para producción)
+
+### OAuth en Producción
+- Google Cloud Console: Client ID nuevo con Authorized redirect URIs apuntando a Supabase callback
+- Supabase Auth: Google provider habilitado, Redirect URLs incluyen `https://flathunt-ai.vercel.app/**`
+- Auth redirige a `window.location.origin + '/home'`
+
+---
+
+## Endpoints del Backend Express
+
+### Local (port 3001)
 | Endpoint | Descripción |
 |----------|-------------|
 | `POST /api/ai/semantic-search` | Búsqueda semántica. Body: `{query, limit, keyword, neighborhoods}` |
@@ -139,6 +176,9 @@ python embeddings.py --regenerate
 | `POST /api/ai/score-listings` | Puntuación IA de múltiples pisos |
 | `POST /api/ai/compare` | Comparación IA de 2-3 pisos |
 | `GET /api/health` | Health check |
+
+### Producción (Vercel)
+Mismos endpoints en `https://flathunt-ai.vercel.app/api/...`
 
 ---
 
@@ -159,6 +199,8 @@ python embeddings.py --regenerate
 3. **Sin paginación** — la lista muestra todos los listings en memoria. Con 2500+ funciona bien, pero >5000 puede ralentizarse.
 4. **Re-scrapeo periódico** — no hay cron job ni GitHub Actions configurado. Idealista cambia listings diariamente.
 5. **Scraper solo Idealista** — no cubre Fotocasa, Milanuncios, etc.
+6. **Vercel Hobby limits** — serverless functions timeout a 60s (suficiente para semantic-search, pero embeddings desde el backend no funcionarían)
+7. **Sin GitHub Actions** — el pipeline de scraping/embeddings solo se ejecuta manualmente en local
 
 ---
 
@@ -166,7 +208,11 @@ python embeddings.py --regenerate
 
 - `ng serve` a veces no recarga cambios → `rm -rf .angular` y reiniciar
 - `.env` tiene `SUPABASE_SERVICE_ROLE_KEY` y `OPENROUTER_API_KEY` — no subir a git
+- En Vercel, las env vars se configuran en el dashboard, no en `.env`
 - El scraper usa `curl_cffi` para bypass Cloudflare — requiere `pip install curl_cffi`
 - La columna `images` en Supabase es `text[]` (array de URLs), no se descargan fotos localmente
 - El frontend filtra barrios en la query natural usando `extractNeighborhoodsFromQuery()`
 - El indicador visual de edificio compartido es `siblingCount > 1` en `listing-card`, no agrupación real
+- `server.js` exporta `app` (module.exports) para que `api/index.js` lo use en serverless
+- El `listen()` en `server.js` está condicionado a `!process.env.VERCEL`
+- Angular environment es único (sin fileReplacements), usa `/api` en todos los entornos (proxy en dev)

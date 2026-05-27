@@ -1,59 +1,74 @@
-# FlathuntAi
+# FlatHunt AI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Búsqueda semántica de pisos en Madrid con IA. Angular 21 + Express + Supabase + OpenRouter.
 
-## Development server
+**Producción:** https://flathunt-ai.vercel.app
 
-To start a local development server, run:
+## Stack
 
-```bash
-ng serve
-```
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | Angular 21 (standalone, Signals, Material UI) |
+| Backend | Express 5 (Vercel Serverless Functions) |
+| DB | Supabase PostgreSQL + pgvector |
+| AI | OpenRouter (Gemini 2.0 Flash + text-embedding-3-small) |
+| Scraper | Python 3.10 + curl_cffi |
+| Hosting | Vercel (frontend + API serverless) |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Desarrollo local
 
 ```bash
-ng generate --help
+# Frontend + backend simultáneamente
+npm start
+
+# Solo frontend (necesita backend aparte)
+rm -rf .angular && npx ng serve --proxy-config proxy.conf.json
+
+# Solo backend
+node server.js
 ```
 
-## Building
+## Producción (Vercel)
 
-To build the project run:
+El proyecto tiene un `vercel.json` que despliega Angular como frontend estático y el Express como serverless function en `/api/*`.
+
+Las variables de entorno están configuradas en el dashboard de Vercel:
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY`
+
+Cada push a `main` redeploya automáticamente en https://flathunt-ai.vercel.app.
+
+## Scraper
 
 ```bash
-ng build
+cd pipeline
+python pipeline.py --pages 5          # Scrapear distritos
+python pipeline.py --full-madrid       # Scrapear Madrid completo
+python pipeline.py --detail-limit 50   # Extraer fotos de detalle
+python embeddings.py                   # Generar embeddings de listings nuevos
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Autenticación
 
-## Running unit tests
+- Google OAuth configurado via Supabase Auth
+- Cliente OAuth en Google Cloud Console con redirect a Supabase callback
+- Session persistida via `@supabase/supabase-js`
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Estructura del proyecto
 
-```bash
-ng test
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+flathunt-ai/
+├── api/index.js              # Entry point serverless Vercel
+├── vercel.json               # Configuración Vercel
+├── server.js                 # Express backend (API endpoints)
+├── pipeline/                 # Scraper Python + embeddings
+│   ├── pipeline.py
+│   ├── idealista_spain.py
+│   └── embeddings.py
+├── supabase/schema.sql       # DB schema + RPC search_listings
+├── src/                      # Angular frontend
+│   └── app/
+│       ├── pages/            # home, listings, listing-detail, login, etc.
+│       ├── services/         # supabase, ai, listings, favorites, etc.
+│       ├── components/       # listing-card, navbar
+│       └── guards/           # auth.guard (protege rutas)
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
