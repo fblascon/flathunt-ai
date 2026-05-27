@@ -44,6 +44,10 @@ __screenshots__/
 pipeline/.env
 flathunter/
 
+# Python
+__pycache__/
+*.pyc
+
 # System files
 .DS_Store
 Thumbs.db

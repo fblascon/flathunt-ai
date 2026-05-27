@@ -317,7 +317,11 @@ app.post('/api/ai/semantic-search', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`FlatHunt AI backend running on http://localhost:${PORT}`);
-  console.log(`OpenRouter key configured: ${OPENROUTER_KEY ? 'Yes' : 'NO - MISSING'}`);
-});
+module.exports = app;
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`FlatHunt AI backend running on http://localhost:${PORT}`);
+    console.log(`OpenRouter key configured: ${OPENROUTER_KEY ? 'Yes' : 'NO - MISSING'}`);
+  });
+}
