@@ -1,0 +1,146 @@
+<div class="page-container">
+  @if (loading()) {
+    <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else if (listing(); as l) {
+    <div class="detail-layout">
+      <div class="detail-main">
+        <!-- Image Carousel -->
+        <div class="image-carousel">
+          @if (allImages.length > 0) {
+            <div class="carousel-main">
+              <img [src]="allImages[currentImageIndex()]" [alt]="l.title" class="detail-image" />
+              @if (allImages.length > 1) {
+                <button class="carousel-nav prev" mat-icon-button (click)="prevImage()">
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+                <button class="carousel-nav next" mat-icon-button (click)="nextImage()">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+                <div class="carousel-counter">{{ currentImageIndex() + 1 }} / {{ allImages.length }}</div>
+              }
+            </div>
+            @if (allImages.length > 1) {
+              <div class="carousel-thumbnails">
+                @for (img of allImages; track $index) {
+                  <img 
+                    [src]="img" 
+                    [class.active]="currentImageIndex() === $index"
+                    (click)="selectImage($index)"
+                    alt="" />
+                }
+              </div>
+            }
+          } @else {
+            <div class="detail-image placeholder">
+              <mat-icon>image_not_supported</mat-icon>
+            </div>
+          }
+        </div>
+
+        <div class="detail-body">
+          <div class="detail-price">{{ l.price | number:'1.0-0' }} €/mes</div>
+          <h1>{{ l.title }}</h1>
+          <p class="detail-address">
+            <mat-icon>location_on</mat-icon>
+            {{ l.address || l.neighborhood || 'Madrid' }}
+          </p>
+
+          <div class="detail-stats">
+            @if (l.rooms) {
+              <div class="stat"><mat-icon>bed</mat-icon> {{ l.rooms }} habitaciones</div>
+            }
+            @if (l.size_m2) {
+              <div class="stat"><mat-icon>square_foot</mat-icon> {{ l.size_m2 }} m²</div>
+            }
+            @if (l.floor) {
+              <div class="stat"><mat-icon>stairs</mat-icon> {{ l.floor }}</div>
+            }
+          </div>
+
+          @if (l.features.length) {
+            <div class="detail-features">
+              <h3>Características</h3>
+              <div>
+                @for (f of l.features; track f) {
+                  <mat-chip>{{ f }}</mat-chip>
+                }
+              </div>
+            </div>
+          }
+
+          @if (l.description) {
+            <div class="detail-description">
+              <h3>Descripción</h3>
+              <p>{{ l.description }}</p>
+            </div>
+          }
+
+          <div class="detail-actions">
+            <a mat-raised-button color="primary" [href]="l.external_url" target="_blank" rel="noopener">
+              <mat-icon>open_in_new</mat-icon> Ver en Idealista
+            </a>
+            <button mat-raised-button [color]="isFavorited() ? 'warn' : undefined" (click)="toggleFavorite()">
+              <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
+              {{ isFavorited() ? 'Quitar favorito' : 'Guardar favorito' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-sidebar">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>smart_toy</mat-icon> Análisis IA
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (analyzing()) {
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              <p class="analyzing-text">Analizando piso...</p>
+            } @else if (aiAnalysis(); as analysis) {
+              <div class="ai-score-big" [class.high]="analysis.score >= 70" [class.low]="analysis.score < 40">
+                {{ analysis.score }}/100
+              </div>
+              <p class="ai-summary">{{ analysis.summary }}</p>
+
+              <h4 class="ai-section-title green">Pros</h4>
+              <ul class="ai-list">
+                @for (pro of analysis.pros; track pro) {
+                  <li>{{ pro }}</li>
+                }
+              </ul>
+
+              <h4 class="ai-section-title red">Contras</h4>
+              <ul class="ai-list">
+                @for (con of analysis.cons; track con) {
+                  <li>{{ con }}</li>
+                }
+              </ul>
+
+              @if (analysis.redFlags.length) {
+                <h4 class="ai-section-title red">Red flags</h4>
+                <ul class="ai-list">
+                  @for (flag of analysis.redFlags; track flag) {
+                    <li>{{ flag }}</li>
+                  }
+                </ul>
+              }
+
+              <div class="ai-price-quality">
+                Relación calidad/precio: {{ analysis.priceQuality }}
+              </div>
+            } @else {
+              <p class="analyze-prompt">
+                Pide a la IA que analice este piso según tus preferencias
+              </p>
+              <button mat-raised-button color="primary" (click)="analyzeWithAi()" class="analyze-btn">
+                <mat-icon>smart_toy</mat-icon> Analizar con IA
+              </button>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

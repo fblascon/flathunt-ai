@@ -1,0 +1,85 @@
+<mat-card class="listing-card" (click)="onSelect.emit(listing().id)">
+  @if (listing().image_url) {
+    <div class="img-container">
+      <img mat-card-image [src]="listing().image_url" [alt]="listing().title" class="listing-image" />
+      @if (listing().neighborhood) {
+        <div class="neighborhood-badge">{{ listing().neighborhood }}</div>
+      }
+      @if (listing().floor) {
+        <div class="floor-badge">{{ listing().floor }}</div>
+      }
+    </div>
+  } @else {
+    <div class="listing-image placeholder">
+      <mat-icon>image_not_supported</mat-icon>
+    </div>
+  }
+
+  <mat-card-content>
+    <div class="listing-price">{{ listing().price | number:'1.0-0' }} €/mes</div>
+    <h3 class="listing-title">{{ listing().title }}</h3>
+    <p class="listing-address">
+      <mat-icon class="small-icon">location_on</mat-icon>
+      {{ listing().address || listing().neighborhood || 'Madrid' }}
+    </p>
+
+    <div class="listing-details">
+      @if (listing().rooms) {
+        <span class="detail">
+          <mat-icon class="small-icon">bed</mat-icon>
+          {{ listing().rooms }} hab.
+        </span>
+      }
+      @if (listing().size_m2) {
+        <span class="detail">
+          <mat-icon class="small-icon">square_foot</mat-icon>
+          {{ listing().size_m2 }} m²
+        </span>
+      }
+      @if (listing().floor) {
+        <span class="detail">
+          <mat-icon class="small-icon">stairs</mat-icon>
+          {{ listing().floor }}
+        </span>
+      }
+      @if (siblingCount() > 1) {
+        <span class="detail building-indicator" [matTooltip]="siblingCount() + ' pisos en este edificio'">
+          <mat-icon class="small-icon">apartment</mat-icon>
+          {{ siblingCount() }}
+        </span>
+      }
+    </div>
+
+    @if (listing().features.length) {
+      <mat-chip-listbox class="features" aria-label="Características">
+        @for (feature of listing().features.slice(0, 4); track feature) {
+          <mat-chip-option disabled>{{ feature }}</mat-chip-option>
+        }
+      </mat-chip-listbox>
+    }
+
+    @if (aiScore()) {
+      <div class="ai-score" [class.high]="aiScore()! >= 70" [class.low]="aiScore()! < 40">
+        <mat-icon>smart_toy</mat-icon>
+        <span>IA: {{ aiScore() }}/100</span>
+      </div>
+    }
+  </mat-card-content>
+
+  <mat-card-actions>
+    <a mat-icon-button [href]="listing().external_url" target="_blank" rel="noopener" matTooltip="Ver en Idealista" (click)="$event.stopPropagation()">
+      <mat-icon>open_in_new</mat-icon>
+    </a>
+    @if (showCompare()) {
+      <button mat-icon-button matTooltip="Comparar" (click)="$event.stopPropagation(); onCompare.emit(listing().id)">
+        <mat-icon>compare_arrows</mat-icon>
+      </button>
+    }
+    @if (showFavorite()) {
+      <button mat-icon-button [color]="isFavorited() ? 'warn' : undefined"
+              matTooltip="Favorito" (click)="$event.stopPropagation(); onFavorite.emit(listing().id)">
+        <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>

@@ -1,0 +1,25 @@
+<div class="page-container">
+  <h1 class="page-title">Mis favoritos</h1>
+
+  @if (loading()) {
+    <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else if (!favorites().length) {
+    <div class="empty-state">
+      <mat-icon>favorite_border</mat-icon>
+      <p>No tienes pisos guardados como favoritos</p>
+      <button mat-raised-button color="primary" routerLink="/listings">Explorar pisos</button>
+    </div>
+  } @else {
+    <div class="listing-grid">
+      @for (fav of favorites(); track fav.listing_id) {
+        <app-listing-card
+          [listing]="$any(fav.listings)"
+          [isFavorited]="true"
+          [showFavorite]="true"
+          (onFavorite)="removeFavorite($event)"
+          (onSelect)="goToDetail($event)"
+        />
+      }
+    </div>
+  }
+</div>

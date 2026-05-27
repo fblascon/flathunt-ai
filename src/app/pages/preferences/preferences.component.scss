@@ -1,0 +1,57 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.prefs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.pref-card {
+  &.inactive {
+    opacity: 0.5;
+  }
+}
+
+.pref-details {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0 8px;
+}
+
+.pref-tag {
+  background: rgba(108, 99, 255, 0.15);
+  color: #6c63ff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.pref-neighborhoods, .pref-must {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+mat-card-actions {
+  justify-content: flex-end;
+}

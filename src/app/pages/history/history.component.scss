@@ -1,0 +1,15 @@
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  overflow: hidden;
+
+  table {
+    width: 100%;
+    background: #1e1e2e;
+  }
+
+  th {
+    color: #aaa;
+    font-weight: 600;
+  }
+}

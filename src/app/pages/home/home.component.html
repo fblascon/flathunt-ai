@@ -1,0 +1,62 @@
+<div class="page-container">
+  <div class="home-hero">
+    <h1>Bienvenido a FlatHunt AI</h1>
+    <p>Encuentra tu piso ideal en Madrid con ayuda de inteligencia artificial.
+       La IA analiza cada anuncio según tus preferencias y te da una puntuación.</p>
+
+    <div class="hero-actions">
+      <a mat-raised-button color="primary" routerLink="/listings">
+        <mat-icon>search</mat-icon> Explorar pisos
+      </a>
+      <a mat-stroked-button routerLink="/preferences">
+        <mat-icon>tune</mat-icon> Mis preferencias
+      </a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else {
+    <mat-tab-group>
+      <mat-tab label="Pisos recientes">
+        @if (recentListings().length) {
+          <div class="listing-grid">
+            @for (listing of recentListings(); track listing.id) {
+              <app-listing-card
+                [listing]="listing"
+                [isFavorited]="getFavoritedIds().has(listing.id)"
+              />
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>search_off</mat-icon>
+            <p>Aún no hay pisos. Los scrapers traerán datos pronto.</p>
+            <a mat-button routerLink="/preferences">Configurar preferencias</a>
+          </div>
+        }
+      </mat-tab>
+
+      <mat-tab label="Mis favoritos">
+        @if (favs().length) {
+          <div class="listing-grid">
+            @for (fav of favs(); track fav.listing_id) {
+              <app-listing-card
+                [listing]="$any(fav.listings)"
+                [isFavorited]="true"
+              />
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>favorite_border</mat-icon>
+            <p>No tienes favoritos. Guarda pisos que te gusten.</p>
+            <a mat-button routerLink="/listings">Ver pisos</a>
+          </div>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

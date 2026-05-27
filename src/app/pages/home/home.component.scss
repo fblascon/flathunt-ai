@@ -1,0 +1,36 @@
+.home-hero {
+  text-align: center;
+  padding: 48px 24px 32px;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  p {
+    max-width: 600px;
+    margin: 0 auto 24px;
+    color: #aaa;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  padding: 24px 0;
+}
+
+mat-spinner {
+  margin: 0 auto;
+}
