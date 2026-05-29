@@ -1,0 +1,282 @@
+{
+  "districts": [
+    {
+      "id": 1,
+      "name": "Centro",
+      "number": "01",
+      "neighborhoods": [
+        { "id": "11", "name": "Palacio" },
+        { "id": "12", "name": "Embajadores" },
+        { "id": "13", "name": "Cortes" },
+        { "id": "14", "name": "Justicia" },
+        { "id": "15", "name": "Universidad" },
+        { "id": "16", "name": "Sol" }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Arganzuela",
+      "number": "02",
+      "neighborhoods": [
+        { "id": "21", "name": "Imperial" },
+        { "id": "22", "name": "Acacias" },
+        { "id": "23", "name": "Chopera" },
+        { "id": "24", "name": "Legazpi" },
+        { "id": "25", "name": "Delicias" },
+        { "id": "26", "name": "Palos de la Frontera" },
+        { "id": "27", "name": "Atocha" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Retiro",
+      "number": "03",
+      "neighborhoods": [
+        { "id": "31", "name": "Pacífico" },
+        { "id": "32", "name": "Adelfas" },
+        { "id": "33", "name": "Estrella" },
+        { "id": "34", "name": "Ibiza" },
+        { "id": "35", "name": "Jerónimos" },
+        { "id": "36", "name": "Niño Jesús" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Salamanca",
+      "number": "04",
+      "neighborhoods": [
+        { "id": "41", "name": "Recoletos" },
+        { "id": "42", "name": "Goya" },
+        { "id": "43", "name": "Fuente del Berro" },
+        { "id": "44", "name": "Guindalera" },
+        { "id": "45", "name": "Lista" },
+        { "id": "46", "name": "Castellana" }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Chamartín",
+      "number": "05",
+      "neighborhoods": [
+        { "id": "51", "name": "El Viso" },
+        { "id": "52", "name": "Prosperidad" },
+        { "id": "53", "name": "Ciudad Jardín" },
+        { "id": "54", "name": "Hispanoamérica" },
+        { "id": "55", "name": "Nueva España" },
+        { "id": "56", "name": "Castilla" }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Tetuán",
+      "number": "06",
+      "neighborhoods": [
+        { "id": "61", "name": "Bellas Vistas" },
+        { "id": "62", "name": "Cuatro Caminos" },
+        { "id": "63", "name": "Castillejos" },
+        { "id": "64", "name": "Almenara" },
+        { "id": "65", "name": "Valdeacederas" },
+        { "id": "66", "name": "Berruguete" }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Chamberí",
+      "number": "07",
+      "neighborhoods": [
+        { "id": "71", "name": "Gaztambide" },
+        { "id": "72", "name": "Arapiles" },
+        { "id": "73", "name": "Trafalgar" },
+        { "id": "74", "name": "Almagro" },
+        { "id": "75", "name": "Ríos Rosas" },
+        { "id": "76", "name": "Vallehermoso" }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Fuencarral-El Pardo",
+      "number": "08",
+      "neighborhoods": [
+        { "id": "81", "name": "El Pardo" },
+        { "id": "82", "name": "Fuentelarreina" },
+        { "id": "83", "name": "Peñagrande" },
+        { "id": "84", "name": "Barrio del Pilar" },
+        { "id": "85", "name": "La Paz" },
+        { "id": "86", "name": "Valverde" },
+        { "id": "87", "name": "Mirasierra" },
+        { "id": "88", "name": "El Goloso" }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Moncloa-Aravaca",
+      "number": "09",
+      "neighborhoods": [
+        { "id": "91", "name": "Casa de Campo" },
+        { "id": "92", "name": "Argüelles" },
+        { "id": "93", "name": "Ciudad Universitaria" },
+        { "id": "94", "name": "Valdezarza" },
+        { "id": "95", "name": "Valdemarín" },
+        { "id": "96", "name": "El Plantío" },
+        { "id": "97", "name": "Aravaca" }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Latina",
+      "number": "10",
+      "neighborhoods": [
+        { "id": "101", "name": "Los Cármenes" },
+        { "id": "102", "name": "Puerta del Ángel" },
+        { "id": "103", "name": "Lucero" },
+        { "id": "104", "name": "Aluche" },
+        { "id": "105", "name": "Campamento" },
+        { "id": "106", "name": "Cuatro Vientos" },
+        { "id": "107", "name": "Las Águilas" }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Carabanchel",
+      "number": "11",
+      "neighborhoods": [
+        { "id": "111", "name": "Comillas" },
+        { "id": "112", "name": "Opañel" },
+        { "id": "113", "name": "San Isidro" },
+        { "id": "114", "name": "Vista Alegre" },
+        { "id": "115", "name": "Puerta Bonita" },
+        { "id": "116", "name": "Buenavista" },
+        { "id": "117", "name": "Abrantes" }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Usera",
+      "number": "12",
+      "neighborhoods": [
+        { "id": "121", "name": "Orcasitas" },
+        { "id": "122", "name": "Orcasur" },
+        { "id": "123", "name": "San Fermín" },
+        { "id": "124", "name": "Almendrales" },
+        { "id": "125", "name": "Moscardó" },
+        { "id": "126", "name": "Zofío" },
+        { "id": "127", "name": "Pradolongo" }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Puente de Vallecas",
+      "number": "13",
+      "neighborhoods": [
+        { "id": "131", "name": "Entrevías" },
+        { "id": "132", "name": "San Diego" },
+        { "id": "133", "name": "Palomeras Bajas" },
+        { "id": "134", "name": "Palomeras Sureste" },
+        { "id": "135", "name": "Portazgo" },
+        { "id": "136", "name": "Numancia" }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Moratalaz",
+      "number": "14",
+      "neighborhoods": [
+        { "id": "141", "name": "Pavones" },
+        { "id": "142", "name": "Horcajo" },
+        { "id": "143", "name": "Marroquina" },
+        { "id": "144", "name": "Media Legua" },
+        { "id": "145", "name": "Fontarrón" },
+        { "id": "146", "name": "Vinateros" }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Ciudad Lineal",
+      "number": "15",
+      "neighborhoods": [
+        { "id": "151", "name": "Ventas" },
+        { "id": "152", "name": "Pueblo Nuevo" },
+        { "id": "153", "name": "Quintana" },
+        { "id": "154", "name": "Concepción" },
+        { "id": "155", "name": "San Pascual" },
+        { "id": "156", "name": "San Juan Bautista" },
+        { "id": "157", "name": "Colina" },
+        { "id": "158", "name": "Atalaya" },
+        { "id": "159", "name": "Costillares" }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Hortaleza",
+      "number": "16",
+      "neighborhoods": [
+        { "id": "161", "name": "Palomas" },
+        { "id": "162", "name": "Piovera" },
+        { "id": "163", "name": "Canillas" },
+        { "id": "164", "name": "Pinar del Rey" },
+        { "id": "165", "name": "Apóstol Santiago" },
+        { "id": "166", "name": "Valdefuentes" }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Villaverde",
+      "number": "17",
+      "neighborhoods": [
+        { "id": "171", "name": "Villaverde Alto" },
+        { "id": "172", "name": "San Cristóbal de los Ángeles" },
+        { "id": "173", "name": "Butarque" },
+        { "id": "174", "name": "Los Rosales" },
+        { "id": "175", "name": "Los Ángeles" }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Villa de Vallecas",
+      "number": "18",
+      "neighborhoods": [
+        { "id": "181", "name": "Casco Histórico de Vallecas" },
+        { "id": "182", "name": "Santa Eugenia" },
+        { "id": "183", "name": "Ensanche de Vallecas" }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Vicálvaro",
+      "number": "19",
+      "neighborhoods": [
+        { "id": "191", "name": "Casco Histórico de Vicálvaro" },
+        { "id": "192", "name": "Valdebernardo" },
+        { "id": "193", "name": "Valderrivas" },
+        { "id": "194", "name": "El Cañaveral" }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "San Blas-Canillejas",
+      "number": "20",
+      "neighborhoods": [
+        { "id": "201", "name": "Simancas" },
+        { "id": "202", "name": "Hellín" },
+        { "id": "203", "name": "Amposta" },
+        { "id": "204", "name": "Arcos" },
+        { "id": "205", "name": "Rosas" },
+        { "id": "206", "name": "Rejas" },
+        { "id": "207", "name": "Canillejas" },
+        { "id": "208", "name": "Salvador" }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Barajas",
+      "number": "21",
+      "neighborhoods": [
+        { "id": "211", "name": "Alameda de Osuna" },
+        { "id": "212", "name": "Aeropuerto" },
+        { "id": "213", "name": "Casco Histórico de Barajas" },
+        { "id": "214", "name": "Timón" },
+        { "id": "215", "name": "Corralejos" }
+      ]
+    }
+  ]
+}

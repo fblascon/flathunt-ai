@@ -1,20 +1,31 @@
-<div class="page-container">
+<ion-content class="ion-padding">
   @if (loading()) {
-    <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
   } @else if (listing(); as l) {
+    <ion-button fill="clear" (click)="goBack()" class="back-btn">
+      <ion-icon slot="start" [name]="getIcon('arrow_back')"></ion-icon>
+      Volver a resultados
+    </ion-button>
+
     <div class="detail-layout">
       <div class="detail-main">
-        <!-- Image Carousel -->
         <div class="image-carousel">
-          @if (allImages.length > 0) {
+          @if (allImages.length > 0 && !mainImageError()) {
             <div class="carousel-main">
-              <img [src]="allImages[currentImageIndex()]" [alt]="l.title" class="detail-image" />
+              <img
+                [src]="allImages[currentImageIndex()]"
+                [alt]="l.title"
+                class="detail-image"
+                (error)="onMainImageError()"
+              />
               @if (allImages.length > 1) {
-                <button class="carousel-nav prev" mat-icon-button (click)="prevImage()">
-                  <mat-icon>chevron_left</mat-icon>
+                <button class="carousel-nav prev" fill="clear" (click)="prevImage()">
+                  <ion-icon [name]="getIcon('chevron_left')"></ion-icon>
                 </button>
-                <button class="carousel-nav next" mat-icon-button (click)="nextImage()">
-                  <mat-icon>chevron_right</mat-icon>
+                <button class="carousel-nav next" fill="clear" (click)="nextImage()">
+                  <ion-icon [name]="getIcon('chevron_right')"></ion-icon>
                 </button>
                 <div class="carousel-counter">
                   {{ currentImageIndex() + 1 }} / {{ allImages.length }}
@@ -28,9 +39,7 @@
                     [src]="img"
                     [class.active]="currentImageIndex() === $index"
                     (click)="selectImage($index)"
-                    (keydown.enter)="selectImage($index)"
-                    (keydown.space)="selectImage($index); $event.preventDefault()"
-                    role="button"
+                    (keydown)="selectImage($index)"
                     tabindex="0"
                     alt=""
                   />
@@ -39,7 +48,7 @@
             }
           } @else {
             <div class="detail-image placeholder">
-              <mat-icon>image_not_supported</mat-icon>
+              <ion-icon [name]="getIcon('image_not_supported')" class="placeholder-icon"></ion-icon>
             </div>
           }
         </div>
@@ -48,28 +57,32 @@
           <div class="detail-price">{{ l.price | number: '1.0-0' }} €/mes</div>
           <h1>{{ l.title }}</h1>
           <p class="detail-address">
-            <mat-icon>location_on</mat-icon>
+            <ion-icon [name]="getIcon('location_on')"></ion-icon>
             {{ l.address || l.neighborhood || 'Madrid' }}
           </p>
 
           <div class="detail-stats">
             @if (l.rooms) {
-              <div class="stat"><mat-icon>bed</mat-icon> {{ l.rooms }} habitaciones</div>
+              <div class="stat">
+                <ion-icon [name]="getIcon('bed')"></ion-icon> {{ l.rooms }} habitaciones
+              </div>
             }
             @if (l.size_m2) {
-              <div class="stat"><mat-icon>square_foot</mat-icon> {{ l.size_m2 }} m²</div>
+              <div class="stat">
+                <ion-icon [name]="getIcon('square_foot')"></ion-icon> {{ l.size_m2 }} m²
+              </div>
             }
             @if (l.floor) {
-              <div class="stat"><mat-icon>stairs</mat-icon> {{ l.floor }}</div>
+              <div class="stat"><ion-icon [name]="getIcon('stairs')"></ion-icon> {{ l.floor }}</div>
             }
           </div>
 
           @if (l.features.length) {
             <div class="detail-features">
               <h3>Características</h3>
-              <div>
+              <div class="features-grid">
                 @for (f of l.features; track f) {
-                  <mat-chip>{{ f }}</mat-chip>
+                  <ion-chip>{{ f }}</ion-chip>
                 }
               </div>
             </div>
@@ -83,35 +96,31 @@
           }
 
           <div class="detail-actions">
-            <a
-              mat-raised-button
-              color="primary"
-              [href]="l.external_url"
-              target="_blank"
-              rel="noopener"
-            >
-              <mat-icon>open_in_new</mat-icon> Ver en Idealista
+            <a [href]="l.external_url" target="_blank" rel="noopener" ion-button color="primary">
+              <ion-icon slot="start" [name]="getIcon('open_in_new')"></ion-icon>
+              Ver en Idealista
             </a>
-            <button
-              mat-raised-button
-              [color]="isFavorited() ? 'warn' : undefined"
-              (click)="toggleFavorite()"
-            >
-              <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
+            <ion-button [color]="isFavorited() ? 'danger' : 'medium'" (click)="toggleFavorite()">
+              <ion-icon
+                slot="start"
+                [name]="getIcon(isFavorited() ? 'favorite' : 'favorite_border')"
+              ></ion-icon>
               {{ isFavorited() ? 'Quitar favorito' : 'Guardar favorito' }}
-            </button>
+            </ion-button>
           </div>
         </div>
       </div>
 
       <div class="detail-sidebar">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title> <mat-icon>smart_toy</mat-icon> Análisis IA </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon [name]="getIcon('smart_toy')"></ion-icon> Análisis IA
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
             @if (analyzing()) {
-              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              <ion-progress-bar type="indeterminate"></ion-progress-bar>
               <p class="analyzing-text">Analizando piso...</p>
             } @else if (aiAnalysis(); as analysis) {
               <div
@@ -153,18 +162,14 @@
               <p class="analyze-prompt">
                 Pide a la IA que analice este piso según tus preferencias
               </p>
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="analyzeWithAi()"
-                class="analyze-btn"
-              >
-                <mat-icon>smart_toy</mat-icon> Analizar con IA
-              </button>
+              <ion-button expand="block" color="primary" (click)="analyzeWithAi()">
+                <ion-icon slot="start" [name]="getIcon('smart_toy')"></ion-icon>
+                Analizar con IA
+              </ion-button>
             }
-          </mat-card-content>
-        </mat-card>
+          </ion-card-content>
+        </ion-card>
       </div>
     </div>
   }
-</div>
+</ion-content>

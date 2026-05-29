@@ -1,13 +1,15 @@
-<div class="page-container">
+<ion-content class="ion-padding">
   <h1 class="page-title">Mis favoritos</h1>
 
   @if (loading()) {
-    <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
   } @else if (!favorites().length) {
     <div class="empty-state">
-      <mat-icon>favorite_border</mat-icon>
-      <p>No tienes pisos guardados como favoritos</p>
-      <button mat-raised-button color="primary" routerLink="/listings">Explorar pisos</button>
+      <ion-icon [name]="getIcon('favorite_border')" class="empty-icon"></ion-icon>
+      <p>No tienes pisos guardados como favorito</p>
+      <ion-button expand="block" color="primary" routerLink="/listings">Explorar pisos</ion-button>
     </div>
   } @else {
     <div class="listing-grid">
@@ -22,4 +24,4 @@
       }
     </div>
   }
-</div>
+</ion-content>

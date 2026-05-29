@@ -88,14 +88,27 @@
     </button>
   </div>
 
-  <div class="neighborhood-chips">
-    <span class="chip-label">Barrios:</span>
-    @for (n of allNeighborhoods; track n) {
-      <mat-chip-option
-        [selected]="selectedNeighborhoods().includes(n)"
-        (selectionChange)="toggleNeighborhood(n)"
-        >{{ n }}</mat-chip-option
+  <div class="neighborhood-selector">
+    <mat-form-field appearance="outline" class="neighborhood-select">
+      <mat-label>Barrios</mat-label>
+      <mat-select
+        multiple
+        [ngModel]="selectedNeighborhoods()"
+        (ngModelChange)="onNeighborhoodsChange($event)"
       >
+        @for (n of allNeighborhoods; track n) {
+          <mat-option [value]="n">{{ n }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (selectedNeighborhoods().length > 0) {
+      <div class="selected-chips">
+        @for (n of selectedNeighborhoods(); track n) {
+          <mat-chip (removed)="removeNeighborhood(n)" removable
+            >{{ n }}<span matChipRemove>&times;</span></mat-chip
+          >
+        }
+      </div>
     }
   </div>
 

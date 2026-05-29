@@ -131,22 +131,19 @@ create index if not exists viewed_listings_viewed_at_idx on viewed_listings(view
 alter table profiles enable row level security;
 create policy "Usuarios ven su propio perfil" on profiles
   for select using (auth.uid() = id);
+create policy "Usuarios actualizan su perfil" on profiles
+  for update using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 -- Search preferences: cada usuario solo ve y gestiona las suyas
 alter table search_preferences enable row level security;
 create policy "Usuarios gestionan sus preferencias" on search_preferences
   for all using (auth.uid() = user_id);
 
--- Listings: visibles para todos los usuarios autenticados
+-- Listings: visibles para todos (autenticados y anónimos)
 alter table listings enable row level security;
-create policy "Listings visibles para autenticados" on listings
-  for select using (auth.role() = 'authenticated');
-
--- Solo el service_role puede insertar/actualizar listings (desde flathunter)
-create policy "Service puede modificar listings" on listings
-  for insert with check (auth.role() = 'service_role');
-create policy "Service puede actualizar listings" on listings
-  for update using (auth.role() = 'service_role');
+create policy "Listings visibles para todos" on listings
+  for select using (true);
 
 -- Favorites: cada usuario gestiona los suyos
 alter table favorites enable row level security;
@@ -162,6 +159,25 @@ create policy "Usuarios ven su historial" on search_history
 alter table viewed_listings enable row level security;
 create policy "Usuarios gestionan sus pisos vistos" on viewed_listings
   for all using (auth.uid() = user_id);
+
+-- Grants for Data API (necesario desde May 2026)
+grant all on profiles to authenticated;
+grant all on profiles to service_role;
+
+grant all on search_preferences to authenticated;
+grant all on search_preferences to service_role;
+
+grant select on listings to anon, authenticated;
+grant all on listings to service_role;
+
+grant all on favorites to authenticated;
+grant all on favorites to service_role;
+
+grant all on search_history to authenticated;
+grant all on search_history to service_role;
+
+grant all on viewed_listings to authenticated;
+grant all on viewed_listings to service_role;
 
 -- ============================================
 -- PG VECTOR INDEX (activar cuando haya datos)

@@ -1,24 +1,18 @@
-"""Idealista Spain scraper - uses curl_cffi for Cloudflare bypass"""
+"""Idealista Spain scraper - uses Decodo API for Cloudflare bypass"""
+import os
 import re
 import time
+import base64
+import requests
 from bs4 import BeautifulSoup
-from curl_cffi import requests
+from dotenv import load_dotenv
 
-HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'es-ES,es;q=0.9',
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
-    'Sec-Fetch-User': '?1',
-    'Upgrade-Insecure-Requests': '1',
-}
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
-BROWSER = 'chrome124'
+DECODO_API_URL = 'https://scraper-api.decodo.com/v2/scrape'
+DECODO_TOKEN = os.environ.get('DECODO_API_TOKEN', '')
+DECODO_AUTH = f'Basic {DECODO_TOKEN}'
 
-# District-specific URLs (21 districts)
 MADRID_DISTRICT_URLS = [
     'https://www.idealista.com/alquiler-viviendas/madrid/centro/',
     'https://www.idealista.com/alquiler-viviendas/madrid/chamberi/',
@@ -43,9 +37,7 @@ MADRID_DISTRICT_URLS = [
     'https://www.idealista.com/alquiler-viviendas/madrid/barajas/',
 ]
 
-# Full Madrid URL (extract neighborhood from HTML)
 MADRID_FULL_URL = 'https://www.idealista.com/alquiler-viviendas/madrid/'
-
 MADRID_URLS = MADRID_DISTRICT_URLS
 
 NEIGHBORHOOD_MAP = {
@@ -72,108 +64,91 @@ NEIGHBORHOOD_MAP = {
     'barajas': 'Barajas',
 }
 
-_session = None
+
+def fetch_page(url):
+    payload = {
+        'url': url,
+        'proxy_pool': 'premium',
+    }
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': DECODO_AUTH,
+        'Content-Type': 'application/json',
+    }
+    resp = requests.post(DECODO_API_URL, headers=headers, json=payload, timeout=120)
+    if resp.status_code != 200:
+        return None
+    data = resp.json()
+    if 'results' not in data:
+        return None
+    content = data['results'][0].get('content', '')
+    if not content:
+        return None
+    return BeautifulSoup(content, 'lxml')
 
 
-def get_session():
-    global _session
-    if _session is None:
-        _session = requests.Session()
-        # Visit homepage to get cookies (may return 403, that's ok)
-        try:
-            _session.get('https://www.idealista.com/', impersonate=BROWSER, timeout=30)
-        except Exception:
-            pass
-        time.sleep(2)
-    return _session
-
-
-def reset_session():
-    global _session
-    _session = None
-    return get_session()
-
-
-def get_neighborhood_from_url(url):
-    for key, name in NEIGHBORHOOD_MAP.items():
-        if f'/madrid/{key}/' in url:
-            return name
-    return 'Madrid'
-
-
-def extract_neighborhood_from_article(article, title, default_neighborhood):
-    """Try to extract neighborhood from article HTML. Falls back to default."""
-    # Try known HTML elements that contain the neighborhood
-    perspective = article.find('span', class_='item-perspective')
-    if perspective:
-        text = clean_text(perspective.text)
-        if text and text != 'Madrid':
-            return text
-
-    # Try extracting from title patterns like:
-    # "Ático en Valdebebas - Valdefuentes, Madrid"
-    # "Piso en Casco Histórico de Vallecas, Madrid"
-    # "Dúplex en Calle Cerro del Murmullo, 13, Ensanche de Vallecas, Madrid"
-    patterns = [
-        r'(?:en|de)\s+([^,]+?)(?:,\s*Madrid)\s*$',  # "..., Barrio, Madrid"
-        r'(?:en|de)\s+([^,]+?)(?:\s*-\s*[^,]+)?(?:,\s*Madrid)\s*$',  # "..., Barrio - Subbarrio, Madrid"
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, title, re.IGNORECASE)
-        if match:
-            candidate = clean_text(match.group(1))
-            if candidate and len(candidate) > 2 and candidate.lower() not in ('alquiler', 'venta', 'madrid'):
-                return candidate
-
-    # Try to find any neighborhood-like text in article details
-    for detail in article.find_all('span', class_='item-detail'):
-        text = clean_text(detail.text)
-        # If detail looks like a neighborhood name (no numbers, no hab., no m², no €)
-        if text and not re.search(r'\d|hab\.|m²|€', text):
-            if text.lower() not in ('madrid', 'alquiler', 'venta'):
-                return text
-
-    return default_neighborhood
-
-
-def fetch_search_page(url, page=1, retry=True):
-    session = get_session()
-
+def fetch_search_page(url, page=1):
     paginated_url = url
     if page > 1:
         paginated_url = url.rstrip('/') + f'/pagina-{page}.htm'
+    return fetch_page(paginated_url)
 
-    headers = {**HEADERS, 'Referer': 'https://www.idealista.com/'}
 
+def fetch_detail_page(url):
     try:
-        resp = session.get(paginated_url, headers=headers, impersonate=BROWSER, timeout=30)
+        soup = fetch_page(url)
+        if soup is None:
+            return {}, '', []
 
-        if resp.status_code == 429:
-            retry_after = int(resp.headers.get('Retry-After', 30))
-            time.sleep(retry_after)
-            resp = session.get(paginated_url, headers=headers, impersonate=BROWSER, timeout=30)
+        description = ''
+        desc_tag = soup.find('div', class_='comment')
+        if not desc_tag:
+            desc_tag = soup.find('div', class_='adCommentsLanguage')
+        if desc_tag:
+            description = desc_tag.text.strip()
 
-        if resp.status_code == 403 and retry:
-            time.sleep(5)
-            reset_session()
-            return fetch_search_page(url, page, retry=False)
+        coords = {}
+        map_container = soup.find('div', id='map')
+        if map_container:
+            lat = map_container.get('data-latitude')
+            lon = map_container.get('data-longitude')
+            if lat and lon:
+                coords = {'latitude': float(lat), 'longitude': float(lon)}
 
-        if resp.status_code != 200:
-            return None
+        images = []
+        seen = set()
 
-        return BeautifulSoup(resp.content, 'lxml')
+        for match in re.finditer(r'https?://img\d+\.idealista\.com/blur/WEB_DETAIL/\d+/[^\"\'<>\s]+\.jpg', str(soup)):
+            img_url = match.group(0)
+            if img_url not in seen:
+                seen.add(img_url)
+                images.append(img_url)
+
+        if not images:
+            og_image = soup.find('meta', property='og:image')
+            if og_image:
+                src = og_image.get('content', '')
+                if src and src not in seen:
+                    seen.add(src)
+                    images.append(src)
+
+        for match in re.finditer(r'https?://img\d+\.idealista\.com/[^"\'<>\s]+\.jpg', str(soup)):
+            img_url = match.group(0)
+            if 'blur' in img_url and img_url not in seen:
+                seen.add(img_url)
+                images.append(img_url)
+
+        return coords, description, images
     except Exception:
-        return None
+        return {}, '', []
 
 
 def extract_listings(soup, neighborhood):
     entries = []
-
     if soup is None:
         return entries
 
     articles = soup.find_all('article', class_='item')
-
     base_url = 'https://www.idealista.com'
 
     for row in articles:
@@ -195,8 +170,8 @@ def extract_listings(soup, neighborhood):
             img_tag = row.find('img')
             if img_tag:
                 src = img_tag.get('src') or img_tag.get('data-src') or ''
-                if src and 'blur' in src:
-                    image = src
+                if src:
+                    image = highres_url(src)
 
             detail_items = row.find_all('span', class_='item-detail')
             detail_texts = [d.text.strip() for d in detail_items]
@@ -208,7 +183,7 @@ def extract_listings(soup, neighborhood):
             for dt in detail_texts:
                 if 'hab.' in dt:
                     rooms = dt
-                elif 'm²' in dt or 'm�' in dt:
+                elif 'm²' in dt or 'm' in dt:
                     size = dt
                 elif any(w in dt.lower() for w in ['planta', 'exterior', 'interior', 'ascensor', 'bajo', 'sin ascensor']):
                     floor = dt
@@ -223,7 +198,6 @@ def extract_listings(soup, neighborhood):
             size_num = parse_number(size)
             floor_clean = parse_floor(floor)
 
-            # Extract neighborhood from HTML when using full Madrid URL
             article_neighborhood = neighborhood
             if neighborhood == 'Madrid':
                 article_neighborhood = extract_neighborhood_from_article(row, title, neighborhood)
@@ -258,69 +232,17 @@ def extract_listings(soup, neighborhood):
     return entries
 
 
-def fetch_detail_page(url):
-    try:
-        time.sleep(1.5)
-        session = get_session()
-        headers = {**HEADERS, 'Referer': 'https://www.idealista.com/alquiler-viviendas/madrid/'}
-        resp = session.get(url, headers=headers, impersonate=BROWSER, timeout=30)
-
-        if resp.status_code != 200:
-            return {}, '', []
-
-        soup = BeautifulSoup(resp.content, 'lxml')
-
-        description = ''
-        desc_tag = soup.find('div', class_='comment')
-        if not desc_tag:
-            desc_tag = soup.find('div', class_='adCommentsLanguage')
-        if desc_tag:
-            description = desc_tag.text.strip()
-
-        coords = {}
-        map_container = soup.find('div', id='map')
-        if map_container:
-            lat = map_container.get('data-latitude')
-            lon = map_container.get('data-longitude')
-            if lat and lon:
-                coords = {'latitude': float(lat), 'longitude': float(lon)}
-
-        # Extract all images from gallery
-        images = []
-        # Try multiple selectors for gallery images
-        gallery_selectors = [
-            'div.gallery-foto img',
-            'div#fotoContainer img',
-            'div.main-media img',
-            'img.foto-gallery',
-            '.gallery-container img',
-        ]
-        for selector in gallery_selectors:
-            for img in soup.select(selector):
-                src = img.get('src') or img.get('data-src') or ''
-                if src and 'idealista' in src and src not in images:
-                    # Get high-res version if available
-                    if '/th/' in src:
-                        src = src.replace('/th/', '/gr/')
-                    elif '/sm/' in src:
-                        src = src.replace('/sm/', '/gr/')
-                    images.append(src)
-
-        # If no gallery images found, try meta tags
-        if not images:
-            og_image = soup.find('meta', property='og:image')
-            if og_image:
-                src = og_image.get('content', '')
-                if src:
-                    images.append(src)
-
-        return coords, description, images
-    except Exception:
-        return {}, '', []
+def highres_url(url):
+    """Convert Idealista small thumbnail to larger WEB_DETAIL size."""
+    if not url:
+        return url
+    if '/blur/' in url:
+        return url.replace('480_360_mq', 'WEB_DETAIL')
+    return url
 
 
 def clean_text(text):
-    text = text.replace('\xa0', ' ').replace('�', '')
+    text = text.replace('\xa0', ' ').replace('\u0080', '')
     text = ' '.join(text.split())
     return text.strip()
 
@@ -377,3 +299,34 @@ def extract_address(title, neighborhood):
     if match:
         return match.group(1).strip()
     return neighborhood
+
+
+def extract_neighborhood_from_article(article, title, default_neighborhood):
+    perspective = article.find('span', class_='item-perspective')
+    if perspective:
+        text = clean_text(perspective.text)
+        if text and text != 'Madrid':
+            return text
+    patterns = [
+        r'(?:en|de)\s+([^,]+?)(?:,\s*Madrid)\s*$',
+        r'(?:en|de)\s+([^,]+?)(?:\s*-\s*[^,]+)?(?:,\s*Madrid)\s*$',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, title, re.IGNORECASE)
+        if match:
+            candidate = clean_text(match.group(1))
+            if candidate and len(candidate) > 2 and candidate.lower() not in ('alquiler', 'venta', 'madrid'):
+                return candidate
+    for detail in article.find_all('span', class_='item-detail'):
+        text = clean_text(detail.text)
+        if text and not re.search(r'\d|hab\.|m²|€', text):
+            if text.lower() not in ('madrid', 'alquiler', 'venta'):
+                return text
+    return default_neighborhood
+
+
+def get_neighborhood_from_url(url):
+    for key, name in NEIGHBORHOOD_MAP.items():
+        if f'/madrid/{key}/' in url:
+            return name
+    return 'Madrid'

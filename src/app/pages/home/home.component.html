@@ -1,4 +1,4 @@
-<div class="page-container">
+<ion-content class="ion-padding">
   <div class="home-hero">
     <h1>Bienvenido a FlatHunt AI</h1>
     <p>
@@ -7,22 +7,33 @@
     </p>
 
     <div class="hero-actions">
-      <a mat-raised-button color="primary" routerLink="/listings">
-        <mat-icon>search</mat-icon> Explorar pisos
-      </a>
-      <a mat-stroked-button routerLink="/preferences">
-        <mat-icon>tune</mat-icon> Mis preferencias
-      </a>
+      <ion-button expand="block" color="primary" routerLink="/listings">
+        <ion-icon slot="start" name="search-outline"></ion-icon>
+        Explorar pisos
+      </ion-button>
+      <ion-button expand="block" fill="outline" routerLink="/preferences">
+        <ion-icon slot="start" name="options-outline"></ion-icon>
+        Mis preferencias
+      </ion-button>
     </div>
   </div>
 
   @if (loading()) {
     <div class="loading-container">
-      <mat-spinner diameter="40"></mat-spinner>
+      <ion-spinner name="crescent"></ion-spinner>
     </div>
   } @else {
-    <mat-tab-group>
-      <mat-tab label="Pisos recientes">
+    <ion-segment [value]="activeTab()" (ionChange)="onTabChange($event.detail.value!)">
+      <ion-segment-button value="recent">
+        <ion-label>Pisos recientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="favs">
+        <ion-label>Mis favoritos</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <div class="tab-content">
+      @if (activeTab() === 'recent') {
         @if (recentListings().length) {
           <div class="listing-grid">
             @for (listing of recentListings(); track listing.id) {
@@ -34,14 +45,12 @@
           </div>
         } @else {
           <div class="empty-state">
-            <mat-icon>search_off</mat-icon>
+            <ion-icon [name]="getIcon('search_off')" class="empty-icon"></ion-icon>
             <p>Aún no hay pisos. Los scrapers traerán datos pronto.</p>
-            <a mat-button routerLink="/preferences">Configurar preferencias</a>
+            <ion-button fill="clear" routerLink="/preferences">Configurar preferencias</ion-button>
           </div>
         }
-      </mat-tab>
-
-      <mat-tab label="Mis favoritos">
+      } @else {
         @if (favs().length) {
           <div class="listing-grid">
             @for (fav of favs(); track fav.listing_id) {
@@ -50,12 +59,12 @@
           </div>
         } @else {
           <div class="empty-state">
-            <mat-icon>favorite_border</mat-icon>
+            <ion-icon [name]="getIcon('favorite_border')" class="empty-icon"></ion-icon>
             <p>No tienes favoritos. Guarda pisos que te gusten.</p>
-            <a mat-button routerLink="/listings">Ver pisos</a>
+            <ion-button fill="clear" routerLink="/listings">Ver pisos</ion-button>
           </div>
         }
-      </mat-tab>
-    </mat-tab-group>
+      }
+    </div>
   }
-</div>
+</ion-content>

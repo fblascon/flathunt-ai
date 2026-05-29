@@ -1,4 +1,4 @@
-"""Pipeline: scrape Idealista Madrid → Supabase"""
+"""Pipeline: scrape Idealista Madrid via Decodo API -> Supabase"""
 import os
 import sys
 import json
@@ -13,8 +13,6 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 from idealista_spain import (
     MADRID_URLS,
-    MADRID_DISTRICT_URLS,
-    MADRID_FULL_URL,
     fetch_search_page,
     extract_listings,
     fetch_detail_page,
@@ -25,12 +23,11 @@ SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
 SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
 
 BATCH_SIZE = 20
-MAX_DETAIL_FETCH = 100
-REQUEST_DELAY = 5
+MAX_DETAIL_FETCH = 50
+REQUEST_DELAY = 2
 
 if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
     print('ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env')
-    print('Get SUPABASE_SERVICE_ROLE_KEY from Supabase Dashboard → Project Settings → API → service_role')
     sys.exit(1)
 
 
@@ -61,7 +58,6 @@ def upsert_listings(listings):
     batch = []
 
     for l in listings:
-        # If images array is available, use first as image_url
         images = l.get('images', [])
         image_url = l['image'] if l.get('image') else (images[0] if images else '')
 
@@ -93,12 +89,12 @@ def upsert_listings(listings):
     return result
 
 
-def scrape_all(max_pages=1, fetch_details=MAX_DETAIL_FETCH, full_madrid=False):
+def scrape_all(max_pages=1, fetch_details=MAX_DETAIL_FETCH):
     all_listings = []
     seen_ids = set()
 
-    urls = [MADRID_FULL_URL] if full_madrid else MADRID_URLS
-    mode = 'full Madrid' if full_madrid else f'{len(MADRID_URLS)} districts'
+    urls = MADRID_URLS
+    mode = f'{len(MADRID_URLS)} districts'
 
     print(f'Scraping {mode} (max {max_pages} pages each)...')
     print()
@@ -111,7 +107,7 @@ def scrape_all(max_pages=1, fetch_details=MAX_DETAIL_FETCH, full_madrid=False):
         for page in range(1, max_pages + 1):
             soup = fetch_search_page(url, page)
             if soup is None:
-                print(f'  Page {page}: no response (blocked?)')
+                print(f'  Page {page}: no response')
                 time.sleep(REQUEST_DELAY * 2)
                 continue
 
@@ -138,7 +134,7 @@ def scrape_all(max_pages=1, fetch_details=MAX_DETAIL_FETCH, full_madrid=False):
             listing.update(coords)
             listing['description'] = description or ''
             listing['images'] = images or []
-            time.sleep(2)
+            time.sleep(1.5)
 
     print()
     print(f'Pushing {len(all_listings)} listings to Supabase...')
@@ -157,11 +153,10 @@ def scrape_all(max_pages=1, fetch_details=MAX_DETAIL_FETCH, full_madrid=False):
 
 
 def mark_old_inactive():
-    """Mark listings not seen in last 7 days as inactive"""
     print('Marking old listings as inactive...')
-    result = supabase_request('PATCH', '/listings?last_seen=lt.' + 
-        (datetime.now(timezone.utc).replace(day=datetime.now(timezone.utc).day - 7).isoformat()),
-        body={'is_active': False})
+    cutoff = datetime.now(timezone.utc).replace(day=datetime.now(timezone.utc).day - 7).isoformat()
+    result = supabase_request('PATCH', f'/listings?last_seen=lt.{cutoff}',
+                              body={'is_active': False})
     if result is not None:
         print('  Done')
 
@@ -170,12 +165,12 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='FlatHunt AI Pipeline')
     parser.add_argument('--pages', type=int, default=5, help='Pages per district (default: 5)')
-    parser.add_argument('--detail-limit', type=int, default=MAX_DETAIL_FETCH, help=f'Max detail pages to fetch (default: {MAX_DETAIL_FETCH}, 0 to skip)')
+    parser.add_argument('--detail-limit', type=int, default=MAX_DETAIL_FETCH,
+                        help=f'Max detail pages (default: {MAX_DETAIL_FETCH}, 0 to skip)')
     parser.add_argument('--cleanup', action='store_true', help='Mark old listings inactive')
-    parser.add_argument('--full-madrid', action='store_true', help='Scrape all Madrid from single URL instead of districts')
     args = parser.parse_args()
 
     if args.cleanup:
         mark_old_inactive()
 
-    scrape_all(max_pages=args.pages, fetch_details=args.detail_limit, full_madrid=args.full_madrid)
+    scrape_all(max_pages=args.pages, fetch_details=args.detail_limit)

@@ -2,9 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY pipeline/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY pipeline/ .
+COPY embeddings.py .
 
-CMD ["python", "-u", "pipeline.py", "--pages", "1", "--detail-limit", "50"]
+CMD ["python", "-u", "embeddings.py"]

@@ -1,15 +1,13 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { FavoritesService, Favorite } from '../../services/favorites.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
 
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, ListingCardComponent],
+  imports: [IonContent, IonButton, IonIcon, IonSpinner, ListingCardComponent],
   templateUrl: './favorites.component.html',
   styleUrl: './favorites.component.scss',
 })
@@ -36,5 +34,12 @@ export class FavoritesComponent implements OnInit {
 
   goToDetail(id: string) {
     this.router.navigate(['/listings', id]);
+  }
+
+  getIcon(name: string): string {
+    const iconMap: Record<string, string> = {
+      favorite_border: 'heart-outline',
+    };
+    return iconMap[name] || name;
   }
 }

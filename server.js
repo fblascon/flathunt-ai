@@ -5,7 +5,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -221,6 +221,138 @@ Devuelve EXCLUSIVAMENTE un JSON (sin markdown):
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Get distinct neighborhoods
+app.get('/api/listings/neighborhoods', async (req, res) => {
+  try {
+    const resp = await fetch(`${process.env.SUPABASE_URL}/rest/v1/listings?select=neighborhood&is_active=eq.true&neighborhood=not.is.null`, {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    });
+    if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
+    const rows = await resp.json();
+    const neighborhoods = [...new Set(rows.map(r => r.neighborhood).filter(Boolean))].sort();
+    res.json(neighborhoods);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List all listings with filters and pagination
+app.get('/api/listings', async (req, res) => {
+  try {
+    const { maxPrice, minRooms, minSize, neighborhoods, page = '1', pageSize = '50' } = req.query;
+    const start = (Number(page) - 1) * Number(pageSize);
+    const end = start + Number(pageSize) - 1;
+    let url = `${process.env.SUPABASE_URL}/rest/v1/listings?select=*&is_active=eq.true&order=last_seen.desc`;
+    if (maxPrice) url += `&price=lte.${maxPrice}`;
+    if (minRooms) url += `&rooms=gte.${minRooms}`;
+    if (minSize) url += `&size_m2=gte.${minSize}`;
+    if (neighborhoods) url += `&neighborhood=in.(${neighborhoods})`;
+
+    const resp = await fetch(url, {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        Prefer: 'count=exact',
+        Range: `${start}-${end}`,
+      },
+    });
+    if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
+    const listings = await resp.json();
+    const count = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0', 10);
+    res.json({ data: listings, count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get listing by ID (uses service role to bypass RLS)
+app.get('/api/listings/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resp = await fetch(`${process.env.SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=*`, {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    });
+    if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
+    const [listing] = await resp.json();
+    if (!listing) return res.status(404).json({ error: 'Not found' });
+    res.json(listing);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Batch fetch listings by IDs
+app.post('/api/listings/batch', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids?.length) return res.json([]);
+    const resp = await fetch(`${process.env.SUPABASE_URL}/rest/v1/listings?id=in.(${ids.join(',')})&select=*`, {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    });
+    if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
+    const listings = await resp.json();
+    res.json(listings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Scrape gallery images for a listing (on-demand via Decodo API)
+app.post('/api/scrape/gallery', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'URL required' });
+
+    const scrapeResp = await fetch('https://scraper-api.decodo.com/v2/scrape', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${process.env.DECODO_API_TOKEN}`,
+      },
+      body: JSON.stringify({ url, proxy_pool: 'premium' }),
+    });
+    if (!scrapeResp.ok) {
+      const err = await scrapeResp.text();
+      throw new Error(`Decodo error: ${scrapeResp.status} - ${err}`);
+    }
+
+    const data = await scrapeResp.json();
+    const content = data.results?.[0]?.content || '';
+    if (!content) return res.json({ images: [] });
+
+    const imgRegex = /https?:\/\/img\d+\.idealista\.com\/blur\/WEB_DETAIL\/\d+\/[^"\'<>\s]+\.jpg/g;
+    const rawImages = [...content.matchAll(imgRegex)].map(m => m[0]);
+    const images = [...new Set(rawImages)];
+
+    // Update Supabase
+    if (images.length > 0 && req.body.id) {
+      await fetch(`${process.env.SUPABASE_URL}/rest/v1/listings?id=eq.${req.body.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ images }),
+      });
+    }
+
+    res.json({ images });
+  } catch (err) {
+    console.error('gallery scrape error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Semantic search: natural language query → embeddings → pgvector

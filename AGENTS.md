@@ -30,7 +30,8 @@ Frontend (Angular :4200) ← Proxy (proxy.conf.json) → Express (:3001) ←→ 
 - `vercel.json` — Configuración Vercel (framework: angular, rewrites para /api)
 - `src/app/pages/listings/` — Página principal de búsqueda
 - `src/app/pages/listing-detail/` — Página de detalle con carousel de fotos
-- `pipeline/pipeline.py` — Scraper de Idealista
+- `pipeline/idealista_spain.py` — Scraper vía Decodo API (bypass Cloudflare)
+- `pipeline/pipeline.py` — Orquestador del scraper
 - `pipeline/embeddings.py` — Generación de embeddings
 - `supabase/schema.sql` — Esquema de base de datos
 - `src/environments/environment.ts` — Credenciales públicas (supabase anon key)
@@ -47,15 +48,14 @@ node server.js
 # Solo frontend
 rm -rf .angular && npx ng serve --proxy-config proxy.conf.json
 
-# Scraper
+# Scraper (necesita DECODO_API_TOKEN en .env)
 cd pipeline
-python pipeline.py --pages 5          # Scrapear distritos
-python pipeline.py --full-madrid       # Scrapear Madrid completo
-python pipeline.py --detail-limit 50   # Extraer fotos de detalle
+python pipeline.py --pages 3          # Scrapear distritos (3 páginas c/u)
+python pipeline.py --pages 1          # Scrapeo rápido (1 página)
 
 # Embeddings
-python embeddings.py --regenerate     # Regenerar todos
-python embeddings.py                 # Solo los que faltan
+python pipeline/embeddings.py --regenerate     # Regenerar todos
+python pipeline/embeddings.py                 # Solo los que faltan
 
 # Verificar build
 npx ng build --configuration development
@@ -70,7 +70,7 @@ vercel deploy --prod --yes
 3. **Fotos como URLs, no descargadas** — la columna `images` en Supabase es `text[]` con links a Idealista
 4. **Filtro de barrios en backend** — el RPC `search_listings` acepta `neighborhoods[]` para filtrar en SQL
 5. **Keyword post-filter** — el embedding busca semanticamente, luego el servidor filtra keywords (plural/accent-tolerant)
-6. **Scraper con delays** — 5 segundos entre requests para evitar bloqueo de Idealista
+6. **Scraper vía Decodo API** — Idealista bloquea scraping directo (Cloudflare JS challenge). La Decodo API usa proxies premium residenciales que bypassan Cloudflare. Plan gratuito: $1 de crédito (~1000 requests proxy premium)
 
 ## Variables de entorno
 
@@ -80,16 +80,17 @@ vercel deploy --prod --yes
 | `SUPABASE_URL` | URL del proyecto Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (secreta, solo backend) |
 | `OPENROUTER_API_KEY` | API key de OpenRouter |
+| `DECODO_API_TOKEN` | Token de la Decodo Web Scraping API |
 
 ### .env (local)
 Mismas variables más `SUPABASE_ANON_KEY` (pública, también en environment.ts).
 
 ## Problemas comunes
-- `403 Forbidden` en Idealista → cambiar IP con VPN o esperar
 - `ng serve` congelado → `rm -rf .angular`
 - `write EPIPE` en Angular → reiniciar `node server.js`
 - Embeddings lentos → timeout de 60s + retry en `embeddings.py`
 - API Vercel timeout → serverless functions tienen límite de 60s en plan Hobby
+- Scraper "no response" en algunos distritos → Idealista no tiene listings en ese distrito o la Decodo API rate-limited. Reintentar más tarde
 
 ## SQL mínimo para nuevas sesiones
 ```sql

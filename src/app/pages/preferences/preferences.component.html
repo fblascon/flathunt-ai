@@ -1,50 +1,48 @@
-<div class="page-container">
+<ion-content class="ion-padding">
   <div class="page-header">
     <h1 class="page-title">Mis preferencias de búsqueda</h1>
-    <button mat-raised-button color="primary" (click)="newPreference()">
-      <mat-icon>add</mat-icon> Nueva preferencia
-    </button>
+    <ion-button color="primary" (click)="newPreference()">
+      <ion-icon slot="start" [name]="getIcon('add')"></ion-icon>
+      Nueva preferencia
+    </ion-button>
   </div>
 
   @if (loading()) {
-    <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
   } @else if (!preferences().length) {
     <div class="empty-state">
-      <mat-icon>tune</mat-icon>
+      <ion-icon [name]="getIcon('tune')" class="empty-icon"></ion-icon>
       <p>No tienes preferencias guardadas</p>
-      <button mat-raised-button color="primary" (click)="newPreference()">
+      <ion-button expand="block" color="primary" (click)="newPreference()">
         Crear primera preferencia
-      </button>
+      </ion-button>
     </div>
   } @else {
     <div class="prefs-grid">
       @for (pref of preferences(); track pref.id) {
-        <mat-card class="pref-card" [class.inactive]="!pref.is_active">
-          <mat-card-header>
-            <mat-card-title>{{ pref.name }}</mat-card-title>
-            <mat-slide-toggle
-              [checked]="pref.is_active"
-              (change)="toggleActive(pref)"
-            ></mat-slide-toggle>
-          </mat-card-header>
-          <mat-card-content>
+        <ion-card class="pref-card" [class.inactive]="!pref.is_active">
+          <ion-card-header>
+            <ion-card-title>{{ pref.name }}</ion-card-title>
+            <ion-toggle [checked]="pref.is_active" (ionChange)="toggleActive(pref)"></ion-toggle>
+          </ion-card-header>
+          <ion-card-content>
             <div class="pref-details">
               @if (pref.max_price) {
-                <span class="pref-tag"
-                  >Max {{ pref.max_price | currency: 'EUR' : 'symbol' : '1.0-0' }}</span
-                >
+                <ion-chip>Max {{ pref.max_price | currency: 'EUR' : 'symbol' : '1.0-0' }}</ion-chip>
               }
               @if (pref.min_rooms) {
-                <span class="pref-tag">{{ pref.min_rooms }}+ hab.</span>
+                <ion-chip>{{ pref.min_rooms }}+ hab.</ion-chip>
               }
               @if (pref.min_size) {
-                <span class="pref-tag">{{ pref.min_size }}+ m²</span>
+                <ion-chip>{{ pref.min_size }}+ m²</ion-chip>
               }
             </div>
             @if (pref.neighborhoods.length) {
               <div class="pref-neighborhoods">
                 @for (n of pref.neighborhoods; track n) {
-                  <mat-chip>{{ n }}</mat-chip>
+                  <ion-chip>{{ n }}</ion-chip>
                 }
               </div>
             }
@@ -52,21 +50,23 @@
               <div class="pref-must">
                 <span class="label">Imprescindible:</span>
                 @for (f of pref.must_have; track f) {
-                  <mat-chip highlighted>{{ f }}</mat-chip>
+                  <ion-chip color="primary">{{ f }}</ion-chip>
                 }
               </div>
             }
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-button (click)="editPreference(pref.id)">
-              <mat-icon>edit</mat-icon> Editar
-            </button>
-            <button mat-button color="warn" (click)="deletePreference(pref.id)">
-              <mat-icon>delete</mat-icon> Eliminar
-            </button>
-          </mat-card-actions>
-        </mat-card>
+          </ion-card-content>
+          <div class="pref-actions">
+            <ion-button fill="clear" (click)="editPreference(pref.id)">
+              <ion-icon slot="start" [name]="getIcon('edit')"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button fill="clear" color="danger" (click)="deletePreference(pref.id)">
+              <ion-icon slot="start" [name]="getIcon('delete')"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </ion-card>
       }
     </div>
   }
-</div>
+</ion-content>

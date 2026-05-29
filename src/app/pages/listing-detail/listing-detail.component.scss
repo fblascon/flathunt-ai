@@ -1,11 +1,26 @@
+.back-btn {
+  margin-bottom: 12px;
+  color: #999;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
 .detail-layout {
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 24px;
+  min-width: 0;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
+}
+
+.detail-main {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .detail-image {
@@ -34,11 +49,13 @@
   border-radius: 12px;
   overflow: hidden;
   background: #1a1a2e;
+  max-width: 100%;
 
   .detail-image {
     display: block;
     width: 100%;
-    height: 450px;
+    max-height: 450px;
+    aspect-ratio: 3/2;
     object-fit: cover;
     border-radius: 0;
   }
@@ -48,9 +65,13 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5) !important;
-  color: white !important;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
   z-index: 2;
+  --background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
 
   &.prev {
     left: 8px;
@@ -59,8 +80,8 @@
     right: 8px;
   }
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.8) !important;
+  ion-icon {
+    font-size: 20px;
   }
 }
 
@@ -76,12 +97,24 @@
   z-index: 2;
 }
 
+.carousel-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 12px;
+  border-radius: 50%;
+  z-index: 3;
+}
+
 .carousel-thumbnails {
   display: flex;
   gap: 8px;
   margin-top: 12px;
   overflow-x: auto;
   padding-bottom: 4px;
+  max-width: 100%;
 
   img {
     width: 80px;

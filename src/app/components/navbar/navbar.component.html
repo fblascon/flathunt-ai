@@ -1,56 +1,36 @@
-<mat-toolbar class="navbar" color="primary">
-  <a routerLink="/" class="logo" mat-button>
-    <mat-icon>apartment</mat-icon>
-    <span>FlatHunt AI</span>
-  </a>
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/" fill="clear">
+        <ion-icon slot="start" [name]="getIcon('apartment')"></ion-icon>
+        <ion-label>FlatHunt AI</ion-label>
+      </ion-button>
+    </ion-buttons>
 
-  <span class="spacer"></span>
+    <ion-buttons slot="end">
+      @if (isAuth) {
+        <ion-button routerLink="/listings" routerLinkActive="active" fill="clear">
+          <ion-icon slot="icon-only" [name]="getIcon('search')"></ion-icon>
+        </ion-button>
+        <ion-button routerLink="/preferences" routerLinkActive="active" fill="clear">
+          <ion-icon slot="icon-only" [name]="getIcon('tune')"></ion-icon>
+        </ion-button>
+        <ion-button routerLink="/favorites" routerLinkActive="active" fill="clear">
+          <ion-icon slot="icon-only" [name]="getIcon('favorite')"></ion-icon>
+        </ion-button>
+        <ion-button routerLink="/history" routerLinkActive="active" fill="clear">
+          <ion-icon slot="icon-only" [name]="getIcon('history')"></ion-icon>
+        </ion-button>
 
-  @if (isAuth) {
-    <nav class="nav-links">
-      <a mat-button routerLink="/listings" routerLinkActive="active-link">
-        <mat-icon>search</mat-icon>
-        <span>Pisos</span>
-      </a>
-      <a mat-button routerLink="/preferences" routerLinkActive="active-link">
-        <mat-icon>tune</mat-icon>
-        <span>Preferencias</span>
-      </a>
-      <a mat-button routerLink="/favorites" routerLinkActive="active-link">
-        <mat-icon>favorite</mat-icon>
-        <span>Favoritos</span>
-      </a>
-      <a mat-button routerLink="/history" routerLinkActive="active-link">
-        <mat-icon>history</mat-icon>
-        <span>Historial</span>
-      </a>
-    </nav>
-
-    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn">
-      @if (userAvatar) {
-        <img [src]="userAvatar" class="avatar" alt="avatar" />
+        <ion-button (click)="signOut()" fill="clear">
+          <ion-icon slot="icon-only" [name]="getIcon('logout')"></ion-icon>
+        </ion-button>
       } @else {
-        <mat-icon>account_circle</mat-icon>
+        <ion-button (click)="signIn()" fill="solid" color="primary">
+          <ion-icon slot="start" [name]="getIcon('login')"></ion-icon>
+          <ion-label>Iniciar sesión</ion-label>
+        </ion-button>
       }
-    </button>
-
-    <mat-menu #userMenu="matMenu">
-      <div class="user-info" mat-menu-item disabled>
-        <mat-icon>person</mat-icon>
-        <span>{{ userName }}</span>
-      </div>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="signOut()">
-        <mat-icon>logout</mat-icon>
-        <span>Cerrar sesión</span>
-      </button>
-    </mat-menu>
-  } @else {
-    <button mat-raised-button color="accent" (click)="signIn()">
-      <mat-icon>login</mat-icon>
-      <span>Iniciar sesión</span>
-    </button>
-  }
-</mat-toolbar>
-
-<div class="nav-spacer"></div>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

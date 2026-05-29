@@ -1,13 +1,21 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { DecimalPipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import {
+  IonContent,
+  IonButton,
+  IonIcon,
+  IonChip,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonSpinner,
+  IonBackButton,
+  IonProgressBar,
+} from '@ionic/angular/standalone';
+import { DecimalPipe, Location } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { HistoryService } from '../../services/history.service';
@@ -18,13 +26,17 @@ import { Listing } from '../../models/listing.model';
   selector: 'app-listing-detail',
   standalone: true,
   imports: [
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonChip,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonSpinner,
+    IonBackButton,
+    IonProgressBar,
     DecimalPipe,
   ],
   templateUrl: './listing-detail.component.html',
@@ -32,29 +44,66 @@ import { Listing } from '../../models/listing.model';
 })
 export class ListingDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
+  private location = inject(Location);
   private listingsService = inject(ListingsService);
   private favoritesService = inject(FavoritesService);
   private historyService = inject(HistoryService);
   private aiService = inject(AiService);
-  private snackBar = inject(MatSnackBar);
 
   listing = signal<Listing | null>(null);
+  galleryImages = signal<string[]>([]);
   aiAnalysis = signal<AiAnalysis | null>(null);
   isFavorited = signal(false);
   loading = signal(true);
   analyzing = signal(false);
   currentImageIndex = signal(0);
+  mainImageError = signal(false);
+
+  getIcon(name: string): string {
+    const iconMap: Record<string, string> = {
+      arrow_back: 'arrow-back-outline',
+      chevron_left: 'chevron-back-outline',
+      chevron_right: 'chevron-forward-outline',
+      location_on: 'location-outline',
+      bed: 'bed-outline',
+      square_foot: 'resize-outline',
+      stairs: 'layers-outline',
+      open_in_new: 'open-outline',
+      smart_toy: 'sparkles-outline',
+      favorite: 'heart',
+      favorite_border: 'heart-outline',
+      image_not_supported: 'image-outline',
+    };
+    return iconMap[name] || name;
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
     try {
       const listing = await this.listingsService.getById(id);
       this.listing.set(listing);
+      if (listing && listing.external_url) {
+        this.scrapeGallery(id, listing.external_url);
+      }
       const fav = await this.favoritesService.isFavorited(id);
       this.isFavorited.set(fav);
       this.historyService.addView(id);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private async scrapeGallery(id: string, url: string) {
+    try {
+      const result = await firstValueFrom(
+        this.http.post<{ images: string[] }>('/api/scrape/gallery', { id, url }),
+      );
+      if (result.images?.length) {
+        this.galleryImages.set(result.images);
+      }
+    } catch (err) {
+      console.error('gallery scrape failed:', err);
     }
   }
 
@@ -74,7 +123,7 @@ export class ListingDetailComponent implements OnInit {
       });
       this.aiAnalysis.set(analysis);
     } catch {
-      this.snackBar.open('Error al analizar con IA', 'Cerrar', { duration: 3000 });
+      console.error('AI analysis failed');
     } finally {
       this.analyzing.set(false);
     }
@@ -83,21 +132,29 @@ export class ListingDetailComponent implements OnInit {
   async toggleFavorite() {
     const l = this.listing();
     if (!l) return;
-    const nowFav = await this.favoritesService.toggle(l.id);
+    await this.favoritesService.toggle(l.id);
+    const nowFav = await this.favoritesService.isFavorited(l.id);
     this.isFavorited.set(nowFav);
-    this.snackBar.open(nowFav ? 'Añadido a favoritos' : 'Eliminado de favoritos', 'Cerrar', {
-      duration: 2000,
-    });
   }
 
   get allImages(): string[] {
     const l = this.listing();
     if (!l) return [];
-    const imgs = l.images || [];
+    const imgs = this.galleryImages().length ? this.galleryImages() : l.images || [];
     if (l.image_url && !imgs.includes(l.image_url)) {
       return [l.image_url, ...imgs];
     }
     return imgs.length > 0 ? imgs : l.image_url ? [l.image_url] : [];
+  }
+
+  onMainImageError() {
+    const images = this.allImages;
+    const nextIndex = this.currentImageIndex() + 1;
+    if (nextIndex < images.length) {
+      this.currentImageIndex.set(nextIndex);
+    } else {
+      this.mainImageError.set(true);
+    }
   }
 
   nextImage() {
@@ -114,5 +171,9 @@ export class ListingDetailComponent implements OnInit {
 
   selectImage(index: number) {
     this.currentImageIndex.set(index);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

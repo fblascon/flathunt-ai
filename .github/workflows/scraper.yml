@@ -21,14 +21,15 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install curl_cffi beautifulsoup4 python-dotenv
+          pip install -r requirements.txt
 
       - name: Run scraper
         working-directory: pipeline
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python pipeline.py --pages 3 --detail-limit 50
+          DECODO_API_TOKEN: ${{ secrets.DECODO_API_TOKEN }}
+        run: python pipeline.py --pages 3 --detail-limit 0
 
       - name: Generate embeddings
         working-directory: pipeline

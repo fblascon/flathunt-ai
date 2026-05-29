@@ -19,6 +19,18 @@
   }
 }
 
+ion-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pref-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 16px;
+}
+
 .pref-details {
   display: flex;
   gap: 8px;

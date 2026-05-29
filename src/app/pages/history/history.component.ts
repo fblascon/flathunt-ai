@@ -1,10 +1,17 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
+import {
+  IonContent,
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonNote,
+  IonSegment,
+  IonSegmentButton,
+} from '@ionic/angular/standalone';
 import { DatePipe } from '@angular/common';
 import { HistoryService } from '../../services/history.service';
 import { FavoritesService } from '../../services/favorites.service';
@@ -16,11 +23,16 @@ import { ListingCardComponent } from '../../components/listing-card/listing-card
   selector: 'app-history',
   standalone: true,
   imports: [
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatProgressSpinnerModule,
-    MatTabsModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonSpinner,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonNote,
+    IonSegment,
+    IonSegmentButton,
     DatePipe,
     ListingCardComponent,
   ],
@@ -36,7 +48,7 @@ export class HistoryComponent implements OnInit {
   searchHistory = signal<SearchHistory[]>([]);
   loading = signal(true);
   favoritedIds = signal<Set<string>>(new Set());
-  displayedColumns = ['query', 'results', 'date'];
+  activeTab = signal<'viewed' | 'searches'>('viewed');
 
   async ngOnInit() {
     try {
@@ -70,5 +82,20 @@ export class HistoryComponent implements OnInit {
   async clearHistory() {
     await this.historyService.clearViews();
     this.viewedListings.set([]);
+  }
+
+  onTabChange(value: string | number | undefined) {
+    if (value === 'viewed' || value === 'searches') {
+      this.activeTab.set(value);
+    }
+  }
+
+  getIcon(name: string): string {
+    const iconMap: Record<string, string> = {
+      delete_sweep: 'trash-outline',
+      visibility: 'eye-outline',
+      search: 'search-outline',
+    };
+    return iconMap[name] || name;
   }
 }

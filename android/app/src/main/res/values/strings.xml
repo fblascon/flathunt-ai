@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FlatHuntAI</string>
+    <string name="title_activity_main">FlatHuntAI</string>
+    <string name="package_name">com.flathuntai.app</string>
+    <string name="custom_url_scheme">com.flathuntai.app</string>
+</resources>

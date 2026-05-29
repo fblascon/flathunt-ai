@@ -1,10 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {
+  IonContent,
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
+} from '@ionic/angular/standalone';
 import { SupabaseService } from '../../services/supabase.service';
 import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
@@ -17,11 +21,13 @@ import { Favorite } from '../../services/favorites.service';
   standalone: true,
   imports: [
     RouterLink,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatProgressSpinnerModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonSpinner,
+    IonSegment,
+    IonSegmentButton,
+    IonLabel,
     ListingCardComponent,
   ],
   templateUrl: './home.component.html',
@@ -36,6 +42,7 @@ export class HomeComponent implements OnInit {
   favs = signal<Favorite[]>([]);
   loading = signal(true);
   user = this.supabase.user;
+  activeTab = signal<'recent' | 'favs'>('recent');
 
   async ngOnInit() {
     try {
@@ -45,14 +52,29 @@ export class HomeComponent implements OnInit {
       ]);
       this.recentListings.set(listingsRes.data);
       this.favs.set(favorites.slice(0, 6));
-    } catch {
-      // Empty state
-    } finally {
+    } catch (e) {
+      console.error('Failed to load home data', e);
       this.loading.set(false);
     }
   }
 
   getFavoritedIds() {
     return new Set(this.favs().map((f) => f.listing_id));
+  }
+
+  onTabChange(value: string | number | undefined) {
+    if (value === 'recent' || value === 'favs') {
+      this.activeTab.set(value);
+    }
+  }
+
+  getIcon(name: string): string {
+    const iconMap: Record<string, string> = {
+      search: 'search-outline',
+      tune: 'options-outline',
+      search_off: 'search-outline',
+      favorite_border: 'heart-outline',
+    };
+    return iconMap[name] || name;
   }
 }

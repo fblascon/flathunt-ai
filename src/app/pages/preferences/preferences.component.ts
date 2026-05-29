@@ -1,12 +1,18 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import {
+  IonContent,
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonCardSubtitle,
+  IonChip,
+  IonToggle,
+} from '@ionic/angular/standalone';
 import { CurrencyPipe } from '@angular/common';
 import { PreferencesService } from '../../services/preferences.service';
 import { SearchPreference } from '../../models/search-preference.model';
@@ -15,13 +21,17 @@ import { SearchPreference } from '../../models/search-preference.model';
   selector: 'app-preferences',
   standalone: true,
   imports: [
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSlideToggleModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatDialogModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonSpinner,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonCardSubtitle,
+    IonChip,
+    IonToggle,
     CurrencyPipe,
   ],
   templateUrl: './preferences.component.html',
@@ -30,7 +40,6 @@ import { SearchPreference } from '../../models/search-preference.model';
 export class PreferencesComponent implements OnInit {
   private prefsService = inject(PreferencesService);
   private router = inject(Router);
-  private dialog = inject(MatDialog);
 
   preferences = signal<SearchPreference[]>([]);
   loading = signal(true);
@@ -39,9 +48,8 @@ export class PreferencesComponent implements OnInit {
     try {
       const prefs = await this.prefsService.getAll();
       this.preferences.set(prefs);
-    } catch {
-      // empty
-    } finally {
+    } catch (e) {
+      console.error('Failed to load preferences', e);
       this.loading.set(false);
     }
   }
@@ -64,5 +72,15 @@ export class PreferencesComponent implements OnInit {
 
   newPreference() {
     this.router.navigate(['/preferences/new']);
+  }
+
+  getIcon(name: string): string {
+    const iconMap: Record<string, string> = {
+      add: 'add-outline',
+      tune: 'options-outline',
+      edit: 'create-outline',
+      delete: 'trash-outline',
+    };
+    return iconMap[name] || name;
   }
 }

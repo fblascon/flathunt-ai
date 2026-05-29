@@ -23,26 +23,19 @@
   max-width: 500px;
 }
 
-.chip-spacer {
-  flex: 1;
+.neighborhood-selector {
+  margin-bottom: 16px;
 }
 
-.group-chip {
-  margin-left: auto;
+.neighborhood-select {
+  width: 220px;
 }
 
-.neighborhood-chips {
+.selected-chips {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 20px;
-}
-
-.chip-label {
-  font-size: 0.85rem;
-  color: #888;
-  margin-right: 4px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .results-header {

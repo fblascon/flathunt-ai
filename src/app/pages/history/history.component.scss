@@ -13,40 +13,41 @@
 }
 
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 20px;
   text-align: center;
-  color: #888;
+  padding: 60px 20px;
 
-  mat-icon {
+  .empty-icon {
     font-size: 64px;
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
     color: #555;
+    margin-bottom: 16px;
   }
 
   p {
+    color: #888;
     margin: 0 0 16px;
     font-size: 1.1rem;
   }
 }
 
-.table-container {
-  overflow-x: auto;
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+ion-list {
+  background: transparent;
+  margin-top: 8px;
+}
+
+ion-item {
+  --background: var(--ion-card-background);
+  --color: var(--ion-text-color);
+  margin-bottom: 4px;
   border-radius: 8px;
-  overflow: hidden;
-  margin-top: 16px;
+}
 
-  table {
-    width: 100%;
-    background: #1e1e2e;
-  }
-
-  th {
-    color: #aaa;
-    font-weight: 600;
-  }
+ion-note {
+  color: #888;
+  font-size: 0.85rem;
 }

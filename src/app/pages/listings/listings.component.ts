@@ -265,11 +265,18 @@ export class ListingsComponent implements OnInit {
     await this.loadListings();
   }
 
-  toggleNeighborhood(n: string) {
-    this.selectedNeighborhoods.update((list) =>
-      list.includes(n) ? list.filter((x) => x !== n) : [...list, n],
-    );
+  onNeighborhoodsChange(neighborhoods: string[]) {
+    this.selectedNeighborhoods.set(neighborhoods || []);
+    if (this.isAiSearchActive()) {
+      this.applyFiltersToAiResults();
+    } else {
+      this.currentPage.set(1);
+      this.loadListings();
+    }
+  }
 
+  removeNeighborhood(n: string) {
+    this.selectedNeighborhoods.update((list) => list.filter((x) => x !== n));
     if (this.isAiSearchActive()) {
       this.applyFiltersToAiResults();
     } else {

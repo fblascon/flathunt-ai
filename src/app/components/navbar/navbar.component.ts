@@ -1,36 +1,34 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatDividerModule } from '@angular/material/divider';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonLabel,
+} from '@ionic/angular/standalone';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatSidenavModule,
-    MatListModule,
-    MatDividerModule,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonButton,
+    IonIcon,
+    IonLabel,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
   supabase = inject(SupabaseService);
-  private router = inject(Router);
+  avatarError = signal(false);
 
   get user() {
     return this.supabase.user();
@@ -52,12 +50,27 @@ export class NavbarComponent {
     );
   }
 
+  getIcon(name: string): string {
+    const iconMap: Record<string, string> = {
+      apartment: 'business-outline',
+      search: 'search-outline',
+      tune: 'settings-outline',
+      favorite: 'heart',
+      favorite_border: 'heart-outline',
+      history: 'time-outline',
+      account_circle: 'person-circle-outline',
+      person: 'person-outline',
+      logout: 'log-out-outline',
+      login: 'log-in-outline',
+    };
+    return iconMap[name] || name;
+  }
+
   async signIn() {
     await this.supabase.signInWithGoogle();
   }
 
   async signOut() {
     await this.supabase.signOut();
-    this.router.navigate(['/login']);
   }
 }
