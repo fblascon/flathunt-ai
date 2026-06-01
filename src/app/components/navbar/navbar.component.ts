@@ -1,13 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import {
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonButton,
-  IonIcon,
-  IonLabel,
-} from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonButtons, IonButton, IonLabel } from '@ionic/angular/standalone';
+import { MatIconModule } from '@angular/material/icon';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
@@ -20,8 +14,8 @@ import { SupabaseService } from '../../services/supabase.service';
     IonToolbar,
     IonButtons,
     IonButton,
-    IonIcon,
     IonLabel,
+    MatIconModule,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
@@ -48,22 +42,6 @@ export class NavbarComponent {
       this.user?.email?.split('@')[0] ??
       'Usuario'
     );
-  }
-
-  getIcon(name: string): string {
-    const iconMap: Record<string, string> = {
-      apartment: 'business-outline',
-      search: 'search-outline',
-      tune: 'settings-outline',
-      favorite: 'heart',
-      favorite_border: 'heart-outline',
-      history: 'time-outline',
-      account_circle: 'person-circle-outline',
-      person: 'person-outline',
-      logout: 'log-out-outline',
-      login: 'log-in-outline',
-    };
-    return iconMap[name] || name;
   }
 
   async signIn() {

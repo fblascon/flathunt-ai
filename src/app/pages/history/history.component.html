@@ -3,7 +3,7 @@
     <h1 class="page-title">Historial</h1>
     @if (viewedListings().length) {
       <ion-button fill="outline" color="danger" (click)="clearHistory()">
-        <ion-icon slot="start" [name]="getIcon('delete_sweep')"></ion-icon>
+        <mat-icon slot="start" fontIcon="delete_sweep"></mat-icon>
         Limpiar historial
       </ion-button>
     }
@@ -26,7 +26,7 @@
     @if (activeTab() === 'viewed') {
       @if (!viewedListings().length) {
         <div class="empty-state">
-          <ion-icon [name]="getIcon('visibility')" class="empty-icon"></ion-icon>
+          <mat-icon fontIcon="visibility" class="empty-icon"></mat-icon>
           <p>No has visto ningún piso todavía</p>
           <ion-button color="primary" routerLink="/listings">Explorar pisos</ion-button>
         </div>
@@ -46,14 +46,14 @@
     } @else {
       @if (!searchHistory().length) {
         <div class="empty-state">
-          <ion-icon [name]="getIcon('search')" class="empty-icon"></ion-icon>
+          <mat-icon fontIcon="search" class="empty-icon"></mat-icon>
           <p>No hay búsquedas registradas</p>
         </div>
       } @else {
         <ion-list>
           @for (row of searchHistory(); track row.id) {
             <ion-item>
-              <ion-icon slot="start" [name]="getIcon('search')"></ion-icon>
+              <mat-icon slot="start" fontIcon="search"></mat-icon>
               <ion-label>{{ row.query }}</ion-label>
               <ion-note slot="end"
                 >{{ row.results_count }} resultados · {{ row.created_at | date: 'short' }}</ion-note

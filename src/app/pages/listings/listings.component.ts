@@ -15,6 +15,7 @@ import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { HistoryService } from '../../services/history.service';
 import { AiService } from '../../services/ai.service';
+import { GeographyService } from '../../services/geography.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
 import { Listing } from '../../models/listing.model';
 
@@ -56,6 +57,7 @@ export class ListingsComponent implements OnInit {
   private favoritesService = inject(FavoritesService);
   private historyService = inject(HistoryService);
   private aiService = inject(AiService);
+  private geographyService = inject(GeographyService);
   private router = inject(Router);
 
   listings = signal<Listing[]>([]);
@@ -71,6 +73,7 @@ export class ListingsComponent implements OnInit {
   isAiSearchActive = signal(false);
   aiRawResults = signal<Listing[]>([]);
   ignoreRoomsFilter = signal(false);
+  subBarrioKeywords = signal<string[]>([]);
 
   maxPrice = signal<number>(2000);
   minRooms = signal<number>(0);
@@ -175,6 +178,15 @@ export class ListingsComponent implements OnInit {
     await this.loadListings();
   }
 
+  private filterBySubBarrio(listings: Listing[]): Listing[] {
+    const keywords = this.subBarrioKeywords();
+    if (keywords.length === 0) return listings;
+    return listings.filter((l) => {
+      const text = `${l.title} ${l.address || ''}`.toLowerCase();
+      return keywords.some((kw) => text.includes(kw.toLowerCase()));
+    });
+  }
+
   private recalcGroups() {
     const raw = this.listings();
 
@@ -211,18 +223,19 @@ export class ListingsComponent implements OnInit {
   async loadListings() {
     this.loading.set(true);
     try {
+      // If sub-barrio filter is active, fetch more results to filter locally
+      const hasSubBarrio = this.subBarrioKeywords().length > 0;
       const { data: listings, count } = await this.listingsService.getAll({
         maxPrice: this.maxPrice(),
         minRooms: this.minRooms() || undefined,
         minSize: this.minSize() || undefined,
-        neighborhoods: this.selectedNeighborhoods().length
-          ? this.selectedNeighborhoods()
-          : undefined,
+        neighborhoods: this.getExpandedNeighborhoods(),
         page: this.currentPage(),
-        pageSize: this.PAGE_SIZE,
+        pageSize: hasSubBarrio ? 500 : this.PAGE_SIZE,
       });
-      this.totalCount.set(count);
-      this.listings.set(listings);
+      const filtered = this.filterBySubBarrio(listings);
+      this.totalCount.set(hasSubBarrio ? filtered.length : count);
+      this.listings.set(filtered);
       this.recalcGroups();
 
       try {
@@ -267,6 +280,11 @@ export class ListingsComponent implements OnInit {
 
   onNeighborhoodsChange(neighborhoods: string[]) {
     this.selectedNeighborhoods.set(neighborhoods || []);
+    const subBarrios = (neighborhoods || []).filter((n) => {
+      const district = this.geographyService.normalizeDistrictName(n);
+      return district && district.toLowerCase() !== n.toLowerCase();
+    });
+    this.subBarrioKeywords.set(subBarrios);
     if (this.isAiSearchActive()) {
       this.applyFiltersToAiResults();
     } else {
@@ -277,6 +295,11 @@ export class ListingsComponent implements OnInit {
 
   removeNeighborhood(n: string) {
     this.selectedNeighborhoods.update((list) => list.filter((x) => x !== n));
+    const subBarrios = this.selectedNeighborhoods().filter((name) => {
+      const district = this.geographyService.normalizeDistrictName(name);
+      return district && district.toLowerCase() !== name.toLowerCase();
+    });
+    this.subBarrioKeywords.set(subBarrios);
     if (this.isAiSearchActive()) {
       this.applyFiltersToAiResults();
     } else {
@@ -362,7 +385,7 @@ export class ListingsComponent implements OnInit {
     // Extract significant words from query (>3 chars, not stop words)
     const queryWords = nq.split(/\s+/).filter((w) => w.length > 3 && !stopWords.has(w));
 
-    return this.allNeighborhoods.filter((n) => {
+    const matched = this.allNeighborhoods.filter((n) => {
       const nNorm = norm(n);
       // Match 1: full neighborhood name contained in query
       if (nq.includes(nNorm)) return true;
@@ -373,6 +396,33 @@ export class ListingsComponent implements OnInit {
       if (nbWords.some((w) => nq.includes(w))) return true;
       return false;
     });
+
+    // Identify sub-barrios (names that map to a different district)
+    const subBarrios = matched.filter((n) => {
+      const district = this.geographyService.normalizeDistrictName(n);
+      return district && district.toLowerCase() !== n.toLowerCase();
+    });
+    this.subBarrioKeywords.set(subBarrios);
+
+    // Expand sub-barrios to include their parent district (e.g. Sanchinarro -> Hortaleza)
+    const expanded = new Set<string>(matched);
+    matched.forEach((n) => {
+      const district = this.geographyService.normalizeDistrictName(n);
+      if (district) expanded.add(district);
+    });
+
+    return Array.from(expanded);
+  }
+
+  private getExpandedNeighborhoods(): string[] | undefined {
+    const selected = this.selectedNeighborhoods();
+    if (selected.length === 0) return undefined;
+    const expanded = new Set<string>(selected);
+    selected.forEach((n) => {
+      const district = this.geographyService.normalizeDistrictName(n);
+      if (district) expanded.add(district);
+    });
+    return Array.from(expanded);
   }
 
   onFilterChange(key: 'maxPrice' | 'minRooms' | 'minSize', value: number) {
@@ -414,7 +464,9 @@ export class ListingsComponent implements OnInit {
 
   private applyFiltersToAiResults() {
     const raw = this.aiRawResults();
-    const filtered = raw.filter((l) => this.matchesFilters(l));
+    let filtered = raw.filter((l) => this.matchesFilters(l));
+    filtered = this.filterBySubBarrio(filtered);
+    this.totalCount.set(filtered.length);
     this.listings.set(filtered);
     this.recalcGroups();
   }
@@ -497,6 +549,7 @@ export class ListingsComponent implements OnInit {
     this.isAiSearchActive.set(false);
     this.aiRawResults.set([]);
     this.aiNoResultsNeighborhoods.set(null);
+    this.subBarrioKeywords.set([]);
     this.currentPage.set(1);
     this.loadListings();
   }
@@ -511,6 +564,7 @@ export class ListingsComponent implements OnInit {
     this.minRooms.set(0);
     this.minSize.set(0);
     this.selectedNeighborhoods.set([]);
+    this.subBarrioKeywords.set([]);
     this.aiQuery.set('');
     this.isAiSearchActive.set(false);
     this.aiRawResults.set([]);

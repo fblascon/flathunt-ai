@@ -9,7 +9,7 @@
       />
     } @else {
       <div class="listing-image placeholder">
-        <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+        <mat-icon fontIcon="image" class="placeholder-icon"></mat-icon>
       </div>
     }
     @if (listing().neighborhood) {
@@ -24,32 +24,32 @@
     <div class="listing-price">{{ listing().price | number: '1.0-0' }} €/mes</div>
     <h3 class="listing-title">{{ listing().title }}</h3>
     <p class="listing-address">
-      <ion-icon [name]="getIcon('location_on')" class="small-icon"></ion-icon>
+      <mat-icon fontIcon="location_on" class="small-icon"></mat-icon>
       {{ listing().address || listing().neighborhood || 'Madrid' }}
     </p>
 
     <div class="listing-details">
       @if (listing().rooms) {
         <span class="detail">
-          <ion-icon [name]="getIcon('bed')" class="small-icon"></ion-icon>
+          <mat-icon fontIcon="bed" class="small-icon"></mat-icon>
           {{ listing().rooms }} hab.
         </span>
       }
       @if (listing().size_m2) {
         <span class="detail">
-          <ion-icon [name]="getIcon('square_foot')" class="small-icon"></ion-icon>
+          <mat-icon fontIcon="square_foot" class="small-icon"></mat-icon>
           {{ listing().size_m2 }} m²
         </span>
       }
       @if (listing().floor) {
         <span class="detail">
-          <ion-icon [name]="getIcon('stairs')" class="small-icon"></ion-icon>
+          <mat-icon fontIcon="stairs" class="small-icon"></mat-icon>
           {{ listing().floor }}
         </span>
       }
       @if (siblingCount() > 1) {
         <span class="detail building-indicator">
-          <ion-icon [name]="getIcon('apartment')" class="small-icon"></ion-icon>
+          <mat-icon fontIcon="apartment" class="small-icon"></mat-icon>
           {{ siblingCount() }}
         </span>
       }
@@ -65,7 +65,7 @@
 
     @if (aiScore()) {
       <div class="ai-score" [class.high]="aiScore()! >= 70" [class.low]="aiScore()! < 40">
-        <ion-icon [name]="getIcon('smart_toy')"></ion-icon>
+        <mat-icon fontIcon="smart_toy"></mat-icon>
         <span>IA: {{ aiScore() }}/100</span>
       </div>
     }
@@ -82,11 +82,11 @@
           fill="clear"
           (click)="$event.stopPropagation()"
         >
-          <ion-icon [name]="getIcon('open_in_new')" slot="icon-only"></ion-icon>
+          <mat-icon fontIcon="open_in_new" slot="icon-only"></mat-icon>
         </a>
         @if (showCompare()) {
           <ion-button fill="clear" (click)="$event.stopPropagation(); compare.emit(listing().id)">
-            <ion-icon [name]="getIcon('compare_arrows')" slot="icon-only"></ion-icon>
+            <mat-icon fontIcon="compare_arrows" slot="icon-only"></mat-icon>
           </ion-button>
         }
         @if (showFavorite()) {
@@ -95,10 +95,9 @@
             [color]="isFavorited() ? 'danger' : undefined"
             (click)="$event.stopPropagation(); favorite.emit(listing().id)"
           >
-            <ion-icon
-              [name]="isFavorited() ? getIcon('favorite') : getIcon('favorite_border')"
-              slot="icon-only"
-            ></ion-icon>
+            <mat-icon slot="icon-only">{{
+              isFavorited() ? 'favorite' : 'favorite_border'
+            }}</mat-icon>
           </ion-button>
         }
       </ion-buttons>

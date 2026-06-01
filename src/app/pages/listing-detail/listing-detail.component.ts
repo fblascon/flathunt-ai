@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import {
   IonContent,
   IonButton,
-  IonIcon,
   IonChip,
   IonCard,
   IonCardContent,
@@ -14,6 +13,7 @@ import {
   IonBackButton,
   IonProgressBar,
 } from '@ionic/angular/standalone';
+import { MatIconModule } from '@angular/material/icon';
 import { DecimalPipe, Location } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ListingsService } from '../../services/listings.service';
@@ -28,7 +28,6 @@ import { Listing } from '../../models/listing.model';
   imports: [
     IonContent,
     IonButton,
-    IonIcon,
     IonChip,
     IonCard,
     IonCardContent,
@@ -37,6 +36,7 @@ import { Listing } from '../../models/listing.model';
     IonSpinner,
     IonBackButton,
     IonProgressBar,
+    MatIconModule,
     DecimalPipe,
   ],
   templateUrl: './listing-detail.component.html',
@@ -59,24 +59,6 @@ export class ListingDetailComponent implements OnInit {
   analyzing = signal(false);
   currentImageIndex = signal(0);
   mainImageError = signal(false);
-
-  getIcon(name: string): string {
-    const iconMap: Record<string, string> = {
-      arrow_back: 'arrow-back-outline',
-      chevron_left: 'chevron-back-outline',
-      chevron_right: 'chevron-forward-outline',
-      location_on: 'location-outline',
-      bed: 'bed-outline',
-      square_foot: 'resize-outline',
-      stairs: 'layers-outline',
-      open_in_new: 'open-outline',
-      smart_toy: 'sparkles-outline',
-      favorite: 'heart',
-      favorite_border: 'heart-outline',
-      image_not_supported: 'image-outline',
-    };
-    return iconMap[name] || name;
-  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;

@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button routerLink="/" fill="clear">
-        <ion-icon slot="start" [name]="getIcon('apartment')"></ion-icon>
+        <mat-icon slot="start" fontIcon="apartment"></mat-icon>
         <ion-label>FlatHunt AI</ion-label>
       </ion-button>
     </ion-buttons>
@@ -10,24 +10,24 @@
     <ion-buttons slot="end">
       @if (isAuth) {
         <ion-button routerLink="/listings" routerLinkActive="active" fill="clear">
-          <ion-icon slot="icon-only" [name]="getIcon('search')"></ion-icon>
+          <mat-icon slot="icon-only" fontIcon="search"></mat-icon>
         </ion-button>
         <ion-button routerLink="/preferences" routerLinkActive="active" fill="clear">
-          <ion-icon slot="icon-only" [name]="getIcon('tune')"></ion-icon>
+          <mat-icon slot="icon-only" fontIcon="tune"></mat-icon>
         </ion-button>
         <ion-button routerLink="/favorites" routerLinkActive="active" fill="clear">
-          <ion-icon slot="icon-only" [name]="getIcon('favorite')"></ion-icon>
+          <mat-icon slot="icon-only" fontIcon="favorite"></mat-icon>
         </ion-button>
         <ion-button routerLink="/history" routerLinkActive="active" fill="clear">
-          <ion-icon slot="icon-only" [name]="getIcon('history')"></ion-icon>
+          <mat-icon slot="icon-only" fontIcon="history"></mat-icon>
         </ion-button>
 
         <ion-button (click)="signOut()" fill="clear">
-          <ion-icon slot="icon-only" [name]="getIcon('logout')"></ion-icon>
+          <mat-icon slot="icon-only" fontIcon="logout"></mat-icon>
         </ion-button>
       } @else {
         <ion-button (click)="signIn()" fill="solid" color="primary">
-          <ion-icon slot="start" [name]="getIcon('login')"></ion-icon>
+          <mat-icon slot="start" fontIcon="login"></mat-icon>
           <ion-label>Iniciar sesión</ion-label>
         </ion-button>
       }

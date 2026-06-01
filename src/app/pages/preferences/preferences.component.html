@@ -2,7 +2,7 @@
   <div class="page-header">
     <h1 class="page-title">Mis preferencias de búsqueda</h1>
     <ion-button color="primary" (click)="newPreference()">
-      <ion-icon slot="start" [name]="getIcon('add')"></ion-icon>
+      <mat-icon slot="start" fontIcon="add"></mat-icon>
       Nueva preferencia
     </ion-button>
   </div>
@@ -13,7 +13,7 @@
     </div>
   } @else if (!preferences().length) {
     <div class="empty-state">
-      <ion-icon [name]="getIcon('tune')" class="empty-icon"></ion-icon>
+      <mat-icon fontIcon="tune" class="empty-icon"></mat-icon>
       <p>No tienes preferencias guardadas</p>
       <ion-button expand="block" color="primary" (click)="newPreference()">
         Crear primera preferencia
@@ -57,11 +57,11 @@
           </ion-card-content>
           <div class="pref-actions">
             <ion-button fill="clear" (click)="editPreference(pref.id)">
-              <ion-icon slot="start" [name]="getIcon('edit')"></ion-icon>
+              <mat-icon slot="start" fontIcon="edit"></mat-icon>
               Editar
             </ion-button>
             <ion-button fill="clear" color="danger" (click)="deletePreference(pref.id)">
-              <ion-icon slot="start" [name]="getIcon('delete')"></ion-icon>
+              <mat-icon slot="start" fontIcon="delete"></mat-icon>
               Eliminar
             </ion-button>
           </div>

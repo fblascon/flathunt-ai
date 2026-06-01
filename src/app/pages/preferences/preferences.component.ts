@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonButton,
-  IonIcon,
   IonSpinner,
   IonCard,
   IonCardHeader,
@@ -13,6 +12,7 @@ import {
   IonChip,
   IonToggle,
 } from '@ionic/angular/standalone';
+import { MatIconModule } from '@angular/material/icon';
 import { CurrencyPipe } from '@angular/common';
 import { PreferencesService } from '../../services/preferences.service';
 import { SearchPreference } from '../../models/search-preference.model';
@@ -23,7 +23,6 @@ import { SearchPreference } from '../../models/search-preference.model';
   imports: [
     IonContent,
     IonButton,
-    IonIcon,
     IonSpinner,
     IonCard,
     IonCardHeader,
@@ -32,6 +31,7 @@ import { SearchPreference } from '../../models/search-preference.model';
     IonCardSubtitle,
     IonChip,
     IonToggle,
+    MatIconModule,
     CurrencyPipe,
   ],
   templateUrl: './preferences.component.html',
@@ -72,15 +72,5 @@ export class PreferencesComponent implements OnInit {
 
   newPreference() {
     this.router.navigate(['/preferences/new']);
-  }
-
-  getIcon(name: string): string {
-    const iconMap: Record<string, string> = {
-      add: 'add-outline',
-      tune: 'options-outline',
-      edit: 'create-outline',
-      delete: 'trash-outline',
-    };
-    return iconMap[name] || name;
   }
 }

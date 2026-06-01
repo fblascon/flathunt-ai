@@ -3,12 +3,12 @@ import { RouterLink } from '@angular/router';
 import {
   IonContent,
   IonButton,
-  IonIcon,
   IonSpinner,
   IonSegment,
   IonSegmentButton,
   IonLabel,
 } from '@ionic/angular/standalone';
+import { MatIconModule } from '@angular/material/icon';
 import { SupabaseService } from '../../services/supabase.service';
 import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
@@ -23,11 +23,11 @@ import { Favorite } from '../../services/favorites.service';
     RouterLink,
     IonContent,
     IonButton,
-    IonIcon,
     IonSpinner,
     IonSegment,
     IonSegmentButton,
     IonLabel,
+    MatIconModule,
     ListingCardComponent,
   ],
   templateUrl: './home.component.html',
@@ -66,15 +66,5 @@ export class HomeComponent implements OnInit {
     if (value === 'recent' || value === 'favs') {
       this.activeTab.set(value);
     }
-  }
-
-  getIcon(name: string): string {
-    const iconMap: Record<string, string> = {
-      search: 'search-outline',
-      tune: 'options-outline',
-      search_off: 'search-outline',
-      favorite_border: 'heart-outline',
-    };
-    return iconMap[name] || name;
   }
 }

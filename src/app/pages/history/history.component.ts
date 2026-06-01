@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonButton,
-  IonIcon,
   IonSpinner,
   IonList,
   IonItem,
@@ -12,6 +11,7 @@ import {
   IonSegment,
   IonSegmentButton,
 } from '@ionic/angular/standalone';
+import { MatIconModule } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 import { HistoryService } from '../../services/history.service';
 import { FavoritesService } from '../../services/favorites.service';
@@ -25,7 +25,6 @@ import { ListingCardComponent } from '../../components/listing-card/listing-card
   imports: [
     IonContent,
     IonButton,
-    IonIcon,
     IonSpinner,
     IonList,
     IonItem,
@@ -33,6 +32,7 @@ import { ListingCardComponent } from '../../components/listing-card/listing-card
     IonNote,
     IonSegment,
     IonSegmentButton,
+    MatIconModule,
     DatePipe,
     ListingCardComponent,
   ],
@@ -88,14 +88,5 @@ export class HistoryComponent implements OnInit {
     if (value === 'viewed' || value === 'searches') {
       this.activeTab.set(value);
     }
-  }
-
-  getIcon(name: string): string {
-    const iconMap: Record<string, string> = {
-      delete_sweep: 'trash-outline',
-      visibility: 'eye-outline',
-      search: 'search-outline',
-    };
-    return iconMap[name] || name;
   }
 }

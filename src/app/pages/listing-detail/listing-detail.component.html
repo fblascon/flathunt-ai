@@ -5,7 +5,7 @@
     </div>
   } @else if (listing(); as l) {
     <ion-button fill="clear" (click)="goBack()" class="back-btn">
-      <ion-icon slot="start" [name]="getIcon('arrow_back')"></ion-icon>
+      <mat-icon slot="start" fontIcon="arrow_back"></mat-icon>
       Volver a resultados
     </ion-button>
 
@@ -22,10 +22,10 @@
               />
               @if (allImages.length > 1) {
                 <button class="carousel-nav prev" fill="clear" (click)="prevImage()">
-                  <ion-icon [name]="getIcon('chevron_left')"></ion-icon>
+                  <mat-icon fontIcon="chevron_left"></mat-icon>
                 </button>
                 <button class="carousel-nav next" fill="clear" (click)="nextImage()">
-                  <ion-icon [name]="getIcon('chevron_right')"></ion-icon>
+                  <mat-icon fontIcon="chevron_right"></mat-icon>
                 </button>
                 <div class="carousel-counter">
                   {{ currentImageIndex() + 1 }} / {{ allImages.length }}
@@ -48,7 +48,7 @@
             }
           } @else {
             <div class="detail-image placeholder">
-              <ion-icon [name]="getIcon('image_not_supported')" class="placeholder-icon"></ion-icon>
+              <mat-icon fontIcon="image_not_supported" class="placeholder-icon"></mat-icon>
             </div>
           }
         </div>
@@ -57,23 +57,23 @@
           <div class="detail-price">{{ l.price | number: '1.0-0' }} €/mes</div>
           <h1>{{ l.title }}</h1>
           <p class="detail-address">
-            <ion-icon [name]="getIcon('location_on')"></ion-icon>
+            <mat-icon fontIcon="location_on"></mat-icon>
             {{ l.address || l.neighborhood || 'Madrid' }}
           </p>
 
           <div class="detail-stats">
             @if (l.rooms) {
               <div class="stat">
-                <ion-icon [name]="getIcon('bed')"></ion-icon> {{ l.rooms }} habitaciones
+                <mat-icon fontIcon="bed"></mat-icon> {{ l.rooms }} habitaciones
               </div>
             }
             @if (l.size_m2) {
               <div class="stat">
-                <ion-icon [name]="getIcon('square_foot')"></ion-icon> {{ l.size_m2 }} m²
+                <mat-icon fontIcon="square_foot"></mat-icon> {{ l.size_m2 }} m²
               </div>
             }
             @if (l.floor) {
-              <div class="stat"><ion-icon [name]="getIcon('stairs')"></ion-icon> {{ l.floor }}</div>
+              <div class="stat"><mat-icon fontIcon="layers"></mat-icon> {{ l.floor }}</div>
             }
           </div>
 
@@ -97,14 +97,11 @@
 
           <div class="detail-actions">
             <a [href]="l.external_url" target="_blank" rel="noopener" ion-button color="primary">
-              <ion-icon slot="start" [name]="getIcon('open_in_new')"></ion-icon>
+              <mat-icon slot="start" fontIcon="open_in_new"></mat-icon>
               Ver en Idealista
             </a>
             <ion-button [color]="isFavorited() ? 'danger' : 'medium'" (click)="toggleFavorite()">
-              <ion-icon
-                slot="start"
-                [name]="getIcon(isFavorited() ? 'favorite' : 'favorite_border')"
-              ></ion-icon>
+              <mat-icon slot="start">{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
               {{ isFavorited() ? 'Quitar favorito' : 'Guardar favorito' }}
             </ion-button>
           </div>
@@ -115,7 +112,7 @@
         <ion-card>
           <ion-card-header>
             <ion-card-title>
-              <ion-icon [name]="getIcon('smart_toy')"></ion-icon> Análisis IA
+              <mat-icon fontIcon="smart_toy"></mat-icon> Análisis IA
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
@@ -163,7 +160,7 @@
                 Pide a la IA que analice este piso según tus preferencias
               </p>
               <ion-button expand="block" color="primary" (click)="analyzeWithAi()">
-                <ion-icon slot="start" [name]="getIcon('smart_toy')"></ion-icon>
+                <mat-icon slot="start" fontIcon="smart_toy"></mat-icon>
                 Analizar con IA
               </ion-button>
             }

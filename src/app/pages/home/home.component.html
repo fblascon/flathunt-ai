@@ -8,11 +8,11 @@
 
     <div class="hero-actions">
       <ion-button expand="block" color="primary" routerLink="/listings">
-        <ion-icon slot="start" name="search-outline"></ion-icon>
+        <mat-icon slot="start" fontIcon="search"></mat-icon>
         Explorar pisos
       </ion-button>
       <ion-button expand="block" fill="outline" routerLink="/preferences">
-        <ion-icon slot="start" name="options-outline"></ion-icon>
+        <mat-icon slot="start" fontIcon="tune"></mat-icon>
         Mis preferencias
       </ion-button>
     </div>
@@ -45,7 +45,7 @@
           </div>
         } @else {
           <div class="empty-state">
-            <ion-icon [name]="getIcon('search_off')" class="empty-icon"></ion-icon>
+            <mat-icon fontIcon="search" class="empty-icon"></mat-icon>
             <p>Aún no hay pisos. Los scrapers traerán datos pronto.</p>
             <ion-button fill="clear" routerLink="/preferences">Configurar preferencias</ion-button>
           </div>
@@ -59,7 +59,7 @@
           </div>
         } @else {
           <div class="empty-state">
-            <ion-icon [name]="getIcon('favorite_border')" class="empty-icon"></ion-icon>
+            <mat-icon fontIcon="favorite_border" class="empty-icon"></mat-icon>
             <p>No tienes favoritos. Guarda pisos que te gusten.</p>
             <ion-button fill="clear" routerLink="/listings">Ver pisos</ion-button>
           </div>
