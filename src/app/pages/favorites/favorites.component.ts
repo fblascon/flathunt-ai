@@ -1,9 +1,10 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
 import { FavoritesService, Favorite } from '../../services/favorites.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-favorites',
@@ -12,16 +13,26 @@ import { ListingCardComponent } from '../../components/listing-card/listing-card
   templateUrl: './favorites.component.html',
   styleUrl: './favorites.component.scss',
 })
-export class FavoritesComponent implements OnInit {
+export class FavoritesComponent {
   private favoritesService = inject(FavoritesService);
+  private supabase = inject(SupabaseService);
   private router = inject(Router);
 
   favorites = signal<Favorite[]>([]);
   loading = signal(true);
 
-  async ngOnInit() {
-    console.log('[FavoritesComponent] ngOnInit');
-    console.log('[FavoritesComponent] userId:', this.favoritesService.getUserId());
+  constructor() {
+    effect(() => {
+      const user = this.supabase.user();
+      console.log('[FavoritesComponent] user signal changed:', user?.email);
+      if (user) {
+        this.loadFavorites();
+      }
+    });
+  }
+
+  private async loadFavorites() {
+    this.loading.set(true);
     try {
       const favs = await this.favoritesService.getAll();
       console.log('[FavoritesComponent] loaded:', favs.length);

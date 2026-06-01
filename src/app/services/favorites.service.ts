@@ -20,12 +20,25 @@ export class FavoritesService {
   }
 
   async getAll(): Promise<Favorite[]> {
+    const userId = this.supabaseService.getUserId();
+    console.log('[FavoritesService.getAll] userId from signal:', userId);
+
+    if (!userId) {
+      console.log('[FavoritesService.getAll] no user, fetching session explicitly');
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) {
+        console.log('[FavoritesService.getAll] no session found, returning empty');
+        return [];
+      }
+      console.log('[FavoritesService.getAll] session found:', data.session.user.email);
+    }
+
     const { data, error } = await this.supabase
       .from('favorites')
       .select('*, listings(*)')
       .order('created_at', { ascending: false });
 
-    console.log('[FavoritesService.getAll] data:', data?.length, 'error:', error);
+    console.log('[FavoritesService.getAll] query result - data:', data?.length, 'error:', error);
     if (error) throw error;
     return data as Favorite[];
   }
