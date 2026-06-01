@@ -4,7 +4,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  padding-top: 64px; /* Space for fixed navbar */
+  height: 100%;
+  overflow: hidden;
 }
 
 $flat-purple: (
@@ -91,7 +92,8 @@ body {
     sans-serif;
   background: #12121a;
   color: #e0e0e0;
-  padding-top: 64px; /* Space for fixed navbar */
+  height: 100%;
+  overflow: hidden;
 }
 
 a {
@@ -105,8 +107,11 @@ a {
 
 .page-container {
   padding: 24px;
+  padding-top: calc(64px + 24px);
   max-width: 1200px;
   margin: 0 auto;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .page-title {
