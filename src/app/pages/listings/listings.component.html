@@ -1,14 +1,5 @@
 <div class="page-container">
-  <div class="page-header">
-    <h1 class="page-title">Pisos en Madrid</h1>
-    <div class="header-actions">
-      <button mat-icon-button (click)="resetFilters()" matTooltip="Resetear filtros">
-        <mat-icon>filter_alt_off</mat-icon>
-      </button>
-    </div>
-  </div>
-
-  <div class="filters-panel">
+  <div class="filters-section">
     <mat-form-field appearance="outline" class="filter-field ai-search">
       <mat-label>Búsqueda (ej: "ático con terraza en Chamberí")</mat-label>
       <input
@@ -19,70 +10,71 @@
       />
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Precio máx.</mat-label>
-      <input
-        matInput
-        type="number"
-        [ngModel]="maxPrice()"
-        (ngModelChange)="onFilterChange('maxPrice', $event)"
-      />
-    </mat-form-field>
+    <div class="filters-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Precio máx.</mat-label>
+        <input
+          matInput
+          type="number"
+          [ngModel]="maxPrice()"
+          (ngModelChange)="onFilterChange('maxPrice', $event)"
+        />
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Habitaciones</mat-label>
-      <mat-select [ngModel]="minRooms()" (ngModelChange)="onFilterChange('minRooms', $event)">
-        <mat-option [value]="0">Cualquiera</mat-option>
-        <mat-option [value]="-1">Estudio</mat-option>
-        <mat-option [value]="1">1+</mat-option>
-        <mat-option [value]="2">2+</mat-option>
-        <mat-option [value]="3">3+</mat-option>
-        <mat-option [value]="4">4+</mat-option>
-      </mat-select>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field rooms-field">
+        <mat-label>Habitaciones</mat-label>
+        <mat-select [ngModel]="minRooms()" (ngModelChange)="onFilterChange('minRooms', $event)">
+          <mat-option [value]="0">Cualquiera</mat-option>
+          <mat-option [value]="-1">Estudio</mat-option>
+          <mat-option [value]="1">1+</mat-option>
+          <mat-option [value]="2">2+</mat-option>
+          <mat-option [value]="3">3+</mat-option>
+          <mat-option [value]="4">4+</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Mín. m²</mat-label>
-      <input
-        matInput
-        type="number"
-        [ngModel]="minSize()"
-        (ngModelChange)="onFilterChange('minSize', $event)"
-      />
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Mín. m²</mat-label>
+        <input
+          matInput
+          type="number"
+          [ngModel]="minSize()"
+          (ngModelChange)="onFilterChange('minSize', $event)"
+        />
+      </mat-form-field>
+    </div>
 
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="aiSearch()"
-      [disabled]="aiSearching() || !aiQuery().trim()"
-    >
-      <mat-icon>search</mat-icon>
-      @if (aiSearching()) {
-        Buscando...
+    <div class="actions-row">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="aiSearch()"
+        [disabled]="aiSearching() || !aiQuery().trim()"
+      >
+        <mat-icon>search</mat-icon>
+        @if (aiSearching()) {
+          Buscando...
+        } @else {
+          Buscar
+        }
+      </button>
+      @if (isAiSearchActive()) {
+        <button mat-stroked-button color="warn" (click)="clearAiSearch()">
+          <mat-icon>close</mat-icon> Limpiar
+        </button>
       } @else {
-        Buscar
+        <button mat-stroked-button (click)="resetFilters()">
+          <mat-icon>filter_alt_off</mat-icon> Limpiar
+        </button>
       }
-    </button>
+    </div>
   </div>
 
   @if (loading()) {
     <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
   } @else if (displayedGroups(); as groups) {
     <div class="results-header">
-      <div class="results-count">
-        {{ listings().length }} pisos encontrados
-      </div>
-      @if (isAiSearchActive()) {
-        <button
-          mat-raised-button
-          color="warn"
-          (click)="clearAiSearch()"
-          size="small"
-        >
-          <mat-icon>close</mat-icon> Limpiar
-        </button>
-      }
+      <div class="results-count">{{ listings().length }} pisos encontrados</div>
     </div>
     @if (
       isAiSearchActive() &&
