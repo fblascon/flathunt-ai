@@ -23,6 +23,8 @@ export class FavoritesComponent implements OnInit {
     try {
       const favs = await this.favoritesService.getAll();
       this.favorites.set(favs);
+    } catch (e) {
+      console.error('Failed to load favorites:', e);
     } finally {
       this.loading.set(false);
     }
