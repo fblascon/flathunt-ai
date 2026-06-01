@@ -1,5 +1,5 @@
 <ion-content class="ion-padding">
-  <h1 class="page-title">Mis favoritos</h1>
+  <h1 class="page-title">Mis favoritos ({{ favorites().length }})</h1>
 
   @if (loading()) {
     <div class="loading-container">
@@ -14,6 +14,7 @@
   } @else {
     <div class="listing-grid">
       @for (fav of favorites(); track fav.listing_id) {
+        <pre>{{ fav | json }}</pre>
         <app-listing-card
           [listing]="$any(fav.listings)"
           [isFavorited]="true"

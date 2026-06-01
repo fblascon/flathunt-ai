@@ -2,6 +2,7 @@ import { Component, inject, signal, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
+import { JsonPipe } from '@angular/common';
 import { FavoritesService, Favorite } from '../../services/favorites.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
 import { SupabaseService } from '../../services/supabase.service';
@@ -9,7 +10,7 @@ import { SupabaseService } from '../../services/supabase.service';
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [IonContent, IonButton, IonSpinner, MatIconModule, ListingCardComponent],
+  imports: [IonContent, IonButton, IonSpinner, MatIconModule, ListingCardComponent, JsonPipe],
   templateUrl: './favorites.component.html',
   styleUrl: './favorites.component.scss',
 })
