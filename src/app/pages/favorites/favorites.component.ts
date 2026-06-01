@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,7 @@ import { SupabaseService } from '../../services/supabase.service';
 export class FavoritesComponent {
   private favoritesService = inject(FavoritesService);
   private supabase = inject(SupabaseService);
+  private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
 
   favorites = signal<Favorite[]>([]);
@@ -34,15 +35,11 @@ export class FavoritesComponent {
   }
 
   private async loadFavorites() {
-    console.log('[FavoritesComponent] loadFavorites called');
     this.loading.set(true);
     try {
       const favs = await this.favoritesService.getAll();
-      console.log('[FavoritesComponent] got', favs.length, 'favorites');
-      favs.forEach((f, i) =>
-        console.log(`  fav[${i}]:`, f.listing_id, 'listings:', f.listings ? 'YES' : 'NULL'),
-      );
       this.favorites.set([...favs]);
+      this.cdr.detectChanges();
     } catch (e) {
       console.error('[FavoritesComponent] error:', e);
     } finally {
