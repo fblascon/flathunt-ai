@@ -2,20 +2,6 @@
   <div class="page-header">
     <h1 class="page-title">Pisos en Madrid</h1>
     <div class="header-actions">
-      <button
-        mat-stroked-button
-        color="accent"
-        (click)="scoreWithAi()"
-        [disabled]="aiScoring() || !listings().length"
-        matTooltip="Pide a la IA que puntúe los pisos visibles según los filtros actuales"
-      >
-        <mat-icon>smart_toy</mat-icon>
-        @if (aiScoring()) {
-          Puntuando...
-        } @else {
-          IA: Puntuar
-        }
-      </button>
       <button mat-icon-button (click)="resetFilters()" matTooltip="Resetear filtros">
         <mat-icon>filter_alt_off</mat-icon>
       </button>
@@ -24,21 +10,13 @@
 
   <div class="filters-panel">
     <mat-form-field appearance="outline" class="filter-field ai-search">
-      <mat-label>Búsqueda con IA (ej: "ático con terraza en Chamberí")</mat-label>
+      <mat-label>Búsqueda (ej: "ático con terraza en Chamberí")</mat-label>
       <input
         matInput
         [(ngModel)]="aiQuery"
         (keyup.enter)="aiSearch()"
         placeholder="piso luminoso cerca del Retiro"
       />
-      <button
-        mat-icon-button
-        matSuffix
-        (click)="aiSearch()"
-        [disabled]="aiSearching() || !aiQuery().trim()"
-      >
-        <mat-icon>smart_toy</mat-icon>
-      </button>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="filter-field">
@@ -88,43 +66,21 @@
     </button>
   </div>
 
-  <div class="neighborhood-selector">
-    <mat-form-field appearance="outline" class="neighborhood-select">
-      <mat-label>Barrios</mat-label>
-      <mat-select
-        multiple
-        [ngModel]="selectedNeighborhoods()"
-        (ngModelChange)="onNeighborhoodsChange($event)"
-      >
-        @for (n of allNeighborhoods; track n) {
-          <mat-option [value]="n">{{ n }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    @if (selectedNeighborhoods().length > 0) {
-      <div class="selected-chips">
-        @for (n of selectedNeighborhoods(); track n) {
-          <mat-chip (removed)="removeNeighborhood(n)" removable
-            >{{ n }}<span matChipRemove>&times;</span></mat-chip
-          >
-        }
-      </div>
-    }
-  </div>
-
   @if (loading()) {
     <div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>
   } @else if (displayedGroups(); as groups) {
     <div class="results-header">
       <div class="results-count">
         {{ listings().length }} pisos encontrados
-        @if (isAiSearchActive()) {
-          <span class="ai-badge">Búsqueda IA</span>
-        }
       </div>
       @if (isAiSearchActive()) {
-        <button mat-stroked-button color="warn" (click)="clearAiSearch()" size="small">
-          <mat-icon>close</mat-icon> Limpiar búsqueda IA
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="clearAiSearch()"
+          size="small"
+        >
+          <mat-icon>close</mat-icon> Limpiar
         </button>
       }
     </div>

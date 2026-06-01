@@ -74,6 +74,7 @@ export class ListingsComponent implements OnInit {
   aiRawResults = signal<Listing[]>([]);
   ignoreRoomsFilter = signal(false);
   subBarrioKeywords = signal<string[]>([]);
+  officialNeighborhoods = new Set<string>();
 
   maxPrice = signal<number>(2000);
   minRooms = signal<number>(0);
@@ -167,6 +168,10 @@ export class ListingsComponent implements OnInit {
   ];
 
   async ngOnInit() {
+    // Load official neighborhoods from geography service
+    this.officialNeighborhoods = new Set(
+      this.geographyService.getAllNeighborhoods().map((n) => n.toLowerCase()),
+    );
     // Load unique neighborhoods from database and merge with static list
     try {
       const dbNeighborhoods = await this.listingsService.getNeighborhoods();
@@ -282,7 +287,8 @@ export class ListingsComponent implements OnInit {
     this.selectedNeighborhoods.set(neighborhoods || []);
     const subBarrios = (neighborhoods || []).filter((n) => {
       const district = this.geographyService.normalizeDistrictName(n);
-      return district && district.toLowerCase() !== n.toLowerCase();
+      const isOfficial = this.officialNeighborhoods.has(n.toLowerCase());
+      return district && district.toLowerCase() !== n.toLowerCase() && !isOfficial;
     });
     this.subBarrioKeywords.set(subBarrios);
     if (this.isAiSearchActive()) {
@@ -297,7 +303,8 @@ export class ListingsComponent implements OnInit {
     this.selectedNeighborhoods.update((list) => list.filter((x) => x !== n));
     const subBarrios = this.selectedNeighborhoods().filter((name) => {
       const district = this.geographyService.normalizeDistrictName(name);
-      return district && district.toLowerCase() !== name.toLowerCase();
+      const isOfficial = this.officialNeighborhoods.has(name.toLowerCase());
+      return district && district.toLowerCase() !== name.toLowerCase() && !isOfficial;
     });
     this.subBarrioKeywords.set(subBarrios);
     if (this.isAiSearchActive()) {
@@ -397,10 +404,12 @@ export class ListingsComponent implements OnInit {
       return false;
     });
 
-    // Identify sub-barrios (names that map to a different district)
+    // Identify sub-barrios: neighborhoods NOT in the official list (e.g. Sanchinarro)
+    // Official neighborhoods (e.g. Barrio del Pilar) don't need post-filtering
     const subBarrios = matched.filter((n) => {
       const district = this.geographyService.normalizeDistrictName(n);
-      return district && district.toLowerCase() !== n.toLowerCase();
+      const isOfficial = this.officialNeighborhoods.has(n.toLowerCase());
+      return district && district.toLowerCase() !== n.toLowerCase() && !isOfficial;
     });
     this.subBarrioKeywords.set(subBarrios);
 

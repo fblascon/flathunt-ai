@@ -1,5 +1,12 @@
 @use '@angular/material' as mat;
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  padding-top: 64px; /* Space for fixed navbar */
+}
+
 $flat-purple: (
   50: #ede7f6,
   100: #d1c4e9,
@@ -74,11 +81,6 @@ $dark-theme: mat.m2-define-dark-theme(
   box-sizing: border-box;
 }
 
-html,
-body {
-  height: 100%;
-}
-
 body {
   font-family:
     'Inter',
@@ -89,6 +91,7 @@ body {
     sans-serif;
   background: #12121a;
   color: #e0e0e0;
+  padding-top: 64px; /* Space for fixed navbar */
 }
 
 a {

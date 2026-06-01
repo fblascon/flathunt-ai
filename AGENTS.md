@@ -103,4 +103,16 @@ CREATE OR REPLACE FUNCTION search_listings (
 RETURNS TABLE (...con floor, description, images...)
 ```
 
+## Problemas comunes (actualizados Jun 2026)
+
+- **`ion-icon` roto (Ionicons 8.x)** → Reemplazar con `<mat-icon fontIcon="name">` de Angular Material. Ver lista completa de componentes afectados en commit `bf8e340`
+- **Sub-barrios sin resultados (Sanchinarro, Valdebebas, etc.)** → Añadir al JSON de `madrid-districts.json` en su distrito padre. El frontend auto-expande sub-barrio a distrito padre y post-filtra por keyword en título/dirección
+- **Scroll en listings** → No usar `height: 100%` en `html/body`. Mantener `body { padding-top: 64px }` para navbar fijo
+- **`ng serve` no recarga cambios** → `rm -rf .angular` y reiniciar
+
+## Decisiones arquitectónicas importantes (actualizado)
+
+7. **Iconos: Material Icons en vez de Ionicons** — Ionicons 8.x falla con `[name]` bindings dinámicos. Todos los iconos usan `<mat-icon fontIcon="name">` o interpolación `{{ cond ? 'favorite' : 'favorite_border' }}`
+8. **Sub-barrios informales** (Sanchinarro, Valdebebas) se mapean a distrito padre y se post-filtran por keyword. Barrios oficiales (Barrio del Pilar) no se post-filtran
+
 Ver `cmtext.md` para estado detallado actual del proyecto.
