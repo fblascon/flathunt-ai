@@ -46,14 +46,18 @@ export class HomeComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      const [listingsRes, favorites] = await Promise.all([
-        this.listingsService.getAll({ page: 1, pageSize: 6 }),
-        this.favoritesService.getAll(),
-      ]);
+      const listingsRes = await this.listingsService.getAll({ page: 1, pageSize: 6 });
       this.recentListings.set(listingsRes.data);
-      this.favs.set(favorites.slice(0, 6));
     } catch (e) {
-      console.error('Failed to load home data', e);
+      console.error('Failed to load recent listings', e);
+    }
+
+    try {
+      const favorites = await this.favoritesService.getAll();
+      this.favs.set(favorites.slice(0, 6));
+    } catch {
+      // Favorites require auth, ignore errors
+    } finally {
       this.loading.set(false);
     }
   }

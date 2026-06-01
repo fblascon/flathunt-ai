@@ -24,18 +24,20 @@ export class SupabaseService {
     return this.supabase;
   }
 
-  async signInWithGoogle(): Promise<void> {
-    await this.supabase.auth.signInWithOAuth({
+  async signInWithGoogle() {
+    const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin + '/' },
     });
+    if (error) throw error;
   }
 
-  async signInWithGithub(): Promise<void> {
-    await this.supabase.auth.signInWithOAuth({
+  async signInWithGithub() {
+    const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'github',
       options: { redirectTo: window.location.origin + '/' },
     });
+    if (error) throw error;
   }
 
   async signOut(): Promise<void> {
