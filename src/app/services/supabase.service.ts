@@ -27,14 +27,14 @@ export class SupabaseService {
   async signInWithGoogle(): Promise<void> {
     await this.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/home' },
+      options: { redirectTo: window.location.origin + '/' },
     });
   }
 
   async signInWithGithub(): Promise<void> {
     await this.supabase.auth.signInWithOAuth({
       provider: 'github',
-      options: { redirectTo: window.location.origin + '/home' },
+      options: { redirectTo: window.location.origin + '/' },
     });
   }
 
