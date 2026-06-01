@@ -316,7 +316,13 @@ export class ListingsComponent implements OnInit {
   }
 
   async toggleFavorite(listingId: string) {
-    await this.favoritesService.toggle(listingId);
+    console.log('[Listings] toggleFavorite:', listingId);
+    try {
+      await this.favoritesService.toggle(listingId);
+      console.log('[Listings] toggleFavorite: success');
+    } catch (e) {
+      console.error('[Listings] toggleFavorite error:', e);
+    }
     this.favoritedIds.update((ids) => {
       const next = new Set(ids);
       if (next.has(listingId)) next.delete(listingId);
