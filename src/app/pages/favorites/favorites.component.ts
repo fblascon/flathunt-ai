@@ -26,12 +26,6 @@ export class FavoritesComponent {
   constructor() {
     effect(() => {
       const user = this.supabase.user();
-      console.log(
-        '[FavoritesComponent] effect triggered, user:',
-        user?.email,
-        'userChecked:',
-        this.userChecked,
-      );
       if (user && !this.userChecked) {
         this.userChecked = true;
         this.loadFavorites();
@@ -40,20 +34,10 @@ export class FavoritesComponent {
   }
 
   private async loadFavorites() {
-    console.log('[FavoritesComponent] loadFavorites');
     this.loading.set(true);
     try {
       const favs = await this.favoritesService.getAll();
-      console.log('[FavoritesComponent] loaded:', favs.length);
-      favs.forEach((f, i) => {
-        console.log(
-          `[FavoritesComponent] fav[${i}] listing_id:`,
-          f.listing_id,
-          'listings:',
-          f.listings,
-        );
-      });
-      this.favorites.set(favs);
+      this.favorites.set([...favs]);
     } catch (e) {
       console.error('[FavoritesComponent] error:', e);
     } finally {

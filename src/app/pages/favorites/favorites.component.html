@@ -1,5 +1,5 @@
 <ion-content class="ion-padding">
-  <h1 class="page-title">Mis favoritos ({{ favorites().length }})</h1>
+  <h1 class="page-title">Mis favoritos</h1>
 
   @if (loading()) {
     <div class="loading-container">
@@ -12,14 +12,21 @@
       <ion-button expand="block" color="primary" routerLink="/listings">Explorar pisos</ion-button>
     </div>
   } @else {
-    <p>Rendering {{ favorites().length }} favorites...</p>
-    @for (fav of favorites(); track fav.listing_id) {
-      <div style="border: 1px solid red; padding: 8px; margin: 8px 0">
-        <p>listing_id: {{ fav.listing_id }}</p>
-        <p>listings: {{ fav.listings | json }}</p>
-        <p>type: {{ typeof fav.listings }}</p>
-        <p>keys: {{ fav.listings ? Object.keys(fav.listings).join(', ') : 'null' }}</p>
-      </div>
-    }
+    <div style="color: white; padding: 20px">
+      <p>Total: {{ favorites().length }} favoritos</p>
+      @for (fav of favorites(); track fav.listing_id) {
+        <div style="background: #333; padding: 16px; margin: 8px 0; border-radius: 8px">
+          <p>ID: {{ fav.listing_id }}</p>
+          <p>listings es null: {{ fav.listings === null }}</p>
+          <p>listings tipo: {{ typeof fav.listings }}</p>
+          @if (fav.listings) {
+            <p>Título: {{ fav.listings['title'] }}</p>
+            <p>Precio: {{ fav.listings['price'] }}</p>
+          } @else {
+            <p style="color: red">⚠️ listings es NULL</p>
+          }
+        </div>
+      }
+    </div>
   }
 </ion-content>
