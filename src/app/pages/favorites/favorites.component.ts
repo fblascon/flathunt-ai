@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,16 +22,26 @@ export class FavoritesComponent {
   loading = signal(true);
 
   constructor() {
-    effect(() => {
-      const user = this.supabase.user();
-      console.log('[FavoritesComponent] user signal changed:', user?.email);
-      if (user) {
-        this.loadFavorites();
-      }
-    });
+    console.log('[FavoritesComponent] constructor');
+    this.loadFavorites();
   }
 
   private async loadFavorites() {
+    console.log('[FavoritesComponent] loadFavorites called');
+    const userId = this.favoritesService.getUserId();
+    console.log('[FavoritesComponent] userId:', userId);
+
+    if (!userId) {
+      console.log('[FavoritesComponent] no userId, checking session...');
+      const { data } = await this.supabase.getClient().auth.getSession();
+      console.log('[FavoritesComponent] session:', data.session?.user?.email ?? 'none');
+      if (!data.session) {
+        console.log('[FavoritesComponent] no session, skipping load');
+        this.loading.set(false);
+        return;
+      }
+    }
+
     this.loading.set(true);
     try {
       const favs = await this.favoritesService.getAll();
