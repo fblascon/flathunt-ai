@@ -1,5 +1,7 @@
 <ion-content class="ion-padding">
-  <h1 class="page-title">Mis favoritos</h1>
+  <h1 class="page-title">Mis favoritos ({{ favorites().length }})</h1>
+
+  <p style="color: white">loading: {{ loading() }}</p>
 
   @if (loading()) {
     <div class="loading-container">

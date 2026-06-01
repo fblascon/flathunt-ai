@@ -27,9 +27,13 @@ export class FavoritesComponent {
   constructor() {
     effect(() => {
       const user = this.supabase.user();
-      if (user && !this.userChecked) {
+      console.log('[FavoritesComponent] effect, user:', user?.email, 'checked:', this.userChecked);
+      if (user) {
         this.userChecked = true;
         this.loadFavorites();
+      } else {
+        this.userChecked = false;
+        this.favorites.set([]);
       }
     });
   }
