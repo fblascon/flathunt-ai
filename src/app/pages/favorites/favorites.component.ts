@@ -45,6 +45,14 @@ export class FavoritesComponent {
     try {
       const favs = await this.favoritesService.getAll();
       console.log('[FavoritesComponent] loaded:', favs.length);
+      favs.forEach((f, i) => {
+        console.log(
+          `[FavoritesComponent] fav[${i}] listing_id:`,
+          f.listing_id,
+          'listings:',
+          f.listings,
+        );
+      });
       this.favorites.set(favs);
     } catch (e) {
       console.error('[FavoritesComponent] error:', e);

@@ -12,17 +12,14 @@
       <ion-button expand="block" color="primary" routerLink="/listings">Explorar pisos</ion-button>
     </div>
   } @else {
-    <div class="listing-grid">
-      @for (fav of favorites(); track fav.listing_id) {
-        <pre>{{ fav | json }}</pre>
-        <app-listing-card
-          [listing]="$any(fav.listings)"
-          [isFavorited]="true"
-          [showFavorite]="true"
-          (favorite)="removeFavorite($event)"
-          (selected)="goToDetail($event)"
-        />
-      }
-    </div>
+    <p>Rendering {{ favorites().length }} favorites...</p>
+    @for (fav of favorites(); track fav.listing_id) {
+      <div style="border: 1px solid red; padding: 8px; margin: 8px 0">
+        <p>listing_id: {{ fav.listing_id }}</p>
+        <p>listings: {{ fav.listings | json }}</p>
+        <p>type: {{ typeof fav.listings }}</p>
+        <p>keys: {{ fav.listings ? Object.keys(fav.listings).join(', ') : 'null' }}</p>
+      </div>
+    }
   }
 </ion-content>
