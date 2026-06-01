@@ -25,27 +25,38 @@ export class FavoritesService {
       .select('*')
       .order('created_at', { ascending: false });
 
+    console.log('[FavoritesService.getAll] favorites data:', data?.length, 'error:', error);
+
     if (error) throw error;
+    if (!data || data.length === 0) return [];
 
-    if (data.length > 0) {
-      const listingIds = data.map((f) => f.listing_id);
-      const { data: listings } = await this.supabase
-        .from('listings')
-        .select('*')
-        .in('id', listingIds);
+    const listingIds = data.map((f) => f.listing_id);
+    console.log('[FavoritesService.getAll] listingIds:', listingIds);
 
-      const listingsMap = new Map();
-      if (listings) {
-        listings.forEach((l) => listingsMap.set(l.id, l));
-      }
+    const { data: listings } = await this.supabase
+      .from('listings')
+      .select('*')
+      .in('id', listingIds);
 
-      return data.map((f) => ({
-        ...f,
-        listings: listingsMap.get(f.listing_id) ?? null,
-      }));
+    console.log('[FavoritesService.getAll] listings fetched:', listings?.length);
+
+    const listingsMap = new Map();
+    if (listings) {
+      listings.forEach((l) => listingsMap.set(l.id, l));
     }
 
-    return data as Favorite[];
+    const result = data.map((f) => ({
+      ...f,
+      listings: listingsMap.get(f.listing_id) ?? null,
+    }));
+
+    console.log(
+      '[FavoritesService.getAll] result:',
+      result.length,
+      'with listings:',
+      result.filter((r) => r.listings).length,
+    );
+    return result;
   }
 
   async isFavorited(listingId: string): Promise<boolean> {
