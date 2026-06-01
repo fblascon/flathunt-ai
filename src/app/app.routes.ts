@@ -9,12 +9,13 @@ import { FavoritesComponent } from './pages/favorites/favorites.component';
 import { HistoryComponent } from './pages/history/history.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent, canActivate: [authGuard] },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'home', component: HomeComponent, canActivate: [authGuard] },
   { path: 'preferences', component: PreferencesComponent, canActivate: [authGuard] },
   { path: 'listings', component: ListingsComponent, canActivate: [authGuard] },
   { path: 'listings/:id', component: ListingDetailComponent, canActivate: [authGuard] },
   { path: 'favorites', component: FavoritesComponent, canActivate: [authGuard] },
   { path: 'history', component: HistoryComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: '/login' },
 ];

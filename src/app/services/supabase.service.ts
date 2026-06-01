@@ -10,10 +10,12 @@ export class SupabaseService {
 
   constructor() {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+
     this.supabase.auth.getSession().then(({ data: { session } }) => {
       this.session.set(session);
       this.user.set(session?.user ?? null);
     });
+
     this.supabase.auth.onAuthStateChange((_event, session) => {
       this.session.set(session);
       this.user.set(session?.user ?? null);
@@ -27,7 +29,7 @@ export class SupabaseService {
   async signInWithGoogle() {
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/' },
+      options: { redirectTo: window.location.origin + '/listings' },
     });
     if (error) throw error;
   }
@@ -35,7 +37,7 @@ export class SupabaseService {
   async signInWithGithub() {
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'github',
-      options: { redirectTo: window.location.origin + '/' },
+      options: { redirectTo: window.location.origin + '/listings' },
     });
     if (error) throw error;
   }

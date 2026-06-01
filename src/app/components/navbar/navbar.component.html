@@ -23,11 +23,7 @@
         </ion-button>
 
         <ion-button (click)="signOut()" fill="clear">
-          @if (userAvatar) {
-            <img [src]="userAvatar" class="user-avatar" alt="avatar" />
-          } @else {
-            <span class="user-initials">{{ userName.charAt(0) }}</span>
-          }
+          <span class="user-initials">{{ userName.charAt(0).toUpperCase() }}</span>
         </ion-button>
       } @else {
         <ion-button (click)="signIn()" fill="solid" color="primary">
