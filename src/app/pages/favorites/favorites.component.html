@@ -12,18 +12,15 @@
       <ion-button expand="block" color="primary" routerLink="/listings">Explorar pisos</ion-button>
     </div>
   } @else {
-    <div style="color: white; padding: 20px">
-      <p>Total: {{ favorites().length }} favoritos</p>
+    <div class="listing-grid">
       @for (fav of favorites(); track fav.listing_id) {
-        <div style="background: #333; padding: 16px; margin: 8px 0; border-radius: 8px">
-          <p>ID: {{ fav.listing_id }}</p>
-          @if (fav.listings) {
-            <p>Título: {{ fav.listings['title'] }}</p>
-            <p>Precio: {{ fav.listings['price'] }}</p>
-          } @else {
-            <p style="color: red">⚠️ listings es NULL</p>
-          }
-        </div>
+        <app-listing-card
+          [listing]="$any(fav.listings)"
+          [isFavorited]="true"
+          [showFavorite]="true"
+          (favorite)="removeFavorite($event)"
+          (selected)="goToDetail($event)"
+        />
       }
     </div>
   }

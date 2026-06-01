@@ -22,10 +22,29 @@ export class FavoritesService {
   async getAll(): Promise<Favorite[]> {
     const { data, error } = await this.supabase
       .from('favorites')
-      .select('*, listings(*)')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+
+    if (data.length > 0) {
+      const listingIds = data.map((f) => f.listing_id);
+      const { data: listings } = await this.supabase
+        .from('listings')
+        .select('*')
+        .in('id', listingIds);
+
+      const listingsMap = new Map();
+      if (listings) {
+        listings.forEach((l) => listingsMap.set(l.id, l));
+      }
+
+      return data.map((f) => ({
+        ...f,
+        listings: listingsMap.get(f.listing_id) ?? null,
+      }));
+    }
+
     return data as Favorite[];
   }
 
