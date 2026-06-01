@@ -82,6 +82,14 @@ export class FavoritesService {
 
   async toggle(listingId: string): Promise<boolean> {
     console.log('[FavoritesService.toggle] listingId:', listingId);
+    const userId = this.supabaseService.getUserId();
+    console.log('[FavoritesService.toggle] userId from signal:', userId);
+
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      console.log('[FavoritesService.toggle] session check - user:', data.session?.user?.email);
+    }
+
     const already = await this.isFavorited(listingId);
     console.log('[FavoritesService.toggle] already:', already);
     if (already) {
