@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
+import { SupabaseService } from './services/supabase.service';
 
 @Component({
   selector: 'app-root',
@@ -9,5 +10,10 @@ import { NavbarComponent } from './components/navbar/navbar.component';
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('flathunt-ai');
+  private supabase = inject(SupabaseService);
+
+  constructor() {
+    console.log('[App] session signal:', this.supabase.session());
+    console.log('[App] user signal:', this.supabase.user());
+  }
 }

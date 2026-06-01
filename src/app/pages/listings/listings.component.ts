@@ -318,17 +318,17 @@ export class ListingsComponent implements OnInit {
   async toggleFavorite(listingId: string) {
     console.log('[Listings] toggleFavorite:', listingId);
     try {
-      await this.favoritesService.toggle(listingId);
-      console.log('[Listings] toggleFavorite: success');
+      const nowFav = await this.favoritesService.toggle(listingId);
+      console.log('[Listings] toggleFavorite: success, nowFav:', nowFav);
+      this.favoritedIds.update((ids) => {
+        const next = new Set(ids);
+        if (nowFav) next.add(listingId);
+        else next.delete(listingId);
+        return next;
+      });
     } catch (e) {
       console.error('[Listings] toggleFavorite error:', e);
     }
-    this.favoritedIds.update((ids) => {
-      const next = new Set(ids);
-      if (next.has(listingId)) next.delete(listingId);
-      else next.add(listingId);
-      return next;
-    });
   }
 
   goToDetail(id: string) {
