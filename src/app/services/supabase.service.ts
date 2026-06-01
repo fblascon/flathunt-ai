@@ -12,11 +12,16 @@ export class SupabaseService {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
 
     this.supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log(
+        '[SupabaseService] getSession:',
+        session ? 'user: ' + session.user?.email : 'null',
+      );
       this.session.set(session);
       this.user.set(session?.user ?? null);
     });
 
-    this.supabase.auth.onAuthStateChange((_event, session) => {
+    this.supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[SupabaseService] onAuthStateChange:', event, session?.user?.email);
       this.session.set(session);
       this.user.set(session?.user ?? null);
     });

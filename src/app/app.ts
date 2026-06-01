@@ -13,7 +13,13 @@ export class App {
   private supabase = inject(SupabaseService);
 
   constructor() {
+    console.log('[App] constructor');
     console.log('[App] session signal:', this.supabase.session());
     console.log('[App] user signal:', this.supabase.user());
+
+    setTimeout(() => {
+      console.log('[App] after 2s - session:', this.supabase.session());
+      console.log('[App] after 2s - user:', this.supabase.user());
+    }, 2000);
   }
 }
