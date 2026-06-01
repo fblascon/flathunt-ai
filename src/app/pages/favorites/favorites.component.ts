@@ -20,11 +20,14 @@ export class FavoritesComponent implements OnInit {
   loading = signal(true);
 
   async ngOnInit() {
+    console.log('[FavoritesComponent] ngOnInit');
+    console.log('[FavoritesComponent] userId:', this.favoritesService.getUserId());
     try {
       const favs = await this.favoritesService.getAll();
+      console.log('[FavoritesComponent] loaded:', favs.length);
       this.favorites.set(favs);
     } catch (e) {
-      console.error('Failed to load favorites:', e);
+      console.error('[FavoritesComponent] error:', e);
     } finally {
       this.loading.set(false);
     }

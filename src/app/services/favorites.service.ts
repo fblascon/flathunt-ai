@@ -15,12 +15,17 @@ export class FavoritesService {
   private supabase = inject(SupabaseService).getClient();
   private supabaseService = inject(SupabaseService);
 
+  getUserId(): string | null {
+    return this.supabaseService.getUserId();
+  }
+
   async getAll(): Promise<Favorite[]> {
     const { data, error } = await this.supabase
       .from('favorites')
       .select('*, listings(*)')
       .order('created_at', { ascending: false });
 
+    console.log('[FavoritesService.getAll] data:', data?.length, 'error:', error);
     if (error) throw error;
     return data as Favorite[];
   }
