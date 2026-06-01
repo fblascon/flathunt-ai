@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonContent,
@@ -18,6 +18,7 @@ import { FavoritesService } from '../../services/favorites.service';
 import { SearchHistory } from '../../models/search-history.model';
 import { Listing } from '../../models/listing.model';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-history',
@@ -39,9 +40,10 @@ import { ListingCardComponent } from '../../components/listing-card/listing-card
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss',
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent {
   private historyService = inject(HistoryService);
   private favoritesService = inject(FavoritesService);
+  private supabase = inject(SupabaseService);
   private router = inject(Router);
 
   viewedListings = signal<Listing[]>([]);
@@ -50,7 +52,22 @@ export class HistoryComponent implements OnInit {
   favoritedIds = signal<Set<string>>(new Set());
   activeTab = signal<'viewed' | 'searches'>('viewed');
 
-  async ngOnInit() {
+  constructor() {
+    this.loadHistory();
+  }
+
+  private async loadHistory() {
+    const userId = this.favoritesService.getUserId();
+
+    if (!userId) {
+      const { data } = await this.supabase.getClient().auth.getSession();
+      if (!data.session) {
+        this.loading.set(false);
+        return;
+      }
+    }
+
+    this.loading.set(true);
     try {
       const [viewed, searches, favs] = await Promise.all([
         this.historyService.getViewedListings(),
@@ -60,6 +77,8 @@ export class HistoryComponent implements OnInit {
       this.viewedListings.set(viewed);
       this.searchHistory.set(searches);
       this.favoritedIds.set(new Set(favs.map((f) => f.listing_id)));
+    } catch (e) {
+      console.error('[HistoryComponent] error:', e);
     } finally {
       this.loading.set(false);
     }

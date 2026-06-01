@@ -22,21 +22,15 @@ export class FavoritesComponent {
   loading = signal(true);
 
   constructor() {
-    console.log('[FavoritesComponent] constructor');
     this.loadFavorites();
   }
 
   private async loadFavorites() {
-    console.log('[FavoritesComponent] loadFavorites called');
     const userId = this.favoritesService.getUserId();
-    console.log('[FavoritesComponent] userId:', userId);
 
     if (!userId) {
-      console.log('[FavoritesComponent] no userId, checking session...');
       const { data } = await this.supabase.getClient().auth.getSession();
-      console.log('[FavoritesComponent] session:', data.session?.user?.email ?? 'none');
       if (!data.session) {
-        console.log('[FavoritesComponent] no session, skipping load');
         this.loading.set(false);
         return;
       }
@@ -45,7 +39,6 @@ export class FavoritesComponent {
     this.loading.set(true);
     try {
       const favs = await this.favoritesService.getAll();
-      console.log('[FavoritesComponent] loaded:', favs.length);
       this.favorites.set(favs);
     } catch (e) {
       console.error('[FavoritesComponent] error:', e);

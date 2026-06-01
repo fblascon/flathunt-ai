@@ -9,6 +9,12 @@ export class HistoryService {
   private supabaseService = inject(SupabaseService);
 
   async getAll(): Promise<SearchHistory[]> {
+    const userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) return [];
+    }
+
     const { data, error } = await this.supabase
       .from('search_history')
       .select('*')
@@ -51,8 +57,12 @@ export class HistoryService {
   }
 
   async getViewedListings(limit = 50): Promise<Listing[]> {
-    const userId = this.supabaseService.getUserId();
-    if (!userId) return [];
+    let userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) return [];
+      userId = data.session.user.id;
+    }
 
     const { data, error } = await this.supabase
       .from('viewed_listings')
