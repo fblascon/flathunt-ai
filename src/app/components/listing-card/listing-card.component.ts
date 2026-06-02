@@ -22,6 +22,14 @@ export class ListingCardComponent {
   selected = output<string>();
   imageError = signal(false);
 
+  onCardClick() {
+    const id = this.listing()?.id;
+    console.log('[ListingCard] onCardClick, id:', id);
+    if (id) {
+      this.selected.emit(id);
+    }
+  }
+
   onImageError() {
     this.imageError.set(true);
   }
