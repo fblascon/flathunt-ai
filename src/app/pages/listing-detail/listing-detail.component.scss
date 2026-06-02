@@ -137,6 +137,15 @@
   }
 }
 
+.carousel-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: #1a1a2e;
+  border-radius: 12px;
+}
+
 .detail-body {
   padding: 16px 0 0;
 }

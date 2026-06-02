@@ -12,7 +12,11 @@
     <div class="detail-layout">
       <div class="detail-main">
         <div class="image-carousel">
-          @if (allImages.length > 0 && !mainImageError()) {
+          @if (galleryLoading() && allImages.length === 0) {
+            <div class="carousel-loading">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (allImages.length > 0 && !mainImageError()) {
             <div class="carousel-main">
               <img
                 [src]="allImages[currentImageIndex()]"

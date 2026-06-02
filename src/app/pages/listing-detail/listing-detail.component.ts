@@ -33,6 +33,7 @@ export class ListingDetailComponent implements OnInit {
   aiAnalysis = signal<AiAnalysis | null>(null);
   isFavorited = signal(false);
   loading = signal(true);
+  galleryLoading = signal(false);
   analyzing = signal(false);
   currentImageIndex = signal(0);
   mainImageError = signal(false);
@@ -43,7 +44,8 @@ export class ListingDetailComponent implements OnInit {
       const listing = await this.listingsService.getById(id);
       this.listing.set(listing);
       if (listing && listing.external_url) {
-        this.scrapeGallery(id, listing.external_url);
+        this.galleryLoading.set(true);
+        this.scrapeGallery(id, listing.external_url).finally(() => this.galleryLoading.set(false));
       }
       const fav = await this.favoritesService.isFavorited(id);
       this.isFavorited.set(fav);
