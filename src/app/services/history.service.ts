@@ -33,8 +33,12 @@ export class HistoryService {
     resultsCount: number,
     source = 'manual',
   ): Promise<void> {
-    const userId = this.supabaseService.getUserId();
-    if (!userId) return;
+    let userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) return;
+      userId = data.session.user.id;
+    }
 
     const { error } = await this.supabase
       .from('search_history')
@@ -44,8 +48,12 @@ export class HistoryService {
   }
 
   async addView(listingId: string): Promise<void> {
-    const userId = this.supabaseService.getUserId();
-    if (!userId) return;
+    let userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) return;
+      userId = data.session.user.id;
+    }
 
     // Upsert: si ya existe ese listing para el usuario, actualiza viewed_at
     const { error } = await this.supabase
