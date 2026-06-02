@@ -60,6 +60,13 @@ export class ListingDetailComponent implements OnInit {
     });
   }
 
+  async reportInactive() {
+    const l = this.listing();
+    if (!l) return;
+    await this.listingsService.markInactive(l.id);
+    this.listing.update((x) => (x ? { ...x, is_active: false } : null));
+  }
+
   private async scrapeGallery(id: string, url: string) {
     try {
       const result = await firstValueFrom(

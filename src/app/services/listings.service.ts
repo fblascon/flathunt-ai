@@ -56,13 +56,7 @@ export class ListingsService {
     }
   }
 
-  async batchCheckActive(ids: string[]): Promise<{ inactiveIds: string[] }> {
-    try {
-      return await lastValueFrom(
-        this.http.post<{ inactiveIds: string[] }>('/api/listings/batch-check-active', { ids }),
-      );
-    } catch {
-      return { inactiveIds: [] };
-    }
+  async markInactive(id: string): Promise<void> {
+    await lastValueFrom(this.http.post(`/api/listings/${id}/mark-inactive`, {}));
   }
 }

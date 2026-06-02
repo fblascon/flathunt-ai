@@ -252,6 +252,16 @@
     }
   }
 
+  &.btn-danger-outline {
+    color: #ff9800;
+    border-color: #ff9800;
+    font-size: 0.8rem;
+
+    &:hover {
+      background: rgba(255, 152, 0, 0.1);
+    }
+  }
+
   &.btn-block {
     width: 100%;
     justify-content: center;

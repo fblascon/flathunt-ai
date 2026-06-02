@@ -499,93 +499,60 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
     const reasons = results.filter(Boolean);
 
     if (reasons.length > 0) {
-      await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_SERVICE_KEY,
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        },
-        body: JSON.stringify({ is_active: false }),
-      });
-      console.log(`[check-active] listing ${id} inactive, reasons:`, reasons);
-      return res.json({ active: false, markedInactive: true, reasons });
-    }
-
-    res.json({ active: true });
+// Mark a listing as inactive (manual report from frontend)
+app.post('/api/listings/:id/mark-inactive', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      },
+      body: JSON.stringify({ is_active: false }),
+    });
+    console.log(`[mark-inactive] listing ${id} marked as inactive`);
+    res.json({ success: true });
   } catch (err) {
-    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
-      return res.json({ active: true, reason: 'timeout' });
-    }
-    console.error('[check-active] error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Batch check multiple listings against Idealista
-app.post('/api/listings/batch-check-active', async (req, res) => {
+// Check if a single listing is still active on Idealista (image CDN only, no rate limit)
+app.post('/api/listings/:id/check-active', async (req, res) => {
   try {
-    const { ids } = req.body;
-    if (!ids?.length) return res.json({ inactiveIds: [] });
-
-    // Fetch all listings from Supabase in one call
-    const listResp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${ids.join(',')})&select=id,external_url,image_url,is_active`, {
+    const { id } = req.params;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=image_url,is_active`, {
       headers: {
         apikey: SUPABASE_SERVICE_KEY,
         Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
       },
     });
-    if (!listResp.ok) return res.json({ inactiveIds: [] });
-    const listings = await listResp.json();
+    if (!resp.ok) return res.status(404).json({ error: 'Listing not found' });
+    const [listing] = await resp.json();
+    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    if (!listing.is_active) return res.json({ active: false, alreadyInactive: true });
 
-    const inactiveIds = await Promise.all(
-      listings
-        .filter((l) => l.is_active && l.external_url)
-        .map(async (listing) => {
-          try {
-            // Check image — if 404, definitely gone
-            if (listing.image_url) {
-              const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
-              if (imgResp.status === 404 || imgResp.status === 410) return listing.id;
-            }
-
-            // Check listing page
-            const pageResp = await fetch(listing.external_url, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
-            const status = pageResp.status;
-            const location = pageResp.headers.get('location') || '';
-            if (status === 404 || status === 410 || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))) {
-              return listing.id;
-            }
-            if (status === 200) {
-              const text = await pageResp.text();
-              const lower = text.toLowerCase().slice(0, 2000);
-              if (lower.includes('no encontrado') || lower.includes('no existe') || lower.includes('página no disponible')) {
-                return listing.id;
-              }
-            }
-          } catch { /* skip */ }
-          return null;
-        }),
-    );
-
-    const found = inactiveIds.filter(Boolean);
-    if (found.length) {
-      await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${found.join(',')})`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_SERVICE_KEY,
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        },
-        body: JSON.stringify({ is_active: false }),
-      });
-      console.log(`[batch-check-active] marked ${found.length} listings as inactive`);
+    if (listing.image_url) {
+      const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+      if (imgResp.status === 404 || imgResp.status === 410) {
+        await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_SERVICE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          },
+          body: JSON.stringify({ is_active: false }),
+        });
+        console.log(`[check-active] listing ${id} inactive (image 404)`);
+        return res.json({ active: false, markedInactive: true });
+      }
     }
-
-    res.json({ inactiveIds: found });
+    res.json({ active: true });
   } catch (err) {
-    console.error('[batch-check-active] error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.json({ active: true, reason: 'error' });
   }
 });
 

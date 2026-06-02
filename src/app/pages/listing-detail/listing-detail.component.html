@@ -106,6 +106,12 @@
               <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
               {{ isFavorited() ? 'Quitar favorito' : 'Guardar favorito' }}
             </button>
+            @if (!mainImageError() && listing()?.is_active !== false) {
+              <button class="btn btn-danger-outline" (click)="reportInactive()">
+                <mat-icon fontIcon="flag"></mat-icon>
+                Dar de baja
+              </button>
+            }
           </div>
         </div>
       </div>
