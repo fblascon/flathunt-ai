@@ -406,6 +406,9 @@ app.post('/api/ai/semantic-search', async (req, res) => {
       }
       let results = await resp.json();
 
+      // Filter out listings without images
+      results = results.filter((r: { image_url?: string }) => r.image_url);
+
       // Keyword post-filter
       if (keyword) {
         const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
