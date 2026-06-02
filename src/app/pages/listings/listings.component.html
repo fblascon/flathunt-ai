@@ -162,6 +162,7 @@
           [siblingCount]="group.siblingCount"
           (favorite)="toggleFavorite($event)"
           (selected)="goToDetail($event)"
+          (imageFailed)="onImageFailed($event)"
         />
       }
     </div>

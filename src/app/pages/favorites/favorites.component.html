@@ -20,6 +20,7 @@
           [showFavorite]="true"
           (favorite)="removeFavorite($event)"
           (selected)="goToDetail($event)"
+          (imageFailed)="onImageFailed($event)"
         />
       }
     </div>

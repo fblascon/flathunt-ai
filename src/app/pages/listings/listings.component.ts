@@ -345,6 +345,16 @@ export class ListingsComponent implements OnInit {
     }
   }
 
+  async onImageFailed(listingId: string) {
+    console.log('[Listings] imageFailed for:', listingId);
+    this.listingsService.checkActive(listingId).then((result) => {
+      if (!result.active) {
+        this.listings.update((list) => list.filter((l) => l.id !== listingId));
+        this.recalcGroups();
+      }
+    });
+  }
+
   goToDetail(id: string) {
     this.router.navigate(['/listings', id]);
   }

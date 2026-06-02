@@ -6,6 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DatePipe } from '@angular/common';
 import { HistoryService } from '../../services/history.service';
 import { FavoritesService } from '../../services/favorites.service';
+import { ListingsService } from '../../services/listings.service';
 import { SearchHistory } from '../../models/search-history.model';
 import { Listing } from '../../models/listing.model';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
@@ -27,6 +28,7 @@ import { SupabaseService } from '../../services/supabase.service';
 export class HistoryComponent {
   private historyService = inject(HistoryService);
   private favoritesService = inject(FavoritesService);
+  private listingsService = inject(ListingsService);
   private supabase = inject(SupabaseService);
   private router = inject(Router);
 
@@ -80,6 +82,14 @@ export class HistoryComponent {
 
   goToDetail(id: string) {
     this.router.navigate(['/listings', id]);
+  }
+
+  async onImageFailed(listingId: string) {
+    this.listingsService.checkActive(listingId).then((result) => {
+      if (!result.active) {
+        this.viewedListings.update((list) => list.filter((l) => l.id !== listingId));
+      }
+    });
   }
 
   async clearHistory() {

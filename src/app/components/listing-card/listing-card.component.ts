@@ -20,6 +20,7 @@ export class ListingCardComponent {
   favorite = output<string>();
   compare = output<string>();
   selected = output<string>();
+  imageFailed = output<string>();
   imageError = signal(false);
 
   onCardClick() {
@@ -31,6 +32,9 @@ export class ListingCardComponent {
   }
 
   onImageError() {
-    this.imageError.set(true);
+    if (!this.imageError()) {
+      this.imageError.set(true);
+      this.imageFailed.emit(this.listing().id);
+    }
   }
 }
