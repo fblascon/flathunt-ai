@@ -37,7 +37,7 @@ export class ListingDetailComponent implements OnInit {
   analyzing = signal(false);
   currentImageIndex = signal(0);
   mainImageError = signal(false);
-  mainImageLoading = signal(true);
+  mainImageLoaded = signal(false);
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -130,30 +130,30 @@ export class ListingDetailComponent implements OnInit {
       this.currentImageIndex.set(nextIndex);
     } else {
       this.mainImageError.set(true);
-      this.mainImageLoading.set(false);
+      this.mainImageLoaded.set(true);
     }
   }
 
   onMainImageLoad() {
-    this.mainImageLoading.set(false);
+    this.mainImageLoaded.set(true);
   }
 
   nextImage() {
     const images = this.allImages;
     if (images.length <= 1) return;
-    this.mainImageLoading.set(true);
+    this.mainImageLoaded.set(false);
     this.currentImageIndex.update((i) => (i + 1) % images.length);
   }
 
   prevImage() {
     const images = this.allImages;
     if (images.length <= 1) return;
-    this.mainImageLoading.set(true);
+    this.mainImageLoaded.set(false);
     this.currentImageIndex.update((i) => (i - 1 + images.length) % images.length);
   }
 
   selectImage(index: number) {
-    this.mainImageLoading.set(true);
+    this.mainImageLoaded.set(false);
     this.currentImageIndex.set(index);
   }
 

@@ -18,19 +18,18 @@
             </div>
           } @else if (allImages.length > 0 && !mainImageError()) {
             <div class="carousel-main">
-              @if (mainImageLoading()) {
-                <div class="carousel-main-spinner">
-                  <mat-spinner diameter="36"></mat-spinner>
-                </div>
-              }
               <img
                 [src]="allImages[currentImageIndex()]"
                 [alt]="l.title"
                 class="detail-image"
+                [class.loaded]="mainImageLoaded()"
                 referrerpolicy="no-referrer"
                 (load)="onMainImageLoad()"
                 (error)="onMainImageError()"
               />
+              <div class="carousel-main-spinner" [class.hidden]="mainImageLoaded()">
+                <mat-spinner diameter="36"></mat-spinner>
+              </div>
               @if (allImages.length > 1) {
                 <button class="carousel-nav prev" (click)="prevImage()">
                   <mat-icon fontIcon="chevron_left"></mat-icon>
