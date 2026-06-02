@@ -7,7 +7,9 @@ ion-header {
 }
 
 ion-toolbar {
-  --background: var(--ion-color-primary, #d4652a);
+  background: #d4652a !important;
+  --background: #d4652a;
+  color: #fff;
   --color: #fff;
   --padding-start: 16px;
   --padding-end: 16px;
@@ -18,7 +20,7 @@ ion-toolbar {
   height: 28px;
   width: auto;
   margin-right: 6px;
-  filter: brightness(0) invert(1);
+  filter: brightness(0) saturate(100%) invert(100%);
 }
 
 ion-button {
