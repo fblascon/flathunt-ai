@@ -1,19 +1,9 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import {
-  IonContent,
-  IonButton,
-  IonChip,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonSpinner,
-  IonBackButton,
-  IonProgressBar,
-} from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DecimalPipe, Location } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ListingsService } from '../../services/listings.service';
@@ -25,20 +15,7 @@ import { Listing } from '../../models/listing.model';
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [
-    IonContent,
-    IonButton,
-    IonChip,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonSpinner,
-    IonBackButton,
-    IonProgressBar,
-    MatIconModule,
-    DecimalPipe,
-  ],
+  imports: [MatIconModule, MatButtonModule, MatProgressSpinnerModule, DecimalPipe],
   templateUrl: './listing-detail.component.html',
   styleUrl: './listing-detail.component.scss',
 })

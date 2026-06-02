@@ -1,13 +1,13 @@
-<ion-content class="ion-padding">
+<div class="page-container detail-page">
   @if (loading()) {
     <div class="loading-container">
-      <ion-spinner name="crescent"></ion-spinner>
+      <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else if (listing(); as l) {
-    <ion-button fill="clear" (click)="goBack()" class="back-btn">
-      <mat-icon slot="start" fontIcon="arrow_back"></mat-icon>
+    <button mat-stroked-button (click)="goBack()" class="back-btn">
+      <mat-icon fontIcon="arrow_back"></mat-icon>
       Volver a resultados
-    </ion-button>
+    </button>
 
     <div class="detail-layout">
       <div class="detail-main">
@@ -21,10 +21,10 @@
                 (error)="onMainImageError()"
               />
               @if (allImages.length > 1) {
-                <button class="carousel-nav prev" fill="clear" (click)="prevImage()">
+                <button class="carousel-nav prev" (click)="prevImage()">
                   <mat-icon fontIcon="chevron_left"></mat-icon>
                 </button>
-                <button class="carousel-nav next" fill="clear" (click)="nextImage()">
+                <button class="carousel-nav next" (click)="nextImage()">
                   <mat-icon fontIcon="chevron_right"></mat-icon>
                 </button>
                 <div class="carousel-counter">
@@ -82,7 +82,7 @@
               <h3>Características</h3>
               <div class="features-grid">
                 @for (f of l.features; track f) {
-                  <ion-chip>{{ f }}</ion-chip>
+                  <span class="feature-chip">{{ f }}</span>
                 }
               </div>
             </div>
@@ -96,28 +96,26 @@
           }
 
           <div class="detail-actions">
-            <a [href]="l.external_url" target="_blank" rel="noopener" ion-button color="primary">
-              <mat-icon slot="start" fontIcon="open_in_new"></mat-icon>
+            <a [href]="l.external_url" target="_blank" rel="noopener" class="btn btn-primary">
+              <mat-icon fontIcon="open_in_new"></mat-icon>
               Ver en Idealista
             </a>
-            <ion-button [color]="isFavorited() ? 'danger' : 'medium'" (click)="toggleFavorite()">
-              <mat-icon slot="start">{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
+            <button class="btn" [class.btn-danger]="isFavorited()" (click)="toggleFavorite()">
+              <mat-icon>{{ isFavorited() ? 'favorite' : 'favorite_border' }}</mat-icon>
               {{ isFavorited() ? 'Quitar favorito' : 'Guardar favorito' }}
-            </ion-button>
+            </button>
           </div>
         </div>
       </div>
 
       <div class="detail-sidebar">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              <mat-icon fontIcon="smart_toy"></mat-icon> Análisis IA
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
+        <div class="sidebar-card">
+          <div class="sidebar-card-header">
+            <mat-icon fontIcon="smart_toy"></mat-icon> Análisis IA
+          </div>
+          <div class="sidebar-card-body">
             @if (analyzing()) {
-              <ion-progress-bar type="indeterminate"></ion-progress-bar>
+              <div class="progress-bar"></div>
               <p class="analyzing-text">Analizando piso...</p>
             } @else if (aiAnalysis(); as analysis) {
               <div
@@ -159,14 +157,14 @@
               <p class="analyze-prompt">
                 Pide a la IA que analice este piso según tus preferencias
               </p>
-              <ion-button expand="block" color="primary" (click)="analyzeWithAi()">
-                <mat-icon slot="start" fontIcon="smart_toy"></mat-icon>
+              <button class="btn btn-primary btn-block" (click)="analyzeWithAi()">
+                <mat-icon fontIcon="smart_toy"></mat-icon>
                 Analizar con IA
-              </ion-button>
+              </button>
             }
-          </ion-card-content>
-        </ion-card>
+          </div>
+        </div>
       </div>
     </div>
   }
-</ion-content>
+</div>
