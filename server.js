@@ -499,6 +499,59 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
   }
 });
 
+// Batch check multiple listings against Idealista
+app.post('/api/listings/batch-check-active', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids?.length) return res.json([]);
+
+    const inactiveIds = [];
+    for (const id of ids) {
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url`, {
+          headers: {
+            apikey: SUPABASE_SERVICE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          },
+        });
+        if (!resp.ok) continue;
+        const [listing] = await resp.json();
+        if (!listing?.external_url) continue;
+
+        const checkResp = await fetch(listing.external_url, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(5000) });
+        const status = checkResp.status;
+        const location = checkResp.headers.get('location') || '';
+
+        const isGone = status === 404
+          || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))
+          || status === 410;
+
+        if (isGone) inactiveIds.push(id);
+      } catch {
+        // timeout or network error — skip
+      }
+    }
+
+    if (inactiveIds.length) {
+      await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${inactiveIds.join(',')})`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        },
+        body: JSON.stringify({ is_active: false }),
+      });
+      console.log(`[batch-check-active] marked ${inactiveIds.length} listings as inactive`);
+    }
+
+    res.json({ inactiveIds });
+  } catch (err) {
+    console.error('[batch-check-active] error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = app;
 
 if (!process.env.VERCEL) {

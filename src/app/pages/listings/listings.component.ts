@@ -255,6 +255,19 @@ export class ListingsComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
+    // Background check: verify active listings against Idealista
+    const ids = this.listings()
+      .map((l) => l.id)
+      .slice(0, 50);
+    if (ids.length > 0 && this.currentPage() === 1) {
+      this.listingsService.batchCheckActive(ids).then((result) => {
+        if (result.inactiveIds?.length) {
+          console.log(`[Listings] removing ${result.inactiveIds.length} inactive listings`);
+          this.listings.update((list) => list.filter((l) => !result.inactiveIds.includes(l.id)));
+          this.recalcGroups();
+        }
+      });
+    }
   }
 
   async goToPage(page: number) {

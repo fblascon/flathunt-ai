@@ -55,4 +55,14 @@ export class ListingsService {
       return { active: true };
     }
   }
+
+  async batchCheckActive(ids: string[]): Promise<{ inactiveIds: string[] }> {
+    try {
+      return await lastValueFrom(
+        this.http.post<{ inactiveIds: string[] }>('/api/listings/batch-check-active', { ids }),
+      );
+    } catch {
+      return { inactiveIds: [] };
+    }
+  }
 }
