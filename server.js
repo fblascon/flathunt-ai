@@ -263,7 +263,7 @@ app.get('/api/listings', async (req, res) => {
     });
     if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
     const allListings = await resp.json();
-    const listings = allListings.filter((l: { image_url?: string }) => l.image_url);
+    const listings = allListings.filter((l) => l.image_url);
     const totalCount = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0', 10);
     res.json({ data: listings, count: totalCount });
   } catch (err) {
@@ -407,7 +407,7 @@ app.post('/api/ai/semantic-search', async (req, res) => {
       let results = await resp.json();
 
       // Filter out listings without images
-      results = results.filter((r: { image_url?: string }) => r.image_url);
+      results = results.filter((r) => r.image_url);
 
       // Keyword post-filter
       if (keyword) {
