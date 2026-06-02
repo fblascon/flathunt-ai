@@ -221,7 +221,7 @@ export class ListingsComponent implements OnInit {
       .sort((a, b) => a.representative.price - b.representative.price);
 
     const multiUnit = result.filter((g) => g.hasSiblings);
-    console.log(`[FlatHunt] ${raw.length} listings. Multi-unit buildings: ${multiUnit.length}`);
+    console.log(`[MadRent] ${raw.length} listings. Multi-unit buildings: ${multiUnit.length}`);
     this.displayedGroups.set(result);
   }
 

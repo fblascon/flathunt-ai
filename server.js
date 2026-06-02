@@ -25,7 +25,7 @@ async function callOpenRouter(messages) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${OPENROUTER_KEY}`,
       'HTTP-Referer': 'http://localhost:3001',
-      'X-Title': 'FlatHunt AI',
+      'X-Title': 'MadRent',
     },
     body: JSON.stringify({
       model: MODEL,
@@ -371,7 +371,7 @@ app.post('/api/ai/semantic-search', async (req, res) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${OPENROUTER_KEY}`,
         'HTTP-Referer': 'http://localhost:3001',
-        'X-Title': 'FlatHunt AI',
+        'X-Title': 'MadRent',
       },
       body: JSON.stringify({ model: EMBED_MODEL, input: [query] }),
     });
@@ -495,7 +495,7 @@ module.exports = app;
 
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`FlatHunt AI backend running on http://localhost:${PORT}`);
+    console.log(`MadRent backend running on http://localhost:${PORT}`);
     console.log(`OpenRouter key configured: ${OPENROUTER_KEY ? 'Yes' : 'NO - MISSING'}`);
   });
 }
