@@ -1,13 +1,4 @@
 import { Component, input, output, signal } from '@angular/core';
-import {
-  IonCard,
-  IonCardContent,
-  IonChip,
-  IonButton,
-  IonButtons,
-  IonFooter,
-  IonToolbar,
-} from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
 import { DecimalPipe } from '@angular/common';
 import { Listing } from '../../models/listing.model';
@@ -15,17 +6,7 @@ import { Listing } from '../../models/listing.model';
 @Component({
   selector: 'app-listing-card',
   standalone: true,
-  imports: [
-    IonCard,
-    IonCardContent,
-    IonChip,
-    IonButton,
-    IonButtons,
-    IonFooter,
-    IonToolbar,
-    MatIconModule,
-    DecimalPipe,
-  ],
+  imports: [MatIconModule, DecimalPipe],
   templateUrl: './listing-card.component.html',
   styleUrl: './listing-card.component.scss',
 })

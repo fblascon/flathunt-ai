@@ -2,28 +2,27 @@
   display: block;
 }
 
-ion-card {
+.card {
   cursor: pointer;
+  background: #1e1e2e;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-  height: 100%;
-  --card-background: #1e1e2e;
-  border-radius: 12px;
-  overflow: hidden;
+  outline: none;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   }
-}
 
-.card-clickable {
-  cursor: pointer;
-}
-
-ion-card-content {
-  padding: 12px 16px;
+  &:focus-visible {
+    box-shadow: 0 0 0 2px #6c63ff;
+  }
 }
 
 .img-container {
@@ -83,10 +82,15 @@ ion-card-content {
   white-space: nowrap;
 }
 
+.card-content {
+  padding: 12px 16px;
+  flex: 1;
+}
+
 .listing-price {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--ion-color-primary, #6c63ff);
+  color: #6c63ff;
   margin-bottom: 4px;
 }
 
@@ -95,7 +99,7 @@ ion-card-content {
   font-weight: 500;
   margin: 0 0 4px;
   line-height: 1.3;
-  color: var(--ion-color-dark, #fff);
+  color: #fff;
 }
 
 .listing-address {
@@ -138,13 +142,16 @@ ion-card-content {
   color: #bbb;
 }
 
-ion-chip {
-  --background: rgba(108, 99, 255, 0.2);
-  --color: #fff;
+.chip {
+  background: rgba(108, 99, 255, 0.2);
+  color: #fff;
   font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
   height: 24px;
-  --padding-start: 8px;
-  --padding-end: 8px;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.6;
 }
 
 .features {
@@ -165,10 +172,6 @@ ion-chip {
   font-size: 0.8rem;
   width: fit-content;
 
-  ion-icon {
-    font-size: 14px;
-  }
-
   &.high {
     background: rgba(76, 175, 80, 0.15);
     color: #66bb6a;
@@ -180,31 +183,44 @@ ion-chip {
   }
 }
 
-ion-footer {
-  --background: transparent;
-  --ion-toolbar-background: transparent;
+.card-footer {
+  border-top: 1px solid #2a2a3a;
+  padding: 4px 8px;
 }
 
-ion-toolbar {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --min-height: 44px;
-}
-
-ion-buttons {
+.footer-buttons {
+  display: flex;
   justify-content: flex-end;
+  gap: 4px;
 }
 
-ion-button {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --color: #999;
+.icon-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.2s,
+    background 0.2s;
+  text-decoration: none;
 
   &:hover {
-    --color: #fff;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
   }
 
-  &[color='danger'] {
-    --color: #ef5350;
+  &.favorited {
+    color: #ef5350;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
