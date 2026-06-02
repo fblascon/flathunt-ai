@@ -453,7 +453,7 @@ app.post('/api/ai/semantic-search', async (req, res) => {
 app.post('/api/listings/:id/check-active', async (req, res) => {
   try {
     const { id } = req.params;
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url,is_active`, {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url,image_url,is_active`, {
       headers: {
         apikey: SUPABASE_SERVICE_KEY,
         Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
@@ -464,18 +464,39 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
     if (!listing) return res.status(404).json({ error: 'Listing not found' });
     if (!listing.is_active) return res.json({ active: false, alreadyInactive: true });
 
-    const externalUrl = listing.external_url;
-    if (!externalUrl) return res.json({ active: false, reason: 'no url' });
+    const reasons = [];
 
-    const checkResp = await fetch(externalUrl, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(8000) });
-    const status = checkResp.status;
-    const location = checkResp.headers.get('location') || '';
+    // Check 1: image URL — if 404, definitely gone
+    if (listing.image_url) {
+      try {
+        const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+        if (imgResp.status === 404 || imgResp.status === 410) {
+          reasons.push('image_404');
+        }
+      } catch { /* skip image check on error */ }
+    }
 
-    const isGone = status === 404
-      || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))
-      || status === 410;
+    // Check 2: listing page URL — check response content for 'not found' indicators
+    if (listing.external_url) {
+      try {
+        const pageResp = await fetch(listing.external_url, { signal: AbortSignal.timeout(8000) });
+        const status = pageResp.status;
+        const location = pageResp.headers.get('location') || '';
 
-    if (isGone) {
+        const isRedirected = status >= 301 && status <= 303 && !location.includes('/inmueble/');
+        if (status === 404 || status === 410 || isRedirected) {
+          reasons.push('page_' + status);
+        } else if (status === 200) {
+          const text = await pageResp.text();
+          const lower = text.toLowerCase().slice(0, 2000);
+          if (lower.includes('no encontrado') || lower.includes('no existe') || lower.includes('página no disponible')) {
+            reasons.push('page_content_not_found');
+          }
+        }
+      } catch { /* skip page check on error */ }
+    }
+
+    if (reasons.length > 0) {
       await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
         method: 'PATCH',
         headers: {
@@ -485,8 +506,8 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
         },
         body: JSON.stringify({ is_active: false }),
       });
-      console.log(`[check-active] listing ${id} marked as inactive (status ${status})`);
-      return res.json({ active: false, markedInactive: true });
+      console.log(`[check-active] listing ${id} inactive, reasons:`, reasons);
+      return res.json({ active: false, markedInactive: true, reasons });
     }
 
     res.json({ active: true });
@@ -503,12 +524,12 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
 app.post('/api/listings/batch-check-active', async (req, res) => {
   try {
     const { ids } = req.body;
-    if (!ids?.length) return res.json([]);
+    if (!ids?.length) return res.json({ inactiveIds: [] });
 
     const inactiveIds = [];
     for (const id of ids) {
       try {
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url`, {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url,image_url,is_active`, {
           headers: {
             apikey: SUPABASE_SERVICE_KEY,
             Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
@@ -516,32 +537,47 @@ app.post('/api/listings/batch-check-active', async (req, res) => {
         });
         if (!resp.ok) continue;
         const [listing] = await resp.json();
-        if (!listing?.external_url) continue;
+        if (!listing?.external_url || !listing.is_active) continue;
 
-        const checkResp = await fetch(listing.external_url, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(5000) });
-        const status = checkResp.status;
-        const location = checkResp.headers.get('location') || '';
+        // Check image — if 404, definitely gone
+        if (listing.image_url) {
+          try {
+            const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+            if (imgResp.status === 404 || imgResp.status === 410) {
+              inactiveIds.push(id);
+              continue;
+            }
+          } catch { /* skip */ }
+        }
 
-        const isGone = status === 404
-          || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))
-          || status === 410;
-
-        if (isGone) inactiveIds.push(id);
+        // Check listing page — redirect = gone, 200 with 'not found' text = maybe gone
+        try {
+          const pageResp = await fetch(listing.external_url, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
+          const status = pageResp.status;
+          const location = pageResp.headers.get('location') || '';
+          if (status === 404 || status === 410 || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))) {
+            inactiveIds.push(id);
+          }
+        } catch { /* skip */ }
       } catch {
-        // timeout or network error — skip
+        // skip individual errors
       }
     }
 
     if (inactiveIds.length) {
-      await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${inactiveIds.join(',')})`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_SERVICE_KEY,
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        },
-        body: JSON.stringify({ is_active: false }),
-      });
+      const chunkSize = 50;
+      for (let i = 0; i < inactiveIds.length; i += chunkSize) {
+        const chunk = inactiveIds.slice(i, i + chunkSize);
+        await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${chunk.join(',')})`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_SERVICE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          },
+          body: JSON.stringify({ is_active: false }),
+        });
+      }
       console.log(`[batch-check-active] marked ${inactiveIds.length} listings as inactive`);
     }
 

@@ -259,7 +259,7 @@ export class ListingsComponent implements OnInit {
     const ids = this.listings()
       .map((l) => l.id)
       .slice(0, 50);
-    if (ids.length > 0 && this.currentPage() === 1) {
+    if (ids.length > 0) {
       this.listingsService.batchCheckActive(ids).then((result) => {
         if (result.inactiveIds?.length) {
           console.log(`[Listings] removing ${result.inactiveIds.length} inactive listings`);
