@@ -262,9 +262,10 @@ app.get('/api/listings', async (req, res) => {
       },
     });
     if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
-    const listings = await resp.json();
-    const count = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0', 10);
-    res.json({ data: listings, count });
+    const allListings = await resp.json();
+    const listings = allListings.filter((l: { image_url?: string }) => l.image_url);
+    const totalCount = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0', 10);
+    res.json({ data: listings, count: totalCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
