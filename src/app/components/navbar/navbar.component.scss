@@ -14,6 +14,13 @@ ion-toolbar {
   --min-height: 64px;
 }
 
+.nav-logo {
+  height: 28px;
+  width: auto;
+  margin-right: 6px;
+  filter: brightness(0) invert(1);
+}
+
 ion-button {
   --color: rgba(255, 255, 255, 0.9);
   --color-activated: #fff;
