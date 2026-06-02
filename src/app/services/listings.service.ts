@@ -45,4 +45,14 @@ export class ListingsService {
   async getNeighborhoods(): Promise<string[]> {
     return lastValueFrom(this.http.get<string[]>('/api/listings/neighborhoods'));
   }
+
+  async checkActive(id: string): Promise<{ active: boolean }> {
+    try {
+      return await lastValueFrom(
+        this.http.post<{ active: boolean }>(`/api/listings/${id}/check-active`, {}),
+      );
+    } catch {
+      return { active: true };
+    }
+  }
 }

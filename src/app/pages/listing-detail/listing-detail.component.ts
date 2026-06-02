@@ -51,6 +51,13 @@ export class ListingDetailComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
+    // Background check: if listing is gone from Idealista, mark inactive
+    this.listingsService.checkActive(id).then((result) => {
+      if (!result.active) {
+        console.log('[ListingDetail] listing', id, 'marked as inactive on Idealista');
+        this.listing.update((l) => (l ? { ...l, is_active: false } : null));
+      }
+    });
   }
 
   private async scrapeGallery(id: string, url: string) {

@@ -449,6 +449,56 @@ app.post('/api/ai/semantic-search', async (req, res) => {
   }
 });
 
+// Check if a listing is still active on Idealista and mark as inactive if gone
+app.post('/api/listings/:id/check-active', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url,is_active`, {
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      },
+    });
+    if (!resp.ok) return res.status(404).json({ error: 'Listing not found' });
+    const [listing] = await resp.json();
+    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    if (!listing.is_active) return res.json({ active: false, alreadyInactive: true });
+
+    const externalUrl = listing.external_url;
+    if (!externalUrl) return res.json({ active: false, reason: 'no url' });
+
+    const checkResp = await fetch(externalUrl, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(8000) });
+    const status = checkResp.status;
+    const location = checkResp.headers.get('location') || '';
+
+    const isGone = status === 404
+      || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))
+      || status === 410;
+
+    if (isGone) {
+      await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        },
+        body: JSON.stringify({ is_active: false }),
+      });
+      console.log(`[check-active] listing ${id} marked as inactive (status ${status})`);
+      return res.json({ active: false, markedInactive: true });
+    }
+
+    res.json({ active: true });
+  } catch (err) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+      return res.json({ active: true, reason: 'timeout' });
+    }
+    console.error('[check-active] error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = app;
 
 if (!process.env.VERCEL) {
