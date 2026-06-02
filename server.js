@@ -464,37 +464,39 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
     if (!listing) return res.status(404).json({ error: 'Listing not found' });
     if (!listing.is_active) return res.json({ active: false, alreadyInactive: true });
 
-    const reasons = [];
-
-    // Check 1: image URL — if 404, definitely gone
+    // Check image AND page in parallel
+    const checks = [];
     if (listing.image_url) {
-      try {
-        const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
-        if (imgResp.status === 404 || imgResp.status === 410) {
-          reasons.push('image_404');
-        }
-      } catch { /* skip image check on error */ }
+      checks.push(
+        fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) })
+          .then((r) => (r.status === 404 || r.status === 410) ? 'image_404' : null)
+          .catch(() => null),
+      );
     }
-
-    // Check 2: listing page URL — check response content for 'not found' indicators
     if (listing.external_url) {
-      try {
-        const pageResp = await fetch(listing.external_url, { signal: AbortSignal.timeout(8000) });
-        const status = pageResp.status;
-        const location = pageResp.headers.get('location') || '';
-
-        const isRedirected = status >= 301 && status <= 303 && !location.includes('/inmueble/');
-        if (status === 404 || status === 410 || isRedirected) {
-          reasons.push('page_' + status);
-        } else if (status === 200) {
-          const text = await pageResp.text();
-          const lower = text.toLowerCase().slice(0, 2000);
-          if (lower.includes('no encontrado') || lower.includes('no existe') || lower.includes('página no disponible')) {
-            reasons.push('page_content_not_found');
-          }
-        }
-      } catch { /* skip page check on error */ }
+      checks.push(
+        (async () => {
+          try {
+            const pageResp = await fetch(listing.external_url, { signal: AbortSignal.timeout(8000) });
+            const status = pageResp.status;
+            if (status === 404 || status === 410) return 'page_' + status;
+            const location = pageResp.headers.get('location') || '';
+            if (status >= 301 && status <= 303 && !location.includes('/inmueble/')) return 'page_redirect';
+            if (status === 200) {
+              const text = await pageResp.text();
+              const lower = text.toLowerCase().slice(0, 2000);
+              if (lower.includes('no encontrado') || lower.includes('no existe') || lower.includes('página no disponible')) {
+                return 'page_content_not_found';
+              }
+            }
+            return null;
+          } catch { return null; }
+        })(),
+      );
     }
+
+    const results = await Promise.all(checks);
+    const reasons = results.filter(Boolean);
 
     if (reasons.length > 0) {
       await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
@@ -526,62 +528,61 @@ app.post('/api/listings/batch-check-active', async (req, res) => {
     const { ids } = req.body;
     if (!ids?.length) return res.json({ inactiveIds: [] });
 
-    const inactiveIds = [];
-    for (const id of ids) {
-      try {
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url,image_url,is_active`, {
-          headers: {
-            apikey: SUPABASE_SERVICE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-          },
-        });
-        if (!resp.ok) continue;
-        const [listing] = await resp.json();
-        if (!listing?.external_url || !listing.is_active) continue;
+    // Fetch all listings from Supabase in one call
+    const listResp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${ids.join(',')})&select=id,external_url,image_url,is_active`, {
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      },
+    });
+    if (!listResp.ok) return res.json({ inactiveIds: [] });
+    const listings = await listResp.json();
 
-        // Check image — if 404, definitely gone
-        if (listing.image_url) {
+    const inactiveIds = await Promise.all(
+      listings
+        .filter((l) => l.is_active && l.external_url)
+        .map(async (listing) => {
           try {
-            const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
-            if (imgResp.status === 404 || imgResp.status === 410) {
-              inactiveIds.push(id);
-              continue;
+            // Check image — if 404, definitely gone
+            if (listing.image_url) {
+              const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+              if (imgResp.status === 404 || imgResp.status === 410) return listing.id;
+            }
+
+            // Check listing page
+            const pageResp = await fetch(listing.external_url, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
+            const status = pageResp.status;
+            const location = pageResp.headers.get('location') || '';
+            if (status === 404 || status === 410 || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))) {
+              return listing.id;
+            }
+            if (status === 200) {
+              const text = await pageResp.text();
+              const lower = text.toLowerCase().slice(0, 2000);
+              if (lower.includes('no encontrado') || lower.includes('no existe') || lower.includes('página no disponible')) {
+                return listing.id;
+              }
             }
           } catch { /* skip */ }
-        }
+          return null;
+        }),
+    );
 
-        // Check listing page — redirect = gone, 200 with 'not found' text = maybe gone
-        try {
-          const pageResp = await fetch(listing.external_url, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
-          const status = pageResp.status;
-          const location = pageResp.headers.get('location') || '';
-          if (status === 404 || status === 410 || (status >= 301 && status <= 303 && !location.includes('/inmueble/'))) {
-            inactiveIds.push(id);
-          }
-        } catch { /* skip */ }
-      } catch {
-        // skip individual errors
-      }
+    const found = inactiveIds.filter(Boolean);
+    if (found.length) {
+      await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${found.join(',')})`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        },
+        body: JSON.stringify({ is_active: false }),
+      });
+      console.log(`[batch-check-active] marked ${found.length} listings as inactive`);
     }
 
-    if (inactiveIds.length) {
-      const chunkSize = 50;
-      for (let i = 0; i < inactiveIds.length; i += chunkSize) {
-        const chunk = inactiveIds.slice(i, i + chunkSize);
-        await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${chunk.join(',')})`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: SUPABASE_SERVICE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-          },
-          body: JSON.stringify({ is_active: false }),
-        });
-      }
-      console.log(`[batch-check-active] marked ${inactiveIds.length} listings as inactive`);
-    }
-
-    res.json({ inactiveIds });
+    res.json({ inactiveIds: found });
   } catch (err) {
     console.error('[batch-check-active] error:', err.message);
     res.status(500).json({ error: err.message });
