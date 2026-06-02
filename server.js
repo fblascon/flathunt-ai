@@ -449,56 +449,6 @@ app.post('/api/ai/semantic-search', async (req, res) => {
   }
 });
 
-// Check if a listing is still active on Idealista and mark as inactive if gone
-app.post('/api/listings/:id/check-active', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=external_url,image_url,is_active`, {
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-      },
-    });
-    if (!resp.ok) return res.status(404).json({ error: 'Listing not found' });
-    const [listing] = await resp.json();
-    if (!listing) return res.status(404).json({ error: 'Listing not found' });
-    if (!listing.is_active) return res.json({ active: false, alreadyInactive: true });
-
-    // Check image AND page in parallel
-    const checks = [];
-    if (listing.image_url) {
-      checks.push(
-        fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) })
-          .then((r) => (r.status === 404 || r.status === 410) ? 'image_404' : null)
-          .catch(() => null),
-      );
-    }
-    if (listing.external_url) {
-      checks.push(
-        (async () => {
-          try {
-            const pageResp = await fetch(listing.external_url, { signal: AbortSignal.timeout(8000) });
-            const status = pageResp.status;
-            if (status === 404 || status === 410) return 'page_' + status;
-            const location = pageResp.headers.get('location') || '';
-            if (status >= 301 && status <= 303 && !location.includes('/inmueble/')) return 'page_redirect';
-            if (status === 200) {
-              const text = await pageResp.text();
-              const lower = text.toLowerCase().slice(0, 2000);
-              if (lower.includes('no encontrado') || lower.includes('no existe') || lower.includes('página no disponible')) {
-                return 'page_content_not_found';
-              }
-            }
-            return null;
-          } catch { return null; }
-        })(),
-      );
-    }
-
-    const results = await Promise.all(checks);
-    const reasons = results.filter(Boolean);
-
-    if (reasons.length > 0) {
 // Mark a listing as inactive (manual report from frontend)
 app.post('/api/listings/:id/mark-inactive', async (req, res) => {
   try {
@@ -519,7 +469,7 @@ app.post('/api/listings/:id/mark-inactive', async (req, res) => {
   }
 });
 
-// Check if a single listing is still active on Idealista (image CDN only, no rate limit)
+// Check if a single listing is still active via image CDN (no rate limit)
 app.post('/api/listings/:id/check-active', async (req, res) => {
   try {
     const { id } = req.params;
