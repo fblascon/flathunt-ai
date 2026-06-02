@@ -51,6 +51,12 @@ def get_listings_missing_images():
     return [r for r in result if not r.get('images')]
 
 
+def mark_inactive(listing_id):
+    body = {'is_active': False}
+    result = supabase_req('PATCH', f'/listings?id=eq.{listing_id}', body)
+    return result is not None
+
+
 def update_images(listing_id, images):
     body = {'images': images}
     result = supabase_req('PATCH', f'/listings?id=eq.{listing_id}', body)
@@ -64,16 +70,22 @@ def main():
     print()
 
     updated = 0
-    failed = 0
+    inactive = 0
     for i, row in enumerate(listings):
         url = row['external_url']
         print(f'  [{i+1}/{len(listings)}] {row["id"][:12]}... ', end='', flush=True)
 
         try:
+            import requests as req_lib
+            resp = req_lib.head(url, allow_redirects=True, timeout=10)
+            is_404 = resp.status_code in (404, 410)
+        except:
+            is_404 = False
+
+        try:
             coords, description, images = fetch_detail_page(url)
         except Exception as e:
             print(f'ERROR: {e}')
-            failed += 1
             continue
 
         if images:
@@ -82,14 +94,19 @@ def main():
                 updated += 1
                 print(' updated')
             else:
-                failed += 1
-                print(' failed')
+                print(' update failed')
+        elif is_404:
+            if mark_inactive(row['id']):
+                inactive += 1
+                print('404 → marked inactive')
+            else:
+                print('404 but failed to mark inactive')
         else:
             print('no images found')
         time.sleep(2)
 
     print()
-    print(f'Done: {updated} updated, {failed} failed')
+    print(f'Done: {updated} updated, {inactive} marked inactive')
 
 
 if __name__ == '__main__':
