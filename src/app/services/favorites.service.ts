@@ -20,12 +20,27 @@ export class FavoritesService {
   }
 
   async getAll(): Promise<Favorite[]> {
+    let userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data: sessionData } = await this.supabase.auth.getSession();
+      if (!sessionData.session) return [];
+      userId = sessionData.session.user.id;
+    }
+
     const { data, error } = await this.supabase
       .from('favorites')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    console.log('[FavoritesService.getAll] favorites data:', data?.length, 'error:', error);
+    console.log(
+      '[FavoritesService.getAll] userId:',
+      userId,
+      'favorites data:',
+      data?.length,
+      'error:',
+      error,
+    );
 
     if (error) throw error;
     if (!data || data.length === 0) return [];
@@ -60,8 +75,12 @@ export class FavoritesService {
   }
 
   async isFavorited(listingId: string): Promise<boolean> {
-    const userId = this.supabaseService.getUserId();
-    if (!userId) return false;
+    let userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) return false;
+      userId = data.session.user.id;
+    }
 
     const { data, error } = await this.supabase
       .from('favorites')
@@ -75,7 +94,7 @@ export class FavoritesService {
   }
 
   async add(listingId: string, aiScore?: number, aiNotes?: string): Promise<void> {
-    const userId = this.supabaseService.getUserId();
+    let userId = this.supabaseService.getUserId();
     if (!userId) {
       console.log('[FavoritesService.add] no userId, checking session...');
       const { data } = await this.supabase.auth.getSession();
@@ -83,11 +102,12 @@ export class FavoritesService {
         console.error('[FavoritesService.add] not authenticated');
         throw new Error('User not authenticated');
       }
+      userId = data.session.user.id;
       console.log('[FavoritesService.add] using session user:', data.session.user.email);
     }
 
     const { error } = await this.supabase.from('favorites').insert({
-      user_id: userId!,
+      user_id: userId,
       listing_id: listingId,
       ai_score: aiScore ?? null,
       ai_notes: aiNotes ?? null,
@@ -98,8 +118,12 @@ export class FavoritesService {
   }
 
   async remove(listingId: string): Promise<void> {
-    const userId = this.supabaseService.getUserId();
-    if (!userId) throw new Error('User not authenticated');
+    let userId = this.supabaseService.getUserId();
+    if (!userId) {
+      const { data } = await this.supabase.auth.getSession();
+      if (!data.session) throw new Error('User not authenticated');
+      userId = data.session.user.id;
+    }
 
     const { error } = await this.supabase
       .from('favorites')

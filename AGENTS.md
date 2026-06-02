@@ -109,10 +109,15 @@ RETURNS TABLE (...con floor, description, images...)
 - **Sub-barrios sin resultados (Sanchinarro, Valdebebas, etc.)** → Añadir al JSON de `madrid-districts.json` en su distrito padre. El frontend auto-expande sub-barrio a distrito padre y post-filtra por keyword en título/dirección
 - **Scroll en listings** → No usar `height: 100%` en `html/body`. Mantener `body { padding-top: 64px }` para navbar fijo
 - **`ng serve` no recarga cambios** → `rm -rf .angular` y reiniciar
+- **`<ion-content>` no renderiza contenido** → El proyecto no tiene `<ion-app>` wrapper, por lo que `ion-content` (Shadow DOM) no proyecta su slot. Usar `<div class="page-container">` con `height: 100vh; overflow-y: auto` en vez de `ion-content`
+- **Favorites/History sin datos visibles (aunque la query devuelva rows)** → Dos causas: (1) `ion-content` ocultaba el render (ver arriba), (2) las queries sin `.eq('user_id', userId)` dependían solo de RLS, que falla si el JWT no está hidratado. Solución: filtrar siempre explícitamente por `user_id` en todas las queries de Supabase desde el frontend
+- **Fallback de sesión no asigna `userId`** → En servicios como `favorites.service.ts`, cuando `getUserId()` retorna null y se hace fallback con `auth.getSession()`, la variable `userId` no se reasignaba, causando inserts con `user_id: null`. Usar `let userId` en vez de `const`
 
 ## Decisiones arquitectónicas importantes (actualizado)
 
 7. **Iconos: Material Icons en vez de Ionicons** — Ionicons 8.x falla con `[name]` bindings dinámicos. Todos los iconos usan `<mat-icon fontIcon="name">` o interpolación `{{ cond ? 'favorite' : 'favorite_border' }}`
 8. **Sub-barrios informales** (Sanchinarro, Valdebebas) se mapean a distrito padre y se post-filtran por keyword. Barrios oficiales (Barrio del Pilar) no se post-filtran
+9. **Sin `<ion-app>` wrapper** — El proyecto no usa `<ion-app>`. Todas las páginas usan `<div class="page-container">` con `height: 100vh; overflow-y: auto` en vez de `<ion-content>`, que requiere `ion-app` para renderizar su Shadow DOM slot
+10. **Filtro `user_id` explícito en queries frontend** — Todas las queries a Supabase desde el frontend llevan `.eq('user_id', userId)` como doble seguridad (además de RLS). Esto evita que un JWT no hidratado devuelva 0 resultados
 
 Ver `cmtext.md` para estado detallado actual del proyecto.

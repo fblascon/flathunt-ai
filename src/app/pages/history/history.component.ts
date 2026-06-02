@@ -1,17 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  IonContent,
-  IonButton,
-  IonSpinner,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonSegment,
-  IonSegmentButton,
-} from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DatePipe } from '@angular/common';
 import { HistoryService } from '../../services/history.service';
 import { FavoritesService } from '../../services/favorites.service';
@@ -24,16 +15,9 @@ import { SupabaseService } from '../../services/supabase.service';
   selector: 'app-history',
   standalone: true,
   imports: [
-    IonContent,
-    IonButton,
-    IonSpinner,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonSegment,
-    IonSegmentButton,
     MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     DatePipe,
     ListingCardComponent,
   ],
@@ -103,7 +87,7 @@ export class HistoryComponent {
     this.viewedListings.set([]);
   }
 
-  onTabChange(value: string | number | undefined) {
+  onTabChange(value: string) {
     if (value === 'viewed' || value === 'searches') {
       this.activeTab.set(value);
     }

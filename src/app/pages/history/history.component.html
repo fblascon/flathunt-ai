@@ -1,34 +1,42 @@
-<ion-content class="ion-padding">
+<div class="page-container">
   <div class="page-header">
     <h1 class="page-title">Historial</h1>
     @if (viewedListings().length) {
-      <ion-button fill="outline" color="danger" (click)="clearHistory()">
-        <mat-icon slot="start" fontIcon="delete_sweep"></mat-icon>
+      <button mat-stroked-button color="warn" (click)="clearHistory()">
+        <mat-icon fontIcon="delete_sweep"></mat-icon>
         Limpiar historial
-      </ion-button>
+      </button>
     }
   </div>
 
   @if (loading()) {
     <div class="loading-container">
-      <ion-spinner name="crescent"></ion-spinner>
+      <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else {
-    <ion-segment [value]="activeTab()" (ionChange)="onTabChange($event.detail.value!)">
-      <ion-segment-button value="viewed">
-        <ion-label>Pisos vistos ({{ viewedListings().length }})</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="searches">
-        <ion-label>Búsquedas ({{ searchHistory().length }})</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <div class="segment-tabs">
+      <button
+        mat-stroked-button
+        [class.active]="activeTab() === 'viewed'"
+        (click)="onTabChange('viewed')"
+      >
+        Pisos vistos ({{ viewedListings().length }})
+      </button>
+      <button
+        mat-stroked-button
+        [class.active]="activeTab() === 'searches'"
+        (click)="onTabChange('searches')"
+      >
+        Búsquedas ({{ searchHistory().length }})
+      </button>
+    </div>
 
     @if (activeTab() === 'viewed') {
       @if (!viewedListings().length) {
         <div class="empty-state">
           <mat-icon fontIcon="visibility" class="empty-icon"></mat-icon>
           <p>No has visto ningún piso todavía</p>
-          <ion-button color="primary" routerLink="/listings">Explorar pisos</ion-button>
+          <button mat-raised-button color="primary" routerLink="/listings">Explorar pisos</button>
         </div>
       } @else {
         <div class="listing-grid">
@@ -50,18 +58,18 @@
           <p>No hay búsquedas registradas</p>
         </div>
       } @else {
-        <ion-list>
+        <div class="search-history-list">
           @for (row of searchHistory(); track row.id) {
-            <ion-item>
-              <mat-icon slot="start" fontIcon="search"></mat-icon>
-              <ion-label>{{ row.query }}</ion-label>
-              <ion-note slot="end"
-                >{{ row.results_count }} resultados · {{ row.created_at | date: 'short' }}</ion-note
+            <div class="search-history-item">
+              <mat-icon fontIcon="search"></mat-icon>
+              <span class="search-query">{{ row.query }}</span>
+              <span class="search-meta"
+                >{{ row.results_count }} resultados · {{ row.created_at | date: 'short' }}</span
               >
-            </ion-item>
+            </div>
           }
-        </ion-list>
+        </div>
       }
     }
   }
-</ion-content>
+</div>
