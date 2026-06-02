@@ -1,36 +1,56 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button routerLink="/" fill="clear">
-        <img src="/logo-mr.svg" alt="Logo" class="nav-logo" />
-        <ion-label>MadRent</ion-label>
-      </ion-button>
-    </ion-buttons>
+<header class="app-header">
+  <div class="toolbar">
+    <div class="toolbar-start">
+      <a class="nav-logo-link" routerLink="/">
+        <img src="/logo-mr.svg" alt="MadRent" class="nav-logo" />
+        <span class="nav-brand">MadRent</span>
+      </a>
+    </div>
 
-    <ion-buttons slot="end">
+    <div class="toolbar-end">
       @if (isAuth) {
-        <ion-button routerLink="/listings" routerLinkActive="active" fill="clear">
-          <mat-icon slot="icon-only" fontIcon="search"></mat-icon>
-        </ion-button>
-        <ion-button routerLink="/preferences" routerLinkActive="active" fill="clear">
-          <mat-icon slot="icon-only" fontIcon="tune"></mat-icon>
-        </ion-button>
-        <ion-button routerLink="/favorites" routerLinkActive="active" fill="clear">
-          <mat-icon slot="icon-only" fontIcon="favorite"></mat-icon>
-        </ion-button>
-        <ion-button routerLink="/history" routerLinkActive="active" fill="clear">
-          <mat-icon slot="icon-only" fontIcon="history"></mat-icon>
-        </ion-button>
+        <a
+          class="nav-icon-btn"
+          routerLink="/listings"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          <mat-icon fontIcon="search"></mat-icon>
+        </a>
+        <a
+          class="nav-icon-btn"
+          routerLink="/preferences"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          <mat-icon fontIcon="tune"></mat-icon>
+        </a>
+        <a
+          class="nav-icon-btn"
+          routerLink="/favorites"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          <mat-icon fontIcon="favorite"></mat-icon>
+        </a>
+        <a
+          class="nav-icon-btn"
+          routerLink="/history"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          <mat-icon fontIcon="history"></mat-icon>
+        </a>
 
-        <ion-button (click)="signOut()" fill="clear">
+        <button class="nav-icon-btn user-btn" (click)="signOut()">
           <span class="user-initials">{{ userName.charAt(0).toUpperCase() }}</span>
-        </ion-button>
+        </button>
       } @else {
-        <ion-button (click)="signIn()" fill="solid" color="primary">
-          <mat-icon slot="start" fontIcon="login"></mat-icon>
-          <ion-label>Iniciar sesión</ion-label>
-        </ion-button>
+        <button class="nav-btn nav-btn-primary" (click)="signIn()">
+          <mat-icon fontIcon="login"></mat-icon>
+          <span>Iniciar sesión</span>
+        </button>
       }
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+    </div>
+  </div>
+</header>

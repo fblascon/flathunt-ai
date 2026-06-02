@@ -57,6 +57,14 @@
   margin-top: 16px;
 }
 
-ion-segment {
-  margin-bottom: 8px;
+.segment-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+
+  button.active {
+    background: #d4652a;
+    color: #fff;
+    border-color: #d4652a;
+  }
 }

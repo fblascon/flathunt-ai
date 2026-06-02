@@ -1,22 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IonHeader, IonToolbar, IonButtons, IonButton, IonLabel } from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [
-    RouterLink,
-    RouterLinkActive,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonButton,
-    IonLabel,
-    MatIconModule,
-  ],
+  imports: [RouterLink, RouterLinkActive, MatIconModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })

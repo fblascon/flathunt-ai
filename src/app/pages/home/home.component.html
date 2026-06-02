@@ -1,4 +1,4 @@
-<ion-content class="ion-padding">
+<div class="page-container">
   <div class="home-hero">
     <h1>Bienvenido a MadRent</h1>
     <p>
@@ -7,30 +7,38 @@
     </p>
 
     <div class="hero-actions">
-      <ion-button expand="block" color="primary" routerLink="/listings">
-        <mat-icon slot="start" fontIcon="search"></mat-icon>
+      <a mat-raised-button color="primary" routerLink="/listings">
+        <mat-icon fontIcon="search"></mat-icon>
         Explorar pisos
-      </ion-button>
-      <ion-button expand="block" fill="outline" routerLink="/preferences">
-        <mat-icon slot="start" fontIcon="tune"></mat-icon>
+      </a>
+      <a mat-stroked-button routerLink="/preferences">
+        <mat-icon fontIcon="tune"></mat-icon>
         Mis preferencias
-      </ion-button>
+      </a>
     </div>
   </div>
 
   @if (loading()) {
     <div class="loading-container">
-      <ion-spinner name="crescent"></ion-spinner>
+      <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else {
-    <ion-segment [value]="activeTab()" (ionChange)="onTabChange($event.detail.value!)">
-      <ion-segment-button value="recent">
-        <ion-label>Pisos recientes</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="favs">
-        <ion-label>Mis favoritos</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <div class="segment-tabs">
+      <button
+        mat-stroked-button
+        [class.active]="activeTab() === 'recent'"
+        (click)="onTabChange('recent')"
+      >
+        Pisos recientes
+      </button>
+      <button
+        mat-stroked-button
+        [class.active]="activeTab() === 'favs'"
+        (click)="onTabChange('favs')"
+      >
+        Mis favoritos
+      </button>
+    </div>
 
     <div class="tab-content">
       @if (activeTab() === 'recent') {
@@ -47,7 +55,7 @@
           <div class="empty-state">
             <mat-icon fontIcon="search" class="empty-icon"></mat-icon>
             <p>Aún no hay pisos. Los scrapers traerán datos pronto.</p>
-            <ion-button fill="clear" routerLink="/preferences">Configurar preferencias</ion-button>
+            <a mat-stroked-button routerLink="/preferences">Configurar preferencias</a>
           </div>
         }
       } @else {
@@ -61,10 +69,10 @@
           <div class="empty-state">
             <mat-icon fontIcon="favorite_border" class="empty-icon"></mat-icon>
             <p>No tienes favoritos. Guarda pisos que te gusten.</p>
-            <ion-button fill="clear" routerLink="/listings">Ver pisos</ion-button>
+            <a mat-stroked-button routerLink="/listings">Ver pisos</a>
           </div>
         }
       }
     </div>
   }
-</ion-content>
+</div>

@@ -1,14 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  IonContent,
-  IonButton,
-  IonSpinner,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-} from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SupabaseService } from '../../services/supabase.service';
 import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
@@ -21,13 +15,9 @@ import { Favorite } from '../../services/favorites.service';
   standalone: true,
   imports: [
     RouterLink,
-    IonContent,
-    IonButton,
-    IonSpinner,
-    IonSegment,
-    IonSegmentButton,
-    IonLabel,
     MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     ListingCardComponent,
   ],
   templateUrl: './home.component.html',
@@ -66,7 +56,7 @@ export class HomeComponent implements OnInit {
     return new Set(this.favs().map((f) => f.listing_id));
   }
 
-  onTabChange(value: string | number | undefined) {
+  onTabChange(value: string) {
     if (value === 'recent' || value === 'favs') {
       this.activeTab.set(value);
     }

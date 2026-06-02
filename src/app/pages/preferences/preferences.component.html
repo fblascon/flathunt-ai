@@ -1,48 +1,58 @@
-<ion-content class="ion-padding">
+<div class="page-container">
   <div class="page-header">
     <h1 class="page-title">Mis preferencias de búsqueda</h1>
-    <ion-button color="primary" (click)="newPreference()">
-      <mat-icon slot="start" fontIcon="add"></mat-icon>
+    <button mat-raised-button color="primary" (click)="newPreference()">
+      <mat-icon fontIcon="add"></mat-icon>
       Nueva preferencia
-    </ion-button>
+    </button>
   </div>
 
   @if (loading()) {
     <div class="loading-container">
-      <ion-spinner name="crescent"></ion-spinner>
+      <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else if (!preferences().length) {
     <div class="empty-state">
       <mat-icon fontIcon="tune" class="empty-icon"></mat-icon>
       <p>No tienes preferencias guardadas</p>
-      <ion-button expand="block" color="primary" (click)="newPreference()">
+      <button mat-raised-button color="primary" (click)="newPreference()">
         Crear primera preferencia
-      </ion-button>
+      </button>
     </div>
   } @else {
     <div class="prefs-grid">
       @for (pref of preferences(); track pref.id) {
-        <ion-card class="pref-card" [class.inactive]="!pref.is_active">
-          <ion-card-header>
-            <ion-card-title>{{ pref.name }}</ion-card-title>
-            <ion-toggle [checked]="pref.is_active" (ionChange)="toggleActive(pref)"></ion-toggle>
-          </ion-card-header>
-          <ion-card-content>
+        <div class="pref-card" [class.inactive]="!pref.is_active">
+          <div class="pref-card-header">
+            <h3 class="pref-card-title">{{ pref.name }}</h3>
+            <label class="toggle-label">
+              <input
+                type="checkbox"
+                class="toggle-input"
+                [checked]="pref.is_active"
+                (change)="toggleActive(pref)"
+              />
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+          <div class="pref-card-body">
             <div class="pref-details">
               @if (pref.max_price) {
-                <ion-chip>Max {{ pref.max_price | currency: 'EUR' : 'symbol' : '1.0-0' }}</ion-chip>
+                <span class="pref-chip"
+                  >Max {{ pref.max_price | currency: 'EUR' : 'symbol' : '1.0-0' }}</span
+                >
               }
               @if (pref.min_rooms) {
-                <ion-chip>{{ pref.min_rooms }}+ hab.</ion-chip>
+                <span class="pref-chip">{{ pref.min_rooms }}+ hab.</span>
               }
               @if (pref.min_size) {
-                <ion-chip>{{ pref.min_size }}+ m²</ion-chip>
+                <span class="pref-chip">{{ pref.min_size }}+ m²</span>
               }
             </div>
             @if (pref.neighborhoods.length) {
               <div class="pref-neighborhoods">
                 @for (n of pref.neighborhoods; track n) {
-                  <ion-chip>{{ n }}</ion-chip>
+                  <span class="pref-chip">{{ n }}</span>
                 }
               </div>
             }
@@ -50,23 +60,23 @@
               <div class="pref-must">
                 <span class="label">Imprescindible:</span>
                 @for (f of pref.must_have; track f) {
-                  <ion-chip color="primary">{{ f }}</ion-chip>
+                  <span class="pref-chip pref-chip-primary">{{ f }}</span>
                 }
               </div>
             }
-          </ion-card-content>
-          <div class="pref-actions">
-            <ion-button fill="clear" (click)="editPreference(pref.id)">
-              <mat-icon slot="start" fontIcon="edit"></mat-icon>
-              Editar
-            </ion-button>
-            <ion-button fill="clear" color="danger" (click)="deletePreference(pref.id)">
-              <mat-icon slot="start" fontIcon="delete"></mat-icon>
-              Eliminar
-            </ion-button>
           </div>
-        </ion-card>
+          <div class="pref-actions">
+            <button mat-stroked-button (click)="editPreference(pref.id)">
+              <mat-icon fontIcon="edit"></mat-icon>
+              Editar
+            </button>
+            <button mat-stroked-button color="warn" (click)="deletePreference(pref.id)">
+              <mat-icon fontIcon="delete"></mat-icon>
+              Eliminar
+            </button>
+          </div>
+        </div>
       }
     </div>
   }
-</ion-content>
+</div>

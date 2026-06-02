@@ -1,18 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  IonContent,
-  IonButton,
-  IonSpinner,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonCardSubtitle,
-  IonChip,
-  IonToggle,
-} from '@ionic/angular/standalone';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CurrencyPipe } from '@angular/common';
 import { PreferencesService } from '../../services/preferences.service';
 import { SearchPreference } from '../../models/search-preference.model';
@@ -20,20 +10,7 @@ import { SearchPreference } from '../../models/search-preference.model';
 @Component({
   selector: 'app-preferences',
   standalone: true,
-  imports: [
-    IonContent,
-    IonButton,
-    IonSpinner,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonCardSubtitle,
-    IonChip,
-    IonToggle,
-    MatIconModule,
-    CurrencyPipe,
-  ],
+  imports: [MatIconModule, MatButtonModule, MatProgressSpinnerModule, CurrencyPipe],
   templateUrl: './preferences.component.html',
   styleUrl: './preferences.component.scss',
 })
