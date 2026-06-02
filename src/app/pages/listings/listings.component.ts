@@ -332,14 +332,8 @@ export class ListingsComponent implements OnInit {
     }
   }
 
-  async onImageFailed(listingId: string) {
-    console.log('[Listings] imageFailed for:', listingId);
-    this.listingsService.checkActive(listingId).then((result) => {
-      if (!result.active) {
-        this.listings.update((list) => list.filter((l) => l.id !== listingId));
-        this.recalcGroups();
-      }
-    });
+  onImageFailed(listingId: string) {
+    console.log('[Listings] image failed for:', listingId);
   }
 
   goToDetail(id: string) {

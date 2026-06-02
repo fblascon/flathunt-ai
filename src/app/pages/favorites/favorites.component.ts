@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FavoritesService, Favorite } from '../../services/favorites.service';
-import { ListingsService } from '../../services/listings.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card.component';
 import { SupabaseService } from '../../services/supabase.service';
 
@@ -17,7 +16,6 @@ import { SupabaseService } from '../../services/supabase.service';
 })
 export class FavoritesComponent {
   private favoritesService = inject(FavoritesService);
-  private listingsService = inject(ListingsService);
   private supabase = inject(SupabaseService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
@@ -62,11 +60,7 @@ export class FavoritesComponent {
     this.router.navigate(['/listings', id]);
   }
 
-  async onImageFailed(listingId: string) {
-    this.listingsService.checkActive(listingId).then((result) => {
-      if (!result.active) {
-        this.favorites.update((list) => list.filter((f) => f.listing_id !== listingId));
-      }
-    });
+  onImageFailed(listingId: string) {
+    console.log('[Favorites] image failed for:', listingId);
   }
 }

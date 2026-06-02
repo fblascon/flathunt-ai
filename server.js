@@ -473,11 +473,11 @@ app.post('/api/listings/:id/mark-inactive', async (req, res) => {
   }
 });
 
-// Check if a single listing is still active via image CDN (no rate limit)
+// Check if a listing is active (database only, no external requests)
 app.post('/api/listings/:id/check-active', async (req, res) => {
   try {
     const { id } = req.params;
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=image_url,is_active`, {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=is_active`, {
       headers: {
         apikey: SUPABASE_SERVICE_KEY,
         Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
@@ -485,26 +485,7 @@ app.post('/api/listings/:id/check-active', async (req, res) => {
     });
     if (!resp.ok) return res.status(404).json({ error: 'Listing not found' });
     const [listing] = await resp.json();
-    if (!listing) return res.status(404).json({ error: 'Listing not found' });
-    if (!listing.is_active) return res.json({ active: false, alreadyInactive: true });
-
-    if (listing.image_url) {
-      const imgResp = await fetch(listing.image_url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
-      if (imgResp.status === 404 || imgResp.status === 410) {
-        await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: SUPABASE_SERVICE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-          },
-          body: JSON.stringify({ is_active: false }),
-        });
-        console.log(`[check-active] listing ${id} inactive (image 404)`);
-        return res.json({ active: false, markedInactive: true });
-      }
-    }
-    res.json({ active: true });
+    res.json({ active: listing?.is_active ?? false });
   } catch (err) {
     res.json({ active: true, reason: 'error' });
   }
