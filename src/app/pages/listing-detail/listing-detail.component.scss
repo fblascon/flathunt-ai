@@ -151,7 +151,7 @@
 
     &.active {
       opacity: 1;
-      border-color: #6c63ff;
+      border-color: #d4652a;
     }
   }
 }
@@ -172,7 +172,7 @@
 .detail-price {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #6c63ff;
+  color: #d4652a;
 }
 
 .detail-body h1 {
@@ -220,7 +220,7 @@
 
 .feature-chip {
   display: inline-block;
-  background: rgba(108, 99, 255, 0.2);
+  background: rgba(212, 101, 42, 0.2);
   color: #fff;
   font-size: 0.8rem;
   padding: 4px 12px;
@@ -262,9 +262,9 @@
   }
 
   &.btn-primary {
-    background: #6c63ff;
+    background: #d4652a;
     color: #fff;
-    border-color: #6c63ff;
+    border-color: #d4652a;
 
     &:hover {
       background: #5b52e0;
@@ -319,7 +319,7 @@
 
 .progress-bar {
   height: 4px;
-  background: #6c63ff;
+  background: #d4652a;
   animation: progress-indeterminate 1.5s infinite ease-in-out;
   border-radius: 2px;
   margin-bottom: 12px;
@@ -393,7 +393,7 @@
 .ai-price-quality {
   margin-top: 12px;
   padding: 8px;
-  background: rgba(108, 99, 255, 0.1);
+  background: rgba(212, 101, 42, 0.1);
   border-radius: 8px;
   font-size: 0.85rem;
   color: #ccc;
