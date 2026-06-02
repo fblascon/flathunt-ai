@@ -266,21 +266,22 @@ export class ListingsComponent implements OnInit {
 
   async search() {
     this.currentPage.set(1);
+    const filters = {
+      maxPrice: this.maxPrice(),
+      minRooms: this.minRooms(),
+      minSize: this.minSize(),
+      neighborhoods: this.selectedNeighborhoods(),
+    };
+    await this.loadListings();
     try {
       await this.historyService.add(
-        `Precio máx: ${this.maxPrice()}€, ${this.minRooms()}+ hab, ${this.minSize()}+ m²`,
-        {
-          maxPrice: this.maxPrice(),
-          minRooms: this.minRooms(),
-          minSize: this.minSize(),
-          neighborhoods: this.selectedNeighborhoods(),
-        },
-        0,
+        `Precio máx: ${filters.maxPrice}€, ${filters.minRooms}+ hab, ${filters.minSize}+ m²`,
+        filters,
+        this.listings().length,
       );
     } catch {
       // history table might not exist yet
     }
-    await this.loadListings();
   }
 
   onNeighborhoodsChange(neighborhoods: string[]) {
@@ -520,6 +521,16 @@ export class ListingsComponent implements OnInit {
       const fullListings = await this.listingsService.getByIds(ids);
       this.aiRawResults.set(fullListings);
       this.applyFiltersToAiResults();
+      try {
+        await this.historyService.add(
+          query,
+          { neighborhoods: allNeighborhoods },
+          this.listings().length,
+          'ai',
+        );
+      } catch {
+        // history table might not exist yet
+      }
     } catch {
       this.aiRawResults.set([]);
       this.listings.set([]);
@@ -549,6 +560,11 @@ export class ListingsComponent implements OnInit {
       const fullListings = await this.listingsService.getByIds(ids);
       this.aiRawResults.set(fullListings);
       this.applyFiltersToAiResults();
+      try {
+        await this.historyService.add(query, {}, this.listings().length, 'ai');
+      } catch {
+        // history table might not exist yet
+      }
     } catch {
       this.aiRawResults.set([]);
       this.listings.set([]);
