@@ -1,75 +1,83 @@
-<ion-card (click)="selected.emit(listing().id)">
-  <div class="img-container">
-    @if (listing().image_url && !imageError()) {
-      <img
-        [src]="listing().image_url"
-        [alt]="listing().title"
-        class="listing-image"
-        (error)="onImageError()"
-      />
-    } @else {
-      <div class="listing-image placeholder">
-        <mat-icon fontIcon="image" class="placeholder-icon"></mat-icon>
-      </div>
-    }
-    @if (listing().neighborhood) {
-      <div class="neighborhood-badge">{{ listing().neighborhood }}</div>
-    }
-    @if (listing().floor) {
-      <div class="floor-badge">{{ listing().floor }}</div>
-    }
-  </div>
-
-  <ion-card-content>
-    <div class="listing-price">{{ listing().price | number: '1.0-0' }} €/mes</div>
-    <h3 class="listing-title">{{ listing().title }}</h3>
-    <p class="listing-address">
-      <mat-icon fontIcon="location_on" class="small-icon"></mat-icon>
-      {{ listing().address || listing().neighborhood || 'Madrid' }}
-    </p>
-
-    <div class="listing-details">
-      @if (listing().rooms) {
-        <span class="detail">
-          <mat-icon fontIcon="bed" class="small-icon"></mat-icon>
-          {{ listing().rooms }} hab.
-        </span>
+<ion-card>
+  <div
+    class="card-clickable"
+    (click)="selected.emit(listing().id)"
+    (keyup.enter)="selected.emit(listing().id)"
+    tabindex="0"
+    role="button"
+  >
+    <div class="img-container">
+      @if (listing().image_url && !imageError()) {
+        <img
+          [src]="listing().image_url"
+          [alt]="listing().title"
+          class="listing-image"
+          (error)="onImageError()"
+        />
+      } @else {
+        <div class="listing-image placeholder">
+          <mat-icon fontIcon="image" class="placeholder-icon"></mat-icon>
+        </div>
       }
-      @if (listing().size_m2) {
-        <span class="detail">
-          <mat-icon fontIcon="square_foot" class="small-icon"></mat-icon>
-          {{ listing().size_m2 }} m²
-        </span>
+      @if (listing().neighborhood) {
+        <div class="neighborhood-badge">{{ listing().neighborhood }}</div>
       }
       @if (listing().floor) {
-        <span class="detail">
-          <mat-icon fontIcon="stairs" class="small-icon"></mat-icon>
-          {{ listing().floor }}
-        </span>
-      }
-      @if (siblingCount() > 1) {
-        <span class="detail building-indicator">
-          <mat-icon fontIcon="apartment" class="small-icon"></mat-icon>
-          {{ siblingCount() }}
-        </span>
+        <div class="floor-badge">{{ listing().floor }}</div>
       }
     </div>
 
-    @if (listing().features.length) {
-      <div class="features">
-        @for (feature of listing().features.slice(0, 4); track feature) {
-          <ion-chip disabled>{{ feature }}</ion-chip>
+    <ion-card-content>
+      <div class="listing-price">{{ listing().price | number: '1.0-0' }} €/mes</div>
+      <h3 class="listing-title">{{ listing().title }}</h3>
+      <p class="listing-address">
+        <mat-icon fontIcon="location_on" class="small-icon"></mat-icon>
+        {{ listing().address || listing().neighborhood || 'Madrid' }}
+      </p>
+
+      <div class="listing-details">
+        @if (listing().rooms) {
+          <span class="detail">
+            <mat-icon fontIcon="bed" class="small-icon"></mat-icon>
+            {{ listing().rooms }} hab.
+          </span>
+        }
+        @if (listing().size_m2) {
+          <span class="detail">
+            <mat-icon fontIcon="square_foot" class="small-icon"></mat-icon>
+            {{ listing().size_m2 }} m²
+          </span>
+        }
+        @if (listing().floor) {
+          <span class="detail">
+            <mat-icon fontIcon="stairs" class="small-icon"></mat-icon>
+            {{ listing().floor }}
+          </span>
+        }
+        @if (siblingCount() > 1) {
+          <span class="detail building-indicator">
+            <mat-icon fontIcon="apartment" class="small-icon"></mat-icon>
+            {{ siblingCount() }}
+          </span>
         }
       </div>
-    }
 
-    @if (aiScore()) {
-      <div class="ai-score" [class.high]="aiScore()! >= 70" [class.low]="aiScore()! < 40">
-        <mat-icon fontIcon="smart_toy"></mat-icon>
-        <span>IA: {{ aiScore() }}/100</span>
-      </div>
-    }
-  </ion-card-content>
+      @if (listing().features.length) {
+        <div class="features">
+          @for (feature of listing().features.slice(0, 4); track feature) {
+            <ion-chip disabled>{{ feature }}</ion-chip>
+          }
+        </div>
+      }
+
+      @if (aiScore()) {
+        <div class="ai-score" [class.high]="aiScore()! >= 70" [class.low]="aiScore()! < 40">
+          <mat-icon fontIcon="smart_toy"></mat-icon>
+          <span>IA: {{ aiScore() }}/100</span>
+        </div>
+      }
+    </ion-card-content>
+  </div>
 
   <ion-footer>
     <ion-toolbar>
