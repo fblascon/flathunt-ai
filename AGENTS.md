@@ -16,7 +16,8 @@ Vercel (Hosting)
   ├── Frontend (Angular 21 static)
   └── API Serverless (Express 5 en api/index.js)
         ├── /api/ai/* → OpenRouter (Gemini + Embeddings)
-        └── /api/ai/semantic-search → Supabase REST + pgvector
+        ├── /api/ai/semantic-search → Supabase REST + pgvector
+        └── /api/geocode/address → madrid-streets.json (callejero oficial)
 ```
 
 Dev local:
@@ -36,6 +37,10 @@ Frontend (Angular :4200) ← Proxy (proxy.conf.json) → Express (:3001) ←→ 
 - `supabase/schema.sql` — Esquema de base de datos
 - `src/environments/environment.ts` — Credenciales públicas (supabase anon key)
 - `.env` — Credenciales sensibles (SUPABASE_SERVICE_ROLE_KEY, OPENROUTER_API_KEY) — no subir a git
+- `pipeline/build-street-index.js` — Script para construir el índice callejero (descarga CSVs oficiales del Ayuntamiento de Madrid y genera madrid-streets.json)
+- `madrid-streets.json` — Índice calle ← distrito/barrio generado automáticamente (~27k variantes de calles)
+- `src/environments/environment.ts` — Credenciales públicas (supabase anon key)
+- `.env` — Credenciales sensibles (SUPABASE_SERVICE_ROLE_KEY, OPENROUTER_API_KEY) — no subir a git
 
 ## Comandos útiles
 ```bash
@@ -53,9 +58,16 @@ cd pipeline
 python pipeline.py --pages 3          # Scrapear distritos (3 páginas c/u)
 python pipeline.py --pages 1          # Scrapeo rápido (1 página)
 
+# Verificar/actualizar barrios oficiales
+npm run verify:districts              # Descarga CSV oficial de barrios y completa madrid-districts.json
+
 # Embeddings
 python pipeline/embeddings.py --regenerate     # Regenerar todos
 python pipeline/embeddings.py                 # Solo los que faltan
+
+# Callejero / Geocoding
+npm run build:street-index                    # Descarga CSVs oficiales y genera madrid-streets.json
+# Después de generarlo, el servidor Express carga el índice en memoria automáticamente
 
 # Verificar build
 npx ng build --configuration development
@@ -105,6 +117,8 @@ RETURNS TABLE (...con floor, description, images...)
 
 ## Problemas comunes (actualizados Jun 2026)
 
+- **`madrid-streets.json` no existe** → Ejecutar `npm run build:street-index` para generarlo. Si falta, el endpoint `/api/geocode/address` devuelve 404 y server.js muestra un warning al arrancar
+
 - **`ion-icon` roto (Ionicons 8.x)** → Reemplazar con `<mat-icon fontIcon="name">` de Angular Material. Ver lista completa de componentes afectados en commit `bf8e340`
 - **Sub-barrios sin resultados (Sanchinarro, Valdebebas, etc.)** → Añadir al JSON de `madrid-districts.json` en su distrito padre. El frontend auto-expande sub-barrio a distrito padre y post-filtra por keyword en título/dirección
 - **Scroll en listings** → No usar `height: 100%` en `html/body`. Mantener `body { padding-top: 64px }` para navbar fijo
@@ -115,6 +129,7 @@ RETURNS TABLE (...con floor, description, images...)
 
 ## Decisiones arquitectónicas importantes (actualizado)
 
+6. **Callejero oficial** — Se usa el callejero oficial del Ayuntamiento de Madrid (CSVs descargables) para geocodificar direcciones de Idealista. El script `pipeline/build-street-index.js` descarga `vialesvigentesdistritosbarrios.csv` (~11k calles) y `barrios_municipio_madrid.csv` (~128 barrios), los cruza, y genera `madrid-streets.json` (~27k variantes). El servidor carga el JSON en memoria al arrancar y expone `GET /api/geocode/address?q=Calle+de+Serrano+10` que devuelve `{ distrito, barrio, distritoCode }`.
 7. **Iconos: Material Icons en vez de Ionicons** — Ionicons 8.x falla con `[name]` bindings dinámicos. Todos los iconos usan `<mat-icon fontIcon="name">` o interpolación `{{ cond ? 'favorite' : 'favorite_border' }}`
 8. **Sub-barrios informales** (Sanchinarro, Valdebebas) se mapean a distrito padre y se post-filtran por keyword. Barrios oficiales (Barrio del Pilar) no se post-filtran
 9. **Sin `<ion-app>` wrapper** — El proyecto no usa `<ion-app>`. Todas las páginas usan `<div class="page-container">` con `height: 100vh; overflow-y: auto` en vez de `<ion-content>`, que requiere `ion-app` para renderizar su Shadow DOM slot

@@ -18,6 +18,59 @@ const EMBED_MODEL = 'openai/text-embedding-3-small';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Street geocoding index
+const STREET_INDEX_PATH = path.join(__dirname, 'madrid-streets.json');
+let streetIndex = null;
+
+function loadStreetIndex() {
+  if (streetIndex) return streetIndex;
+  try {
+    const data = JSON.parse(require('fs').readFileSync(STREET_INDEX_PATH, 'utf-8'));
+    streetIndex = data.streets;
+    console.log(`[Geocoder] ${streetIndex ? Object.keys(streetIndex).length : 0} streets loaded`);
+    return streetIndex;
+  } catch {
+    console.warn('[Geocoder] madrid-streets.json not found, geocoding disabled');
+    return null;
+  }
+}
+
+function normalizeStr(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function geocode(address) {
+  const idx = loadStreetIndex();
+  if (!idx || !address) return null;
+
+  const normalized = normalizeStr(address)
+    .replace(/^(calle|c\/|avda|av\b|paseo|plaza|pl\b|travesia|pasaje|ronda|glorieta|camino|cl)\b/g, '')
+    .replace(/n[ºo]\s*\d+/g, '')
+    .replace(/[,\-]\s*(madrid|km\d+|esquina)\b/g, ' ')
+    .replace(/[,\-\.#]+/g, ' ')
+    .replace(/\d+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const words = normalized.split(/\s+/);
+  let best = null;
+  let bestLen = 0;
+
+  for (let i = 0; i < words.length; i++) {
+    for (let j = words.length; j > i; j--) {
+      const phrase = words.slice(i, j).join(' ');
+      if (phrase.length < 4) continue;
+      const entry = idx[phrase];
+      if (entry && phrase.length > bestLen) {
+        best = { ...entry, match: phrase };
+        bestLen = phrase.length;
+      }
+    }
+  }
+
+  return best;
+}
+
 async function callOpenRouter(messages) {
   const response = await fetch(OPENROUTER_URL, {
     method: 'POST',
@@ -61,6 +114,39 @@ app.post('/api/ai/analyze-listing', async (req, res) => {
   try {
     const { listing, preferences } = req.body;
 
+    let marketContext = '';
+    if (listing.neighborhood && listing.size > 0) {
+      try {
+        const n = encodeURIComponent(listing.neighborhood);
+        const resp = await fetch(
+          `${SUPABASE_URL}/rest/v1/listings?select=price,size_m2&is_active=eq.true&neighborhood=eq.${n}`,
+          {
+            headers: {
+              apikey: SUPABASE_SERVICE_KEY,
+              Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+            },
+          },
+        );
+        if (resp.ok) {
+          const rows = await resp.json();
+          const valid = rows.filter((r) => r.size_m2 > 0);
+          if (valid.length > 1) {
+            const avg = valid.reduce((s, r) => s + r.price / r.size_m2, 0) / valid.length;
+            const listingPriceM2 = listing.price / listing.size;
+            const diff = (((listingPriceM2 - avg) / avg) * 100).toFixed(1);
+            marketContext = `
+CONTEXTO DE MERCADO:
+- Precio medio en ${listing.neighborhood}: ${avg.toFixed(1)}€/m² (basado en ${valid.length} pisos activos)
+- Este piso: ${listingPriceM2.toFixed(1)}€/m²
+- Diferencia: ${diff > 0 ? '+' : ''}${diff}% respecto a la media del barrio
+`;
+          }
+        }
+      } catch (e) {
+        // market context is optional
+      }
+    }
+
     let prefsText = '';
     if (preferences) {
       prefsText = `
@@ -80,9 +166,10 @@ PISO:
 - Habitaciones: ${listing.rooms}
 - Tamaño: ${listing.size} m²
 - Dirección: ${listing.address}
+- Barrio: ${listing.neighborhood}
 - Características: ${listing.features?.join(', ') || 'No especificadas'}
 - Descripción: ${listing.description || 'No disponible'}
-
+${marketContext}
 ${prefsText}
 
 Devuelve EXCLUSIVAMENTE un JSON (sin markdown, sin explicaciones) con este formato:
@@ -91,7 +178,7 @@ Devuelve EXCLUSIVAMENTE un JSON (sin markdown, sin explicaciones) con este forma
   "pros": ["ventaja 1", "ventaja 2", "ventaja 3"],
   "cons": ["desventaja 1", "desventaja 2"],
   "summary": "resumen de 2-3 frases sobre si es buena opción",
-  "priceQuality": "breve valoración calidad/precio",
+  "priceQuality": "breve valoración calidad/precio incluyendo comparativa de precio por m² contra la media del barrio",
   "redFlags": ["posible red flag si la hay, o array vacío si no"]
 }`;
 
@@ -223,10 +310,63 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Get distinct neighborhoods
+// Price per m² stats by neighborhood
+app.get('/api/stats/price-m2', async (req, res) => {
+  try {
+    const resp = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/listings?select=neighborhood,price,size_m2&is_active=eq.true&size_m2=gt.0&neighborhood=not.is.null&limit=5000`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+      },
+    );
+    if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
+    const rows = await resp.json();
+
+    const stats = {};
+    for (const r of rows) {
+      const n = r.neighborhood;
+      if (!n) continue;
+      if (!stats[n]) stats[n] = { sum: 0, count: 0 };
+      stats[n].sum += r.price / r.size_m2;
+      stats[n].count += 1;
+    }
+
+    const result = {};
+    for (const [neighborhood, s] of Object.entries(stats)) {
+      result[neighborhood] = {
+        avg: Math.round((s.sum / s.count) * 10) / 10,
+        count: s.count,
+      };
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Geocode a street address → district + barrio
+app.get('/api/geocode/address', (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.status(400).json({ error: 'Query param "q" required' });
+
+    const result = geocode(q);
+    if (!result) return res.json({ found: false, query: q });
+
+    res.json({ found: true, query: q, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get distinct neighborhoods with listing counts
 app.get('/api/listings/neighborhoods', async (req, res) => {
   try {
-    const resp = await fetch(`${process.env.SUPABASE_URL}/rest/v1/listings?select=neighborhood&is_active=eq.true&neighborhood=not.is.null`, {
+    const resp = await fetch(`${process.env.SUPABASE_URL}/rest/v1/listings?select=neighborhood,price,size_m2&is_active=eq.true&neighborhood=not.is.null&limit=5000`, {
       headers: {
         apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
         Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
@@ -234,8 +374,28 @@ app.get('/api/listings/neighborhoods', async (req, res) => {
     });
     if (!resp.ok) return res.status(500).json({ error: 'Supabase error' });
     const rows = await resp.json();
-    const neighborhoods = [...new Set(rows.map(r => r.neighborhood).filter(Boolean))].sort();
-    res.json(neighborhoods);
+
+    const groups = {};
+    for (const r of rows) {
+      const n = r.neighborhood;
+      if (!n) continue;
+      if (!groups[n]) groups[n] = { name: n, count: 0, sum: 0, sizeCount: 0 };
+      groups[n].count += 1;
+      if (r.size_m2 > 0) {
+        groups[n].sum += r.price / r.size_m2;
+        groups[n].sizeCount += 1;
+      }
+    }
+
+    const result = Object.values(groups)
+      .map((g) => ({
+        name: g.name,
+        count: g.count,
+        avgPriceM2: g.sizeCount > 0 ? Math.round((g.sum / g.sizeCount) * 10) / 10 : null,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -442,8 +602,15 @@ app.post('/api/ai/semantic-search', async (req, res) => {
       return results;
     }
 
-    const results = await runSearch(true);
-    const filteredNeighborhoods = neighborhoods && neighborhoods.length > 0 ? neighborhoods : null;
+    let results = await runSearch(true);
+    let filteredNeighborhoods = neighborhoods && neighborhoods.length > 0 ? neighborhoods : null;
+
+    // If neighborhoods filter returned 0 results, retry without filter
+    if (results.length === 0 && neighborhoods && neighborhoods.length > 0) {
+      console.log(`[semantic-search] 0 results with neighborhoods, retrying without filter`);
+      results = await runSearch(false);
+      filteredNeighborhoods = null;
+    }
 
     console.log(`[semantic-search] returning ${results.length} results`);
     res.json({ results, filteredNeighborhoods });

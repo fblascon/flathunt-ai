@@ -41,6 +41,10 @@
           <mat-icon fontIcon="square_foot" class="small-icon"></mat-icon>
           {{ listing().size_m2 }} m²
         </span>
+        <span class="detail price-m2-detail">
+          <mat-icon fontIcon="euro" class="small-icon"></mat-icon>
+          {{ listing().price / listing().size_m2 | number: '1.1-1' }}
+        </span>
       }
       @if (listing().floor) {
         <span class="detail">

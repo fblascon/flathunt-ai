@@ -74,9 +74,7 @@
 
           <div class="detail-stats">
             @if (l.rooms) {
-              <div class="stat">
-                <mat-icon fontIcon="bed"></mat-icon> {{ l.rooms }} habitaciones
-              </div>
+              <div class="stat"><mat-icon fontIcon="bed"></mat-icon> {{ l.rooms }} hab.</div>
             }
             @if (l.size_m2) {
               <div class="stat">
@@ -85,6 +83,25 @@
             }
             @if (l.floor) {
               <div class="stat"><mat-icon fontIcon="layers"></mat-icon> {{ l.floor }}</div>
+            }
+            @if (priceM2) {
+              <div
+                class="stat stat-price-m2"
+                [class.above]="priceM2Diff && priceM2Diff > 5"
+                [class.below]="priceM2Diff && priceM2Diff <= 5"
+              >
+                <mat-icon fontIcon="euro"></mat-icon>
+                {{ priceM2 | number: '1.1-1' }} €/m²
+                @if (avgPriceM2) {
+                  <span
+                    class="avg-badge"
+                    [class.above]="priceM2Diff && priceM2Diff > 5"
+                    [class.below]="priceM2Diff && priceM2Diff <= 5"
+                  >
+                    {{ priceM2Diff! > 0 ? '+' : '' }}{{ priceM2Diff }}%
+                  </span>
+                }
+              </div>
             }
           </div>
 

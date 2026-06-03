@@ -53,3 +53,6 @@ __pycache__/
 Thumbs.db
 .vercel
 .env*.local
+pipeline/barrios_municipio_madrid.csv
+pipeline/vialesvigentesdistritosbarrios.csv
+nul

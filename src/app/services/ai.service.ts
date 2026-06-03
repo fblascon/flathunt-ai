@@ -22,6 +22,13 @@ export interface AiComparison {
   }[];
 }
 
+export interface PriceStats {
+  avg: number;
+  count: number;
+}
+
+export type PriceStatsMap = Record<string, PriceStats>;
+
 @Injectable({ providedIn: 'root' })
 export class AiService {
   private http = inject(HttpClient);
@@ -36,12 +43,17 @@ export class AiService {
       description: string;
       address: string;
       features: string[];
+      neighborhood?: string;
     },
     preferences?: { maxPrice?: number; minRooms?: number; minSize?: number; mustHave?: string[] },
   ): Promise<AiAnalysis> {
     return lastValueFrom(
       this.http.post<AiAnalysis>(`${this.apiUrl}/ai/analyze-listing`, { listing, preferences }),
     );
+  }
+
+  async getPriceStats(): Promise<PriceStatsMap> {
+    return lastValueFrom(this.http.get<PriceStatsMap>(`${this.apiUrl}/stats/price-m2`));
   }
 
   async scoreListings(

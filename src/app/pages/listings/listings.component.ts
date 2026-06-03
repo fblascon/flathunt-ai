@@ -11,8 +11,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
-import { ListingsService } from '../../services/listings.service';
+import { ListingsService, NeighborhoodInfo } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
+import { SearchStateService, SearchState } from '../../services/search-state.service';
 import { HistoryService } from '../../services/history.service';
 import { AiService } from '../../services/ai.service';
 import { GeographyService } from '../../services/geography.service';
@@ -53,16 +54,66 @@ interface BuildingGroup {
 export class ListingsComponent implements OnInit {
   private readonly PAGE_SIZE = 50;
 
+  private readonly dbToOfficial: Record<string, string> = {
+    Centro: 'Centro',
+    Chamberí: 'Chamberí',
+    Salamanca: 'Salamanca',
+    Retiro: 'Retiro',
+    Arganzuela: 'Arganzuela',
+    Chamartín: 'Chamartín',
+    Tetuán: 'Tetuán',
+    Moncloa: 'Moncloa-Aravaca',
+    Latina: 'Latina',
+    Carabanchel: 'Carabanchel',
+    Usera: 'Usera',
+    'Puente de Vallecas': 'Puente de Vallecas',
+    Moratalaz: 'Moratalaz',
+    'Ciudad Lineal': 'Ciudad Lineal',
+    Hortaleza: 'Hortaleza',
+    Villaverde: 'Villaverde',
+    'Villa de Vallecas': 'Villa de Vallecas',
+    Vicálvaro: 'Vicálvaro',
+    'San Blas': 'San Blas-Canillejas',
+    Barajas: 'Barajas',
+    Fuencarral: 'Fuencarral-El Pardo',
+    'Fuencarral-El Pardo': 'Fuencarral-El Pardo',
+  };
+
+  private readonly officialToDb: Record<string, string> = {
+    Centro: 'Centro',
+    Chamberí: 'Chamberí',
+    Salamanca: 'Salamanca',
+    Retiro: 'Retiro',
+    Arganzuela: 'Arganzuela',
+    Chamartín: 'Chamartín',
+    Tetuán: 'Tetuán',
+    'Moncloa-Aravaca': 'Moncloa',
+    Latina: 'Latina',
+    Carabanchel: 'Carabanchel',
+    Usera: 'Usera',
+    'Puente de Vallecas': 'Puente de Vallecas',
+    Moratalaz: 'Moratalaz',
+    'Ciudad Lineal': 'Ciudad Lineal',
+    Hortaleza: 'Hortaleza',
+    Villaverde: 'Villaverde',
+    'Villa de Vallecas': 'Villa de Vallecas',
+    Vicálvaro: 'Vicálvaro',
+    'San Blas-Canillejas': 'San Blas',
+    Barajas: 'Barajas',
+    'Fuencarral-El Pardo': 'Fuencarral',
+  };
+
   private listingsService = inject(ListingsService);
   private favoritesService = inject(FavoritesService);
   private historyService = inject(HistoryService);
   private aiService = inject(AiService);
   private geographyService = inject(GeographyService);
+  private searchState = inject(SearchStateService);
   private router = inject(Router);
 
   listings = signal<Listing[]>([]);
   displayedGroups = signal<BuildingGroup[] | null>(null);
-  neighborhoods = signal<string[]>([]);
+  neighborhoodsInfo = signal<NeighborhoodInfo[]>([]);
   loading = signal(true);
   favoritedIds = signal<Set<string>>(new Set());
   aiScores = signal<Map<string, number>>(new Map());
@@ -172,15 +223,43 @@ export class ListingsComponent implements OnInit {
     this.officialNeighborhoods = new Set(
       this.geographyService.getAllNeighborhoods().map((n) => n.toLowerCase()),
     );
-    // Load unique neighborhoods from database and merge with static list
+    const official = this.geographyService.getAllNeighborhoods();
+    // Load neighborhoods with counts from DB and merge with official list
     try {
       const dbNeighborhoods = await this.listingsService.getNeighborhoods();
-      const merged = [...new Set([...this.allNeighborhoods, ...dbNeighborhoods])];
+      this.neighborhoodsInfo.set(dbNeighborhoods);
+      const dbNames = dbNeighborhoods.map((n) => n.name);
+      const merged = [...new Set([...this.allNeighborhoods, ...dbNames, ...official])];
       this.allNeighborhoods = merged.sort();
     } catch {
-      // Use static list if DB query fails
+      const merged = [...new Set([...this.allNeighborhoods, ...official])];
+      this.allNeighborhoods = merged.sort();
     }
     await this.loadListings();
+
+    // Restore search state from a previous navigation (e.g., back from detail)
+    if (this.searchState.hasState()) {
+      this.restoreState(this.searchState.restore()!);
+    }
+  }
+
+  private restoreState(state: SearchState) {
+    this.maxPrice.set(state.maxPrice);
+    this.minRooms.set(state.minRooms);
+    this.minSize.set(state.minSize);
+    this.selectedNeighborhoods.set(state.selectedNeighborhoods);
+    this.subBarrioKeywords.set(state.subBarrioKeywords);
+    this.aiQuery.set(state.aiQuery);
+    this.isAiSearchActive.set(state.isAiSearchActive);
+    this.currentPage.set(state.currentPage);
+    this.aiNoResultsNeighborhoods.set(state.aiNoResultsNeighborhoods);
+    this.ignoreRoomsFilter.set(state.ignoreRoomsFilter);
+
+    if (state.isAiSearchActive) {
+      this.aiSearch();
+    } else {
+      this.search();
+    }
   }
 
   private filterBySubBarrio(listings: Listing[]): Listing[] {
@@ -265,6 +344,7 @@ export class ListingsComponent implements OnInit {
   }
 
   async search() {
+    this.searchState.clear();
     this.currentPage.set(1);
     const filters = {
       maxPrice: this.maxPrice(),
@@ -337,6 +417,18 @@ export class ListingsComponent implements OnInit {
   }
 
   goToDetail(id: string) {
+    this.searchState.save({
+      aiQuery: this.aiQuery(),
+      maxPrice: this.maxPrice(),
+      minRooms: this.minRooms(),
+      minSize: this.minSize(),
+      selectedNeighborhoods: this.selectedNeighborhoods(),
+      isAiSearchActive: this.isAiSearchActive(),
+      currentPage: this.currentPage(),
+      subBarrioKeywords: this.subBarrioKeywords(),
+      aiNoResultsNeighborhoods: this.aiNoResultsNeighborhoods(),
+      ignoreRoomsFilter: this.ignoreRoomsFilter(),
+    });
     this.router.navigate(['/listings', id]);
   }
 
@@ -427,11 +519,48 @@ export class ListingsComponent implements OnInit {
     // Expand sub-barrios to include their parent district (e.g. Sanchinarro -> Hortaleza)
     const expanded = new Set<string>(matched);
     matched.forEach((n) => {
-      const district = this.geographyService.normalizeDistrictName(n);
+      const official = this.geographyService.normalizeDistrictName(n);
+      if (!official) return;
+      const district = this.officialToDb[official] || official;
       if (district) expanded.add(district);
     });
 
     return Array.from(expanded);
+  }
+
+  private readonly adjacent: Record<string, string[]> = {
+    Centro: ['Arganzuela', 'Chamberí', 'Salamanca', 'Moncloa'],
+    Arganzuela: ['Centro', 'Retiro', 'Puente de Vallecas', 'Carabanchel', 'Usera'],
+    Retiro: ['Arganzuela', 'Salamanca', 'Ciudad Lineal', 'Moratalaz', 'Puente de Vallecas'],
+    Salamanca: ['Centro', 'Retiro', 'Chamartín', 'Ciudad Lineal'],
+    Chamartín: ['Salamanca', 'Tetuán', 'Fuencarral', 'Ciudad Lineal'],
+    Tetuán: ['Chamartín', 'Chamberí', 'Fuencarral'],
+    Chamberí: ['Centro', 'Tetuán', 'Fuencarral', 'Moncloa'],
+    Moncloa: ['Chamberí', 'Fuencarral', 'Latina'],
+    Latina: ['Moncloa', 'Carabanchel', 'Usera'],
+    Carabanchel: ['Latina', 'Arganzuela', 'Usera', 'Villaverde'],
+    Usera: ['Carabanchel', 'Villaverde', 'Puente de Vallecas'],
+    'Puente de Vallecas': ['Arganzuela', 'Retiro', 'Usera', 'Moratalaz', 'Villa de Vallecas'],
+    Moratalaz: ['Puente de Vallecas', 'Retiro', 'Ciudad Lineal', 'Vicálvaro'],
+    'Ciudad Lineal': ['Retiro', 'Salamanca', 'Chamartín', 'Hortaleza', 'Moratalaz', 'San Blas'],
+    Hortaleza: ['Ciudad Lineal', 'San Blas', 'Barajas', 'Villa de Vallecas'],
+    Villaverde: ['Carabanchel', 'Usera', 'Villa de Vallecas'],
+    'Villa de Vallecas': ['Puente de Vallecas', 'Hortaleza', 'Villaverde', 'Vicálvaro'],
+    Vicálvaro: ['Moratalaz', 'Villa de Vallecas', 'San Blas'],
+    'San Blas': ['Ciudad Lineal', 'Hortaleza', 'Vicálvaro', 'Barajas'],
+    Barajas: ['Hortaleza', 'San Blas'],
+    Fuencarral: ['Tetuán', 'Chamberí', 'Moncloa', 'Chamartín'],
+  };
+
+  private expandToAdjacent(neighborhoods: string[]): string[] {
+    const result = new Set(neighborhoods);
+    for (const n of neighborhoods) {
+      const official = this.geographyService.normalizeDistrictName(n);
+      const district = official ? this.officialToDb[official] || official : n;
+      const neighbors = this.adjacent[district];
+      if (neighbors) neighbors.forEach((nb) => result.add(nb));
+    }
+    return Array.from(result);
   }
 
   private getExpandedNeighborhoods(): string[] | undefined {
@@ -492,17 +621,19 @@ export class ListingsComponent implements OnInit {
   }
 
   async aiSearch() {
+    this.searchState.clear();
     const query = this.aiQuery().trim();
     if (!query) return;
     this.aiSearching.set(true);
     this.loading.set(true);
     this.isAiSearchActive.set(true);
+    this.aiNoResultsNeighborhoods.set(null);
     // Detect studio search to ignore rooms filter
     this.ignoreRoomsFilter.set(this.isStudioQuery(query));
     try {
       const queryNeighborhoods = this.extractNeighborhoodsFromQuery(query);
       const selected = this.selectedNeighborhoods();
-      const allNeighborhoods = [...new Set([...queryNeighborhoods, ...selected])];
+      const expanded = this.expandToAdjacent([...new Set([...queryNeighborhoods, ...selected])]);
 
       // If filters are active, increase limit to account for post-filtering
       const hasActiveFilters =
@@ -516,7 +647,7 @@ export class ListingsComponent implements OnInit {
         query,
         limit,
         query,
-        allNeighborhoods.length ? allNeighborhoods : undefined,
+        expanded.length ? expanded : undefined,
       );
       this.aiNoResultsNeighborhoods.set(
         results.length === 0 && filteredNeighborhoods ? filteredNeighborhoods : null,
@@ -528,7 +659,7 @@ export class ListingsComponent implements OnInit {
       try {
         await this.historyService.add(
           query,
-          { neighborhoods: allNeighborhoods },
+          { neighborhoods: expanded },
           this.listings().length,
           'ai',
         );
@@ -580,6 +711,7 @@ export class ListingsComponent implements OnInit {
   }
 
   clearAiSearch() {
+    this.searchState.clear();
     this.aiQuery.set('');
     this.isAiSearchActive.set(false);
     this.aiRawResults.set([]);
@@ -595,6 +727,7 @@ export class ListingsComponent implements OnInit {
   }
 
   resetFilters() {
+    this.searchState.clear();
     this.maxPrice.set(2000);
     this.minRooms.set(0);
     this.minSize.set(0);

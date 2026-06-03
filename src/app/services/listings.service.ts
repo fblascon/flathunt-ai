@@ -3,6 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Listing } from '../models/listing.model';
 import { lastValueFrom } from 'rxjs';
 
+export interface NeighborhoodInfo {
+  name: string;
+  count: number;
+  avgPriceM2: number | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ListingsService {
   private http = inject(HttpClient);
@@ -42,8 +48,8 @@ export class ListingsService {
     }
   }
 
-  async getNeighborhoods(): Promise<string[]> {
-    return lastValueFrom(this.http.get<string[]>('/api/listings/neighborhoods'));
+  async getNeighborhoods(): Promise<NeighborhoodInfo[]> {
+    return lastValueFrom(this.http.get<NeighborhoodInfo[]>('/api/listings/neighborhoods'));
   }
 
   async checkActive(id: string): Promise<{ active: boolean }> {

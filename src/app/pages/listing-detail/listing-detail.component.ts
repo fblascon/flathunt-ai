@@ -9,7 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { ListingsService } from '../../services/listings.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { HistoryService } from '../../services/history.service';
-import { AiService, AiAnalysis } from '../../services/ai.service';
+import { AiService, AiAnalysis, PriceStatsMap } from '../../services/ai.service';
 import { Listing } from '../../models/listing.model';
 
 @Component({
@@ -38,6 +38,25 @@ export class ListingDetailComponent implements OnInit {
   currentImageIndex = signal(0);
   mainImageError = signal(false);
   mainImageLoaded = signal(false);
+  priceStats = signal<PriceStatsMap | null>(null);
+
+  get priceM2(): number | null {
+    const l = this.listing();
+    if (!l || !l.size_m2 || l.size_m2 <= 0 || !l.price) return null;
+    return Math.round((l.price / l.size_m2) * 10) / 10;
+  }
+
+  get avgPriceM2(): number | null {
+    const l = this.listing();
+    const stats = this.priceStats();
+    if (!l || !l.neighborhood || !stats || !stats[l.neighborhood]) return null;
+    return stats[l.neighborhood].avg;
+  }
+
+  get priceM2Diff(): number | null {
+    if (this.priceM2 === null || this.avgPriceM2 === null) return null;
+    return Math.round(((this.priceM2 - this.avgPriceM2) / this.avgPriceM2) * 100);
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -51,8 +70,18 @@ export class ListingDetailComponent implements OnInit {
       const fav = await this.favoritesService.isFavorited(id);
       this.isFavorited.set(fav);
       this.historyService.addView(id);
+      this.fetchPriceStats();
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private async fetchPriceStats() {
+    try {
+      const stats = await this.aiService.getPriceStats();
+      this.priceStats.set(stats);
+    } catch (err) {
+      console.error('Failed to load price stats:', err);
     }
   }
 
@@ -89,6 +118,7 @@ export class ListingDetailComponent implements OnInit {
         description: l.description || '',
         address: l.address || '',
         features: l.features || [],
+        neighborhood: l.neighborhood || undefined,
       });
       this.aiAnalysis.set(analysis);
     } catch {
