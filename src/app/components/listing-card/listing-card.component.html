@@ -19,6 +19,15 @@
     @if (listing().floor) {
       <div class="floor-badge">{{ listing().floor }}</div>
     }
+    @if (similarity() > 0) {
+      <div
+        class="similarity-badge"
+        [class.high]="similarity() >= 0.8"
+        [class.medium]="similarity() >= 0.5 && similarity() < 0.8"
+      >
+        {{ similarity() * 100 | number: '1.0-0' }}%
+      </div>
+    }
   </div>
 
   <div class="card-content">

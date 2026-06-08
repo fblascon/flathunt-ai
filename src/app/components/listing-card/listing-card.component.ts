@@ -17,6 +17,7 @@ export class ListingCardComponent {
   isFavorited = input(false);
   aiScore = input<number | null>(null);
   siblingCount = input(0);
+  similarity = input<number>(0);
   favorite = output<string>();
   compare = output<string>();
   selected = output<string>();

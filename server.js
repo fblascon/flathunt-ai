@@ -572,14 +572,40 @@ app.post('/api/ai/semantic-search', async (req, res) => {
       // Keyword post-filter
       if (keyword) {
         const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        // Fetch features from Supabase for keyword matching (RPC doesn't return features)
+        const needFeatures = results.some(r => !r.features);
+        if (needFeatures && results.length > 0) {
+          const ids = results.map(r => r.id);
+          try {
+            const featResp = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=in.(${ids.join(',')})&select=id,features`, {
+              headers: {
+                apikey: SUPABASE_SERVICE_KEY,
+                Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+              },
+            });
+            if (featResp.ok) {
+              const featData = await featResp.json();
+              const featMap = {};
+              featData.forEach(f => { featMap[f.id] = f.features || []; });
+              results.forEach(r => { if (!r.features) r.features = featMap[r.id] || []; });
+            }
+          } catch (e) {
+            console.error('[semantic-search] Error fetching features:', e.message);
+          }
+        }
         const allKeywords = keyword.toLowerCase().split(/\s+/).filter(k => k.length > 1).map(norm);
 
         const floorSet = new Set([
           'atico', 'aticos', 'bajo', 'bajos', 'entreplanta', 'entresuelo',
           'sotano', 'semisotano', 'estudio', 'duplex', 'penthouse',
         ]);
+        const stopSet = new Set([
+          'en', 'de', 'con', 'por', 'para', 'el', 'la', 'los', 'las',
+          'un', 'una', 'del', 'al', 'y', 'o', 'que', 'es', 'se', 'su',
+          'como', 'mas', 'pero', 'este', 'entre', 'sin', 'todo',
+        ]);
         const floorKeywords = allKeywords.filter(k => floorSet.has(k));
-        const generalKeywords = allKeywords.filter(k => !floorSet.has(k));
+        const generalKeywords = allKeywords.filter(k => !floorSet.has(k) && !stopSet.has(k));
 
         const matchWord = (val, kw) => {
           if (!val) return false;
@@ -589,13 +615,15 @@ app.post('/api/ai/semantic-search', async (req, res) => {
           return words.some(w => w === kw || kw.includes(w) || w.includes(kw));
         };
         const matchFloor = (r, kw) => matchWord(r.title, kw) || matchWord(r.description, kw) || matchWord(r.floor, kw);
-        const matchGeneral = (r, kw) => matchWord(r.title, kw) || matchWord(r.description, kw) || matchWord(r.neighborhood, kw);
+        const matchGeneral = (r, kw) => matchWord(r.title, kw) || matchWord(r.description, kw) || (r.features && Array.isArray(r.features) && r.features.some(f => matchWord(f, kw)));
 
         if (floorKeywords.length > 0) {
           results = results.filter(r => floorKeywords.some(kw => matchFloor(r, kw)));
         }
         if (generalKeywords.length > 0) {
+          const beforeGeneral = [...results];
           results = results.filter(r => generalKeywords.some(kw => matchGeneral(r, kw)));
+          if (results.length === 0) results = beforeGeneral;
         }
         results = results.slice(0, limit);
       }

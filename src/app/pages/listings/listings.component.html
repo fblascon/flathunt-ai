@@ -160,6 +160,7 @@
           [showCompare]="true"
           [aiScore]="aiScores().get(group.representative.id) ?? null"
           [siblingCount]="group.siblingCount"
+          [similarity]="similarities().get(group.representative.id) ?? 0"
           (favorite)="toggleFavorite($event)"
           (selected)="goToDetail($event)"
           (imageFailed)="onImageFailed($event)"

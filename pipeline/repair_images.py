@@ -83,7 +83,7 @@ def main():
             is_404 = False
 
         try:
-            coords, description, images = fetch_detail_page(url)
+            coords, description, images, features = fetch_detail_page(url)
         except Exception as e:
             print(f'ERROR: {e}')
             continue

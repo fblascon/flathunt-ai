@@ -123,6 +123,7 @@ export class ListingsComponent implements OnInit {
   aiNoResultsNeighborhoods = signal<string[] | null>(null);
   isAiSearchActive = signal(false);
   aiRawResults = signal<Listing[]>([]);
+  similarities = signal<Map<string, number>>(new Map());
   ignoreRoomsFilter = signal(false);
   subBarrioKeywords = signal<string[]>([]);
   officialNeighborhoods = new Set<string>();
@@ -346,6 +347,7 @@ export class ListingsComponent implements OnInit {
   async search() {
     this.searchState.clear();
     this.currentPage.set(1);
+    this.similarities.set(new Map());
     const filters = {
       maxPrice: this.maxPrice(),
       minRooms: this.minRooms(),
@@ -652,6 +654,13 @@ export class ListingsComponent implements OnInit {
       this.aiNoResultsNeighborhoods.set(
         results.length === 0 && filteredNeighborhoods ? filteredNeighborhoods : null,
       );
+      const simMap = new Map<string, number>();
+      results.forEach((r) => simMap.set(r.id, r.similarity));
+      const maxSim = results.reduce((max, r) => Math.max(max, r.similarity), 0);
+      if (maxSim > 0) {
+        simMap.forEach((v, k, m) => m.set(k, v / maxSim));
+      }
+      this.similarities.set(simMap);
       const ids = results.map((r) => r.id);
       const fullListings = await this.listingsService.getByIds(ids);
       this.aiRawResults.set(fullListings);
@@ -691,6 +700,13 @@ export class ListingsComponent implements OnInit {
       const limit = hasActiveFilters ? 100 : 30;
 
       const { results } = await this.aiService.semanticSearch(query, limit, query, undefined);
+      const simMap = new Map<string, number>();
+      results.forEach((r) => simMap.set(r.id, r.similarity));
+      const maxSim = results.reduce((max, r) => Math.max(max, r.similarity), 0);
+      if (maxSim > 0) {
+        simMap.forEach((v, k, m) => m.set(k, v / maxSim));
+      }
+      this.similarities.set(simMap);
       const ids = results.map((r) => r.id);
       const fullListings = await this.listingsService.getByIds(ids);
       this.aiRawResults.set(fullListings);
@@ -717,6 +733,7 @@ export class ListingsComponent implements OnInit {
     this.aiRawResults.set([]);
     this.aiNoResultsNeighborhoods.set(null);
     this.subBarrioKeywords.set([]);
+    this.similarities.set(new Map());
     this.currentPage.set(1);
     this.loadListings();
   }
@@ -737,6 +754,7 @@ export class ListingsComponent implements OnInit {
     this.isAiSearchActive.set(false);
     this.aiRawResults.set([]);
     this.aiNoResultsNeighborhoods.set(null);
+    this.similarities.set(new Map());
     this.currentPage.set(1);
     this.loadListings();
   }

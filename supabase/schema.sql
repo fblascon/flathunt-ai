@@ -180,11 +180,11 @@ grant all on viewed_listings to authenticated;
 grant all on viewed_listings to service_role;
 
 -- ============================================
--- PG VECTOR INDEX (activar cuando haya datos)
+-- PG VECTOR INDEX
 -- ============================================
--- create index if not exists listings_embedding_idx
---   on listings using ivfflat (embedding vector_cosine_ops)
---   with (lists = 100);
+create index if not exists listings_embedding_idx
+  on listings using ivfflat (embedding vector_cosine_ops)
+  with (lists = 20);
 
 -- ============================================
 -- RPC: Búsqueda semántica con pgvector
@@ -208,7 +208,8 @@ returns table (
   images text[],
   similarity float,
   floor text,
-  description text
+  description text,
+  features text[]
 )
 language sql stable
 as $$
@@ -224,11 +225,19 @@ as $$
     listings.images,
     1 - (listings.embedding <=> query_embedding) as similarity,
     listings.floor,
-    listings.description
+    listings.description,
+    listings.features
   from listings
   where listings.embedding is not null
     and listings.is_active = true
     and (neighborhoods is null or listings.neighborhood = any(neighborhoods))
-  order by listings.embedding <=> query_embedding
+  order by (listings.embedding <=> query_embedding) * (
+    case
+      when listings.last_seen > now() - interval '7 days' then 0.8
+      when listings.last_seen > now() - interval '30 days' then 0.9
+      when listings.last_seen > now() - interval '90 days' then 0.95
+      else 1.0
+    end
+  )
   limit match_count;
 $$;

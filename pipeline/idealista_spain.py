@@ -98,7 +98,7 @@ def fetch_detail_page(url):
     try:
         soup = fetch_page(url)
         if soup is None:
-            return {}, '', []
+            return {}, '', [], []
 
         description = ''
         desc_tag = soup.find('div', class_='comment')
@@ -138,9 +138,24 @@ def fetch_detail_page(url):
                 seen.add(img_url)
                 images.append(img_url)
 
-        return coords, description, images
+        features = []
+        for feat_div in soup.find_all('div', class_='details-property_features'):
+            for li in feat_div.find_all('li'):
+                text = clean_text(li.text)
+                if not text:
+                    continue
+                if re.match(r'^\d', text):
+                    continue
+                if re.search(r'm²|m2|planta|orientaci', text, re.IGNORECASE):
+                    continue
+                if text.endswith(':'):
+                    continue
+                if text not in features:
+                    features.append(text)
+
+        return coords, description, images, features
     except Exception:
-        return {}, '', []
+        return {}, '', [], []
 
 
 def extract_listings(soup, neighborhood):

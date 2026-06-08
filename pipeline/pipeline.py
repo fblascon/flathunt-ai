@@ -130,10 +130,12 @@ def scrape_all(max_pages=1, fetch_details=MAX_DETAIL_FETCH):
         print(f'Fetching details for first {detail_limit} listings...')
         for i, listing in enumerate(all_listings[:detail_limit]):
             print(f'  [{i+1}/{detail_limit}] {listing["title"][:60]}...')
-            coords, description, images = fetch_detail_page(listing['url'])
+            coords, description, images, detail_features = fetch_detail_page(listing['url'])
             listing.update(coords)
             listing['description'] = description or ''
             listing['images'] = images or []
+            if detail_features:
+                listing['features'] = detail_features
             time.sleep(1.5)
 
     print()
