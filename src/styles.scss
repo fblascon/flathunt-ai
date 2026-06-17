@@ -1,5 +1,5 @@
 @use '@angular/material' as mat;
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 html,
 body {
@@ -7,99 +7,6 @@ body {
   padding: 0;
   height: 100%;
   overflow: hidden;
-}
-
-$madrid-primary: (
-  50: #fdf0e8,
-  100: #f5d5be,
-  200: #edb894,
-  300: #e49b6a,
-  400: #dd854a,
-  500: #d4652a,
-  600: #c05a22,
-  700: #aa4d1a,
-  800: #944013,
-  900: #7a330c,
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
-    100: rgba(0, 0, 0, 0.87),
-    200: rgba(0, 0, 0, 0.87),
-    300: rgba(0, 0, 0, 0.87),
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  ),
-);
-
-$madrid-accent: (
-  50: #faf6e8,
-  100: #f2e8c4,
-  200: #e9d89c,
-  300: #e0c874,
-  400: #d9bc56,
-  500: #d0ad38,
-  600: #b89730,
-  700: #9d7e26,
-  800: #82661d,
-  900: #634b12,
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
-    100: rgba(0, 0, 0, 0.87),
-    200: rgba(0, 0, 0, 0.87),
-    300: rgba(0, 0, 0, 0.87),
-    400: rgba(0, 0, 0, 0.87),
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  ),
-);
-
-$primary: mat.m2-define-palette($madrid-primary, 500);
-$accent: mat.m2-define-palette($madrid-accent, 500);
-$warn: mat.m2-define-palette(mat.$m2-red-palette);
-
-$dark-theme: mat.m2-define-dark-theme(
-  (
-    color: (
-      primary: $primary,
-      accent: $accent,
-      warn: $warn,
-    ),
-    typography: mat.m2-define-typography-config(
-        $font-family: '"Plus Jakarta Sans", sans-serif',
-      ),
-    density: 0,
-  )
-);
-
-@include mat.all-component-themes($dark-theme);
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background: #13111c;
-  color: #e0e0e0;
-  height: 100%;
-  overflow: hidden;
-}
-
-a {
-  color: mat.m2-get-color-from-palette($primary, 300);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 $flat-purple: (
@@ -156,7 +63,7 @@ $primary: mat.m2-define-palette($flat-purple, 500);
 $accent: mat.m2-define-palette($flat-accent, 500);
 $warn: mat.m2-define-palette(mat.$m2-red-palette);
 
-$dark-theme: mat.m2-define-dark-theme(
+$light-theme: mat.m2-define-light-theme(
   (
     color: (
       primary: $primary,
@@ -168,7 +75,40 @@ $dark-theme: mat.m2-define-dark-theme(
   )
 );
 
-@include mat.all-component-themes($dark-theme);
+@include mat.all-component-themes($light-theme);
+
+:root {
+  --bg: #f5f5f8;
+  --surface: #ffffff;
+  --surface-hover: #f0f2f8;
+  --border: #e4e6ef;
+  --border-strong: #d1d5db;
+  --text: #1a1a2e;
+  --text-secondary: #5f6368;
+  --text-muted: #6b7280;
+  --text-tertiary: #9ca3af;
+  --accent: #d4652a;
+  --accent-hover: #c05a22;
+  --accent-bg: rgba(212, 101, 42, 0.1);
+  --accent-bg-strong: rgba(212, 101, 42, 0.15);
+  --success: #2e7d32;
+  --success-bg: rgba(76, 175, 80, 0.1);
+  --error: #ef5350;
+  --error-bg: rgba(239, 83, 80, 0.2);
+  --error-bg-light: rgba(239, 83, 80, 0.1);
+  --error-dark: #c62828;
+  --warning: #ff9800;
+  --warning-bg: rgba(255, 152, 0, 0.1);
+  --gold: #ffb300;
+  --hover: rgba(0, 0, 0, 0.05);
+  --overlay: rgba(0, 0, 0, 0.7);
+  --overlay-light: rgba(0, 0, 0, 0.5);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --nav-bg: #d4652a;
+  --nav-text: #ffffff;
+  --nav-text-muted: rgba(255, 255, 255, 0.85);
+  --nav-hover: rgba(255, 255, 255, 0.15);
+}
 
 * {
   margin: 0;
@@ -184,14 +124,14 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
-  background: #12121a;
-  color: #e0e0e0;
+  background: var(--bg);
+  color: var(--text);
   height: 100%;
   overflow: hidden;
 }
 
 a {
-  color: mat.m2-get-color-from-palette($primary, 300);
+  color: mat.m2-get-color-from-palette($primary, 600);
   text-decoration: none;
 
   &:hover {
@@ -212,7 +152,7 @@ a {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 24px;
-  color: mat.m2-get-color-from-palette($primary, 200);
+  color: mat.m2-get-color-from-palette($primary, 800);
 }
 
 .loading-container {
@@ -228,7 +168,7 @@ a {
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  color: #888;
+  color: var(--text-muted);
   gap: 16px;
 
   mat-icon {
@@ -244,5 +184,5 @@ a {
 }
 
 .mat-mdc-card {
-  background-color: #1e1e2e !important;
+  background-color: var(--surface) !important;
 }

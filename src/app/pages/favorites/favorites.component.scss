@@ -10,12 +10,11 @@
 
   .empty-icon {
     font-size: 48px;
-    color: #888;
+    color: var(--text-muted);
     margin-bottom: 12px;
   }
-
   p {
-    color: #aaa;
+    color: var(--text-muted);
     margin-bottom: 20px;
   }
 }

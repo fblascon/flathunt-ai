@@ -32,12 +32,10 @@
 .filter-field {
   min-width: 130px;
 }
-
 .ai-search {
   flex: 1;
   max-width: 100%;
 }
-
 .rooms-field {
   flex: 1;
   min-width: 160px;
@@ -51,7 +49,7 @@
 }
 
 .results-count {
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -60,7 +58,7 @@
   align-items: flex-start;
   gap: 12px;
   background: #fce4ec;
-  color: #c62828;
+  color: var(--error-dark);
   padding: 14px 16px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -72,7 +70,6 @@
     height: 24px;
     margin-top: 2px;
   }
-
   p {
     margin: 0 0 8px;
   }
@@ -82,7 +79,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin-bottom: 12px;
 
@@ -116,7 +113,7 @@
 
   .page-indicator {
     font-size: 0.9rem;
-    color: #888;
+    color: var(--text-muted);
   }
 }
 
@@ -133,16 +130,15 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  color: #888;
+  color: var(--text-muted);
 
   mat-icon {
     font-size: 64px;
     width: 64px;
     height: 64px;
     margin-bottom: 16px;
-    color: #555;
+    color: var(--text-tertiary);
   }
-
   p {
     margin: 0 0 8px;
     font-size: 1.1rem;
@@ -150,7 +146,7 @@
 
   .empty-hint {
     font-size: 0.9rem;
-    color: #777;
+    color: var(--text-tertiary);
     margin-bottom: 20px;
   }
 
@@ -163,19 +159,14 @@
   .search-suggestions {
     .suggestions-title {
       font-size: 0.85rem;
-      color: #999;
+      color: var(--text-tertiary);
       margin-bottom: 12px;
     }
-
     .suggestion-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       justify-content: center;
-
-      button {
-        font-size: 0.85rem;
-      }
     }
   }
 }
@@ -184,11 +175,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.85rem;
   margin-bottom: 12px;
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.02);
   border-radius: 8px;
   width: fit-content;
 
@@ -221,20 +212,16 @@
 @media (max-width: 768px) {
   .filters-row {
     gap: 8px;
-
     .filter-field {
       flex: 1;
       min-width: 0;
     }
-
     .rooms-field {
       min-width: 160px;
     }
   }
-
   .actions-row {
     justify-content: stretch;
-
     button {
       flex: 1;
     }

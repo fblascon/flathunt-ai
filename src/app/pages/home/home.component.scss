@@ -11,7 +11,7 @@
   p {
     max-width: 600px;
     margin: 0 auto 24px;
-    color: #aaa;
+    color: var(--text-muted);
     font-size: 1rem;
     line-height: 1.6;
   }
@@ -43,12 +43,11 @@
 
   .empty-icon {
     font-size: 48px;
-    color: #888;
+    color: var(--text-muted);
     margin-bottom: 12px;
   }
-
   p {
-    color: #aaa;
+    color: var(--text-muted);
     margin-bottom: 20px;
   }
 }
@@ -63,8 +62,8 @@
   margin-top: 24px;
 
   button.active {
-    background: #d4652a;
+    background: var(--accent);
     color: #fff;
-    border-color: #d4652a;
+    border-color: var(--accent);
   }
 }

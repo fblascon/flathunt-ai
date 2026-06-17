@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -14,7 +14,8 @@
 }
 
 .pref-card {
-  background: #1e1e2e;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
 
@@ -58,13 +59,13 @@
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: #ccc;
+  background: var(--hover);
+  color: var(--text-secondary);
 }
 
 .pref-chip-primary {
-  background: rgba(212, 101, 42, 0.2);
-  color: #d4652a;
+  background: var(--accent-bg-strong);
+  color: var(--accent);
 }
 
 .pref-neighborhoods,
@@ -78,10 +79,9 @@
 
 .label {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
-/* CSS toggle switch */
 .toggle-label {
   position: relative;
   display: inline-block;
@@ -99,7 +99,7 @@
 .toggle-track {
   position: absolute;
   inset: 0;
-  background: #555;
+  background: var(--text-tertiary);
   border-radius: 24px;
   transition: background 0.3s;
 }
@@ -111,15 +111,62 @@
   left: 2px;
   width: 20px;
   height: 20px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 50%;
   transition: transform 0.3s;
 }
 
 .toggle-input:checked + .toggle-track {
-  background: #d4652a;
+  background: var(--accent);
 }
-
 .toggle-input:checked + .toggle-track::after {
   transform: translateX(20px);
+}
+
+/* -- styles from old listings for actions -- */
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .filter-field {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+.actions-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-row {
+    gap: 8px;
+    .filter-field {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+  .actions-row {
+    justify-content: stretch;
+    button {
+      flex: 1;
+    }
+  }
 }
