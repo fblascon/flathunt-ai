@@ -1,5 +1,4 @@
 @use '@angular/material' as mat;
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 html,
 body {
@@ -9,42 +8,17 @@ body {
   overflow: hidden;
 }
 
-$flat-purple: (
-  50: #ede7f6,
-  100: #d1c4e9,
-  200: #b39ddb,
-  300: #9575cd,
-  400: #7e57c2,
-  500: #6c63ff,
-  600: #5e35b1,
-  700: #512da8,
-  800: #4527a0,
-  900: #311b92,
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
-    100: rgba(0, 0, 0, 0.87),
-    200: rgba(0, 0, 0, 0.87),
-    300: white,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  ),
-);
-
-$flat-accent: (
-  50: #e0f7fa,
-  100: #b2ebf2,
-  200: #80deea,
-  300: #4dd0e1,
-  400: #26c6da,
-  500: #00bcd4,
-  600: #00acc1,
-  700: #0097a7,
-  800: #00838f,
-  900: #006064,
+$flat-terracotta: (
+  50: #fdf3ef,
+  100: #fbe1d7,
+  200: #f6ccbc,
+  300: #efb19a,
+  400: #e69678,
+  500: #c2583e,
+  600: #b34a32,
+  700: #a6442b,
+  800: #93391f,
+  900: #7a2e18,
   contrast: (
     50: rgba(0, 0, 0, 0.87),
     100: rgba(0, 0, 0, 0.87),
@@ -59,8 +33,33 @@ $flat-accent: (
   ),
 );
 
-$primary: mat.m2-define-palette($flat-purple, 500);
-$accent: mat.m2-define-palette($flat-accent, 500);
+$flat-olive: (
+  50: #eef5f1,
+  100: #d5e7db,
+  200: #b9d7c2,
+  300: #93c2a1,
+  400: #72af85,
+  500: #4a7c59,
+  600: #3d6b4f,
+  700: #335a42,
+  800: #294a36,
+  900: #1f3a29,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: rgba(0, 0, 0, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  ),
+);
+
+$primary: mat.m2-define-palette($flat-terracotta, 500);
+$accent: mat.m2-define-palette($flat-olive, 500);
 $warn: mat.m2-define-palette(mat.$m2-red-palette);
 
 $light-theme: mat.m2-define-light-theme(
@@ -70,7 +69,15 @@ $light-theme: mat.m2-define-light-theme(
       accent: $accent,
       warn: $warn,
     ),
-    typography: mat.m2-define-typography-config(),
+    typography: mat.m2-define-typography-config(
+        $font-family: '"DM Sans", sans-serif',
+        $headline-1: mat.m2-define-typography-level(32px, 40px, 700, '"DM Serif Display", serif'),
+        $headline-2: mat.m2-define-typography-level(28px, 36px, 700, '"DM Serif Display", serif'),
+        $headline-3: mat.m2-define-typography-level(24px, 32px, 700, '"DM Serif Display", serif'),
+        $headline-4: mat.m2-define-typography-level(20px, 28px, 600, '"DM Serif Display", serif'),
+        $headline-5: mat.m2-define-typography-level(18px, 26px, 600, '"DM Serif Display", serif'),
+        $headline-6: mat.m2-define-typography-level(16px, 24px, 600, '"DM Serif Display", serif'),
+      ),
     density: 0,
   )
 );
@@ -78,36 +85,46 @@ $light-theme: mat.m2-define-light-theme(
 @include mat.all-component-themes($light-theme);
 
 :root {
-  --bg: #f5f5f8;
-  --surface: #ffffff;
-  --surface-hover: #f0f2f8;
-  --border: #e4e6ef;
-  --border-strong: #d1d5db;
-  --text: #1a1a2e;
-  --text-secondary: #5f6368;
-  --text-muted: #6b7280;
-  --text-tertiary: #9ca3af;
-  --accent: #d4652a;
-  --accent-hover: #c05a22;
-  --accent-bg: rgba(212, 101, 42, 0.1);
-  --accent-bg-strong: rgba(212, 101, 42, 0.15);
-  --success: #2e7d32;
-  --success-bg: rgba(76, 175, 80, 0.1);
-  --error: #ef5350;
-  --error-bg: rgba(239, 83, 80, 0.2);
-  --error-bg-light: rgba(239, 83, 80, 0.1);
-  --error-dark: #c62828;
-  --warning: #ff9800;
-  --warning-bg: rgba(255, 152, 0, 0.1);
-  --gold: #ffb300;
-  --hover: rgba(0, 0, 0, 0.05);
-  --overlay: rgba(0, 0, 0, 0.7);
-  --overlay-light: rgba(0, 0, 0, 0.5);
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  --nav-bg: #d4652a;
+  --bg: #faf7f2;
+  --bg-gradient: linear-gradient(180deg, #faf7f2 0%, #f3ede5 100%);
+  --surface: #fffdfb;
+  --surface-hover: #f5efe8;
+  --border: #e8e0d6;
+  --border-strong: #d4c9bb;
+  --text: #2d2520;
+  --text-secondary: #6b5f56;
+  --text-muted: #8c8075;
+  --text-tertiary: #b0a396;
+  --accent: #c2583e;
+  --accent-hover: #a6442b;
+  --accent-bg: rgba(194, 88, 62, 0.08);
+  --accent-bg-strong: rgba(194, 88, 62, 0.14);
+  --accent-light: rgba(194, 88, 62, 0.04);
+  --success: #3d6b4f;
+  --success-bg: rgba(61, 107, 79, 0.08);
+  --success-bg-strong: rgba(61, 107, 79, 0.14);
+  --error: #c73e3a;
+  --error-bg: rgba(199, 62, 58, 0.12);
+  --error-bg-light: rgba(199, 62, 58, 0.06);
+  --error-dark: #a6322e;
+  --warning: #c4853a;
+  --warning-bg: rgba(196, 133, 58, 0.1);
+  --gold: #c8963e;
+  --gold-bg: rgba(200, 150, 62, 0.1);
+  --hover: rgba(45, 37, 32, 0.04);
+  --overlay: rgba(45, 37, 32, 0.7);
+  --overlay-light: rgba(45, 37, 32, 0.45);
+  --shadow: 0 8px 30px rgba(45, 37, 32, 0.08);
+  --shadow-lg: 0 16px 48px rgba(45, 37, 32, 0.12);
+  --nav-bg: #a6442b;
   --nav-text: #ffffff;
-  --nav-text-muted: rgba(255, 255, 255, 0.85);
-  --nav-hover: rgba(255, 255, 255, 0.15);
+  --nav-text-muted: rgba(255, 255, 255, 0.82);
+  --nav-hover: rgba(255, 255, 255, 0.12);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --font-display: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
 * {
@@ -117,13 +134,7 @@ $light-theme: mat.m2-define-light-theme(
 }
 
 body {
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   height: 100%;
@@ -131,10 +142,12 @@ body {
 }
 
 a {
-  color: mat.m2-get-color-from-palette($primary, 600);
+  color: var(--accent);
   text-decoration: none;
+  transition: color 0.2s;
 
   &:hover {
+    color: var(--accent-hover);
     text-decoration: underline;
   }
 }
@@ -149,10 +162,12 @@ a {
 }
 
 .page-title {
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
   margin-bottom: 24px;
-  color: mat.m2-get-color-from-palette($primary, 800);
+  color: var(--text);
+  letter-spacing: -0.02em;
 }
 
 .loading-container {
@@ -175,14 +190,91 @@ a {
     font-size: 64px;
     width: 64px;
     height: 64px;
-    opacity: 0.4;
+    opacity: 0.35;
   }
 
   p {
     font-size: 1.1rem;
+    font-family: var(--font-body);
   }
 }
 
 .mat-mdc-card {
   background-color: var(--surface) !important;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.reveal {
+  opacity: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.reveal-delay-1 {
+  animation-delay: 0.05s;
+}
+.reveal-delay-2 {
+  animation-delay: 0.1s;
+}
+.reveal-delay-3 {
+  animation-delay: 0.15s;
+}
+.reveal-delay-4 {
+  animation-delay: 0.2s;
+}
+.reveal-delay-5 {
+  animation-delay: 0.25s;
+}
+.reveal-delay-6 {
+  animation-delay: 0.3s;
+}
+.reveal-delay-7 {
+  animation-delay: 0.35s;
+}
+.reveal-delay-8 {
+  animation-delay: 0.4s;
+}
+.reveal-delay-9 {
+  animation-delay: 0.45s;
+}
+.reveal-delay-10 {
+  animation-delay: 0.5s;
+}
+
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover) 0%,
+    var(--bg) 50%,
+    var(--surface-hover) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
 }
