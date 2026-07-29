@@ -7,7 +7,7 @@ App Angular 21 + Express + Supabase para buscar pisos en Madrid. Usa scraping de
 
 | Entorno | URL |
 |---------|-----|
-| Producción | https://flathunt-ai.vercel.app |
+| Producción | https://madrent-ai.vercel.app |
 | GitHub | https://github.com/fblascon/flathunt-ai |
 
 ## Arquitectura rápida
@@ -134,5 +134,7 @@ RETURNS TABLE (...con floor, description, images...)
 8. **Sub-barrios informales** (Sanchinarro, Valdebebas) se mapean a distrito padre y se post-filtran por keyword. Barrios oficiales (Barrio del Pilar) no se post-filtran
 9. **Sin `<ion-app>` wrapper** — El proyecto no usa `<ion-app>`. Todas las páginas usan `<div class="page-container">` con `height: 100vh; overflow-y: auto` en vez de `<ion-content>`, que requiere `ion-app` para renderizar su Shadow DOM slot
 10. **Filtro `user_id` explícito en queries frontend** — Todas las queries a Supabase desde el frontend llevan `.eq('user_id', userId)` como doble seguridad (además de RLS). Esto evita que un JWT no hidratado devuelva 0 resultados
+
+11. **Sin login requerido** — El proyecto usa `signInAnonymously()` de Supabase para crear sesiones automáticas sin fricción. El usuario anónimo tiene rol `authenticated`, por lo que las RLS y grants existentes funcionan igual. Requiere que la opción **Anonymous sign-ins** esté activada en Supabase → Authentication → Settings (si no, el app funciona sin favoritos/historial).
 
 Ver `cmtext.md` para estado detallado actual del proyecto.

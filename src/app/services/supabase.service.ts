@@ -7,48 +7,39 @@ export class SupabaseService {
   private supabase: SupabaseClient;
   readonly user = signal<User | null>(null);
   readonly session = signal<Session | null>(null);
+  private initPromise: Promise<void>;
 
   constructor() {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
 
-    this.supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log(
-        '[SupabaseService] getSession:',
-        session ? 'user: ' + session.user?.email : 'null',
-      );
-      this.session.set(session);
-      this.user.set(session?.user ?? null);
-    });
+    this.initPromise = this.initialize();
+  }
 
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[SupabaseService] onAuthStateChange:', event, session?.user?.email);
-      this.session.set(session);
-      this.user.set(session?.user ?? null);
+  private async initialize(): Promise<void> {
+    const {
+      data: { session },
+    } = await this.supabase.auth.getSession();
+    this.session.set(session);
+    this.user.set(session?.user ?? null);
+
+    if (!session) {
+      try {
+        const { data } = await this.supabase.auth.signInAnonymously();
+        console.log('[SupabaseService] anonymous sign in:', data.session?.user?.id);
+      } catch (e) {
+        console.warn('[SupabaseService] anonymous auth not available:', e);
+      }
+    }
+
+    this.supabase.auth.onAuthStateChange((event, s) => {
+      console.log('[SupabaseService] onAuthStateChange:', event, s?.user?.id);
+      this.session.set(s);
+      this.user.set(s?.user ?? null);
     });
   }
 
   getClient(): SupabaseClient {
     return this.supabase;
-  }
-
-  async signInWithGoogle() {
-    const { error } = await this.supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + '/listings' },
-    });
-    if (error) throw error;
-  }
-
-  async signInWithGithub() {
-    const { error } = await this.supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: window.location.origin + '/listings' },
-    });
-    if (error) throw error;
-  }
-
-  async signOut(): Promise<void> {
-    await this.supabase.auth.signOut();
   }
 
   getUserId(): string | null {

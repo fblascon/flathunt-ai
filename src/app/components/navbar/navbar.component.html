@@ -8,49 +8,38 @@
     </div>
 
     <div class="toolbar-end">
-      @if (isAuth) {
-        <a
-          class="nav-icon-btn"
-          routerLink="/listings"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
-        >
-          <mat-icon fontIcon="search"></mat-icon>
-        </a>
-        <a
-          class="nav-icon-btn"
-          routerLink="/preferences"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
-        >
-          <mat-icon fontIcon="tune"></mat-icon>
-        </a>
-        <a
-          class="nav-icon-btn"
-          routerLink="/favorites"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
-        >
-          <mat-icon fontIcon="favorite"></mat-icon>
-        </a>
-        <a
-          class="nav-icon-btn"
-          routerLink="/history"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
-        >
-          <mat-icon fontIcon="history"></mat-icon>
-        </a>
-
-        <button class="nav-icon-btn user-btn" (click)="signOut()">
-          <span class="user-initials">{{ userName.charAt(0).toUpperCase() }}</span>
-        </button>
-      } @else {
-        <button class="nav-btn nav-btn-primary" (click)="signIn()">
-          <mat-icon fontIcon="login"></mat-icon>
-          <span>Iniciar sesión</span>
-        </button>
-      }
+      <a
+        class="nav-icon-btn"
+        routerLink="/listings"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        <mat-icon fontIcon="search"></mat-icon>
+      </a>
+      <a
+        class="nav-icon-btn"
+        routerLink="/preferences"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        <mat-icon fontIcon="tune"></mat-icon>
+      </a>
+      <a
+        class="nav-icon-btn"
+        routerLink="/favorites"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        <mat-icon fontIcon="favorite"></mat-icon>
+      </a>
+      <a
+        class="nav-icon-btn"
+        routerLink="/history"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        <mat-icon fontIcon="history"></mat-icon>
+      </a>
     </div>
   </div>
 </header>
